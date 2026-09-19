@@ -1,0 +1,93 @@
+/* =========================================
+   DDD Website — Layout
+   Framework / positioning / sizing
+   ========================================= */
+
+* {box-sizing: border-box;}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {min-height: 100vh;overflow-x: hidden;}
+
+img {
+    display: block;
+    max-width: 100%;
+    padding: 8px 0;
+    box-sizing: border-box;
+
+}
+
+a {text-decoration: none;}
+
+
+/* ------------ */
+/*  GRID DEMON  */
+/* ------------ */
+
+/* Align go center */
+/* margin */ .out-warper, .logo, .logo img, header, footer, main-warper, {margin-left: auto;margin-right: auto;}
+/* text-align */ footer {text-align: center;}
+/* align-items */ .logo, .candy-river, footer {align-items: center;}
+/* Flex CENTER */ .logo, footer {display: flex;justify-content: space-around;}
+/* Flex CENTER2 */ main-warper {display: flex;flex-direction: column;align-items: center;}
+
+
+/* position */ header, footer {position: fixed;}
+/* z-index MAX */ header, footer {z-index: 1000;}
+
+
+/* ------------- */
+/*  WIDTH DEMON  */
+/* ------------- */
+
+/* width 100% */ header, footer, main-warper {width: 100%;}
+/* MAX 500px */ /* {max-width: 500px;}*/
+/* MAX 360px */ .out-warper, .main-warper { max-width: 360px;}
+
+
+/* ------------- */
+/* POSITION DEMON */
+/* ------------- */
+
+/* out-warper = DDD domain */ .out-warper {position: relative;width: 100%;min-height: 100vh;margin-left: auto;margin-right: auto;}
+
+/* header */ header {top: 0;left: 0;}
+
+/* main-warper */ main-warper {min-height: calc(100vh - 200px);padding-top: 100px;padding-bottom: 100px;}
+
+/* footer */ footer {bottom: 0;left: 0;}
+
+
+/* ------------ */
+/*     DIVs     */
+/* ------------ */
+
+/* header */ .logo {height: 100px;}
+/* logo */ .logo img {width: 32px;}
+
+/* nav */ .nav {}
+
+/* burger / summon */ .burger {}
+.summon {}
+
+/* footer */ footer {height: 100px;}
+
+
+/* ------------ */
+/*  Index.html  */
+/* ------------ */
+
+/* content */ .content {width: 100%;}
+
+/* post */ 
+.post-title {}
+.post-cover {}
+.post-text {}
+.index {}
+.sub {}
+.post-tag {}

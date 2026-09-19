@@ -1,0 +1,177 @@
+/* ------- EVERYWHERE --------- */
+.codex-selector.index {    display: flex;    justify-content: space-around;margin-left: auto;margin-right: auto;}
+.codex-selector.index select{
+    width: 100%;
+    height: 40px;
+    max-width: 340px;
+    border: #d7d7d7 1px solid;
+    font-family: "Noto Serif TC", "Source Han Serif TC", serif;
+    padding-left: 10px ;
+}
+
+/* ------- Codex.html --------- */
+.codex-boss {    width: 100%;
+    box-sizing: border-box;
+    padding-left: 24px;}
+.codex-banshee {margin-top: 100px;}
+
+.codex-post {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-image.codex {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.post-image.codex img.post.codex {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+}
+
+.codex-post-title {
+    flex: 1;
+    text-align: left;
+    padding-left: 5px;
+    color: #a1a1a1;
+}
+
+.codex-post-date {
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 20px;
+}
+/* -- Sp -- */
+/* ========================================
+   Codex Hover Frame
+   ======================================== */
+
+.codex-post,
+.codex-catalog-title,
+.codex-header {
+    position: relative;
+    overflow: hidden;
+
+    border: 1px solid #ffffff;
+}
+
+.codex-post{border-bottom: 1px #cccccc dashed;    padding: 7px 0;}
+
+/* Hover 時只改 Border 顏色
+   不改尺寸，避免 Layout Shift */
+
+.codex-post:has(a:hover),
+.codex-catalog-title:has(a:hover),
+.codex-header:has(a:hover) {
+    border-color: #242424;
+}
+
+
+/* ========================================
+   Hover Dimension Effect
+   ======================================== */
+
+.codex-post::after,
+.codex-catalog-title::after,
+.codex-header::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    background:
+        repeating-linear-gradient(
+            112deg,
+            transparent 0px,
+            transparent 7px,
+            rgba(36, 36, 36, 0.35) 8px,
+            transparent 9px,
+            transparent 17px
+        ),
+        repeating-linear-gradient(
+            68deg,
+            transparent 0px,
+            transparent 13px,
+            rgba(36, 36, 36, 0.22) 14px,
+            transparent 15px,
+            transparent 25px
+        );
+
+    transform: translate(-35%, -10%);
+
+    z-index: 0;
+}
+
+
+/* Hover 瞬間播放一次 */
+
+.codex-post:has(a:hover)::after,
+.codex-catalog-title:has(a:hover)::after,
+.codex-header:has(a:hover)::after {
+    animation:
+        codex-dimension-barrage
+        0.75s
+        ease-out
+        1;
+}
+
+
+/* 保持文字在特效上方 */
+
+.codex-post > *,
+.codex-catalog-title > *,
+.codex-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ========================================
+   Dimension Barrage
+   ======================================== */
+
+@keyframes codex-dimension-barrage {
+
+    0% {
+        opacity: 0;
+        transform:
+            translate(-40%, -15%)
+            rotate(-1deg);
+    }
+
+    12% {
+        opacity: 1;
+    }
+
+    35% {
+        opacity: 0.75;
+        transform:
+            translate(-10%, 0%)
+            rotate(0deg);
+    }
+
+    65% {
+        opacity: 0.45;
+        transform:
+            translate(15%, 5%)
+            rotate(0.5deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(45%, 15%)
+            rotate(1deg);
+    }
+
+}

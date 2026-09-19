@@ -1,0 +1,166 @@
+/* Post Loader
+   Shared Post-system CSS hook.
+   Visual styling is intentionally left to the page/theme stage.
+
+   Page-specific Post elements use the .post marker:
+   .post-catalog.post
+   .post-images.post <-- Call All (1)(2).jpg ..etc
+   .post-image.post <-- Call (1).jpg only
+   .post-date.post
+   .post-title.post
+   .post-text.post
+   .post-tag.post
+   .post-catalog-link.post
+   .post-get-link.post
+   .post-tag-link.post
+   .post-readmore.post
+   .post-prev-link.post
+   .post-next-link.post
+*/
+
+/* EVERYWHERE SUMMON */
+.post-loader {
+    width: 100%;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    padding-bottom: 10px;
+}
+/* FOR Index.html */
+
+.post-title.index {
+    flex: 1;
+    color: white;
+}
+
+.post-title.index h3 {
+    text-shadow: -1px -1px 15px rgb(172 172 172 / 70%), 4px 4px 8px rgb(0 0 0 / 19%);
+}
+
+.post-image.index {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    overflow: hidden;
+
+    border: 2px solid white;
+    box-sizing: border-box;
+
+    box-shadow: 0 3px 10px rgb(0 0 0 / 35%);
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.post-image.index img.post.index {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.post-text.index {
+    height: calc(100vh - 470px);
+}
+/* FOR Codex.html */
+.post-text.codex {}
+
+/* FOR Post.html */
+.post-date.post {letter-spacing:24px; text-align: center;}
+.post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;}
+.post-related-link.post:hover {
+    border: #cccccc 1px solid;
+}
+.post-related {
+    border: #ffffff 1px solid;
+}
+
+/* Post catalog / Get post link */
+.post-catalog.post {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.post-catalog.post > span {
+    min-width: 0;
+}
+
+.post-catalog.post > span:last-child {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.post-get-link.post {
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Temporary copy confirmation */
+.post-link-notice.post {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 2000;
+
+    transform: translate(-50%, -50%);
+    padding: 6px 12px;
+
+    border: 1px solid rgb(255 255 255 / 70%);
+    background: rgb(255 255 255 / 100%);
+    color: #696969;
+    width:340px;
+    text-align:center;
+
+    font-size: clamp(14px, 1vw, 16px);
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+
+.post-link-notice.post.is-visible {
+    opacity: 1;
+}
+
+/* Post previous / next navigation */
+.post-readmore.post {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 15px;
+    margin-bottom:10px;
+    border-top: 1px dashed #eeeeee;
+}
+
+.post-readmore.post > span {
+    min-width: 0;
+}
+
+.post-readmore.post > span:last-child {
+    margin-left: auto;
+    text-align: right;
+}
+
+.post-prev-link.post,
+.post-next-link.post {
+    white-space: nowrap;
+}
+
+.post-tag.post, .post-related.post{padding-bottom:10px;}
+.post-readmore.post, .post-tag.post { border-top: 1px dashed #eeeeee;}
+
+.post-tag.post a {padding-right:10px;}
+.post-tag-link.post::before {
+    content: "#";
+    margin-right: 0.25em;
+}

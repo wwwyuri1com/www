@@ -1,0 +1,135 @@
+/* CANDY LOADER */
+
+/* GUIDE */
+
+.candy-river {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+
+    padding: 24px;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+
+    text-align: justify;
+    z-index: 5;
+}
+.candy-boss {
+    z-index: 1000;
+    position: absolute;
+    left: 32px;
+    bottom: 10px;
+}
+
+/* THEME */
+.candy-river {
+    text-align: justify;
+}
+.candy-guideline {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.candy-boss {
+    scrollbar-width: thin;
+    scrollbar-color: #e3e3e300 transparent
+}
+
+/*
+ * Index cover:
+ * The cover is intentionally a fixed-height display area.
+ * candy-loader-fix.png is 360x600 transparent PNG.
+ * background-size: cover keeps it at its natural width on a 360px box
+ * and crops vertically instead of shrinking it to fit the height.
+ */
+.candy-loader {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 70px;
+}
+
+
+/* Fixed cover area at the top of Candy */
+.candy-boss {
+    width: 340px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: auto;
+    overflow-y: auto;
+    background-image: url(../../img/cover-def.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    z-index: 1;
+}
+
+/* The transparent staging area reserves the cover height.
+   The page itself remains normally scrollable. */
+.candy-banshee {
+    height: 500px;
+}
+
+/* River is part of normal document flow. */
+.candy-viewport {
+    position: relative;
+    overflow: visible;
+    z-index: 2;
+}
+
+.candy-river {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+
+    padding: 24px;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+
+    text-align: justify;
+    z-index: 2;
+}
+
+/* Each post enters as a normal row in the page. */
+.candy-guideline {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+/* The transparent fix image is only a visual overlay/stretcher. */
+.candy-boss img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Index post links */
+.post-link.index {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    text-decoration: none;
+}
+
+/* Fixed candy-boss layer; its position never moves with the river. */
+.candy-boss img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}

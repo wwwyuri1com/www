@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CODEX \ Derive Dimension Demon Official Website</title>
+    <!-- Config Loader -->
+    <link rel="stylesheet" href="Config/css/guide.css">
+    <link rel="stylesheet" href="Config/css/theme.css">
+    <!-- Plug-in Loader -->
+    <!-- Candy -->
+    <link rel="stylesheet" href="Config/plug-in/candy-loader/candy-loader.css">
+    <script src="Config/plug-in/candy-loader/candy-loader.js"></script>    
+    <!-- Codex -->
+    <link rel="stylesheet" href="Config/plug-in/codex-loader/codex-loader.css">
+    <script src="Config/plug-in/codex-loader/codex-loader.js" defer></script>
+    <!-- Post -->
+    <link rel="stylesheet" href="Config/plug-in/post-loader/post-loader.css">
+    <script src="Config/plug-in/post-loader/post-loader.js" defer></script>
+</head>
+
+<body>
+<div class="out-warper"><!-- out-warper lock max-width -->
+
+
+<main-warper>
+  <header>
+  <div class="logo"><a href="index.html"><img src="Config/img/icon-xs.png"></a></div>
+  <!-- 本業特有頁首 START -->
+   <div class="codex-loader">
+    <div id="codex-filter-catalog" class="codex-selector index">
+      <select>
+        <option value="" disabled selected hidden>⛛ Select Catalog</option>
+      </select>
+    </div>
+
+    <div id="codex-filter-tag" class="codex-selector index">
+      <select>
+        <option value="" disabled selected hidden>⛛ Select Tag</option>
+      </select>
+    </div>
+<!-- 本頁特有頁首 END -->
+</div>
+
+</header>
+<!-- 本頁特有內容 START -->
+ <div class="codex-boss">
+ <div class="codex-loader codex-banshee">
+<!-- Now Create By JS 
+     Codex Navigation 
+    <div class="codex-header" data-codex="home">
+        <a href="index.html">⛚ Home</a>
+    </div>
+
+    <div class="codex-header" data-codex="codex">
+        <a href="Codex.html?catalog=All">▧ Codex</a>
+    </div>
+-->
+
+    <!-- Catalog structure -->
+    <template id="codex-catalog-template">
+
+        <div class="codex-catalog">
+
+            <div class="codex-catalog-title"
+                 data-codex="catalog-title">
+
+                <a href=""
+                   data-codex="catalog-link"></a>
+
+            </div>
+
+            <div class="codex-post-list"
+                 data-codex="post-list">
+            </div>
+
+        </div>
+
+    </template>
+
+
+    <!-- Post structure -->
+    <template id="codex-post-template">
+
+        <div class="codex-post"
+             data-codex="post">
+
+            <div class="post-image codex"
+                 data-codex="post-image">
+
+                <img class="post codex"
+                     data-codex="post-image-link"
+                     alt="">
+
+            </div>
+
+            <div class="codex-post-title s"
+                 data-codex="post-title">
+
+                <a href=""
+                   data-codex="post-link"></a>
+
+            </div>
+
+            <div class="codex-post-date"
+                 data-codex="post-date">
+
+                <span></span>
+
+            </div>
+
+        </div>
+
+    </template>
+
+
+    <!-- JS fills this area -->
+    <div class="codex-results"
+         data-codex="results">
+    </div>
+
+</div>
+</div>
+<!-- 本頁特有內容 END -->
+</main-warper>
+<footer><span>© Produced by Derive Dimension Demon</span></footer>
+</div>
+</body>
+</html>
