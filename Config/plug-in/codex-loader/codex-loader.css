@@ -39,7 +39,7 @@
     flex: 1;
     text-align: left;
     padding-left: 5px;
-    color: #a1a1a1;
+    color: #fa6699;
 }
 
 .codex-post-date {
@@ -69,7 +69,7 @@
 .codex-post:has(a:hover),
 .codex-catalog-title:has(a:hover),
 .codex-header:has(a:hover) {
-    border-color: #242424;
+    border-color: #fa6699;
 }
 
 
