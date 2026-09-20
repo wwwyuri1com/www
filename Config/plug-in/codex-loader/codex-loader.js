@@ -361,7 +361,7 @@ appendResultHeader(title);
                 )}`;
 
             catalogLink.textContent =
-                `${indent(depth)}⛡ ${name}`;
+                `${indent(depth)}✧ ${name}`;
 
         } else if (catalogTitle) {
             catalogTitle.remove();
@@ -458,7 +458,7 @@ appendResultHeader(title);
 
 
         appendResultHeader(
-            `⇲ #${tag}`
+            `✦ #${tag}`
         );
 
 
@@ -756,7 +756,7 @@ appendResultHeader(title);
             "index.html";
 
         homeLink.textContent =
-            "⛚ Home";
+            "֎ Home";
 
 
         homeHeader.appendChild(
@@ -979,7 +979,7 @@ appendResultHeader(title);
         select.appendChild(
             createOption(
                 "Home",
-                "⛚ Home",
+                "֎ Home",
                 "home",
                 "Home"
             )
@@ -992,7 +992,7 @@ appendResultHeader(title);
         select.appendChild(
             createOption(
                 "All",
-                "⛞ Codex",
+                "𖤐 Codex",
                 "catalog",
                 "All"
             )
@@ -1098,7 +1098,7 @@ appendResultHeader(title);
             select.appendChild(
                 createOption(
                     path,
-                    `${indent(depth)}⛡ ${name}`,
+                    `${indent(depth)}✧ ${name}`,
                     "catalog",
                     path
                 )
@@ -1122,7 +1122,7 @@ appendResultHeader(title);
                         select.appendChild(
                             createOption(
                                 postId,
-                                `${indent(depth + 1)}⇲ ${
+                                `${indent(depth + 1)}✦ ${
                                     titles.get(postId) ||
                                     humanizeId(postId)
                                 }`,
@@ -1277,7 +1277,7 @@ appendResultHeader(title);
 
 
             group.label =
-                `↘ ${groupName}`;
+                `✥ ${groupName}`;
 
 
             if (Array.isArray(tags)) {
