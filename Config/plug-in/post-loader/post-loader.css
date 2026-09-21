@@ -161,7 +161,7 @@
 .post-tag.post, .post-related.post{padding-bottom:10px;}
 .post-readmore.post, .post-tag.post { border-top: 1px dashed #eeeeee;}
 
-.post-tag.post a {padding-right:10px;}
+.post-tag.post a {padding-right:10px;    white-space: nowrap;}
 .post-tag-link.post::before {
     content: "#";
     margin-right: 0.25em;

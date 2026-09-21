@@ -1,105 +1,66 @@
 {
     "groups": {
-        "Members": [
-            "DDD_Members",
-            "DDD_Golden",
-            "DDD_White",
-            "DDD_Cyan",
-            "DDD_Red",
-            "DDD_Dark",
-            "DDD_Night"
+        "Love Emo": [
+            "Sweet",
+            "Spicy",
+            "Wild",
+            "Mischievous",
+            "NG"
         ],
-        "Series": [
-            "DDD_Teehee",
-            "DDD_Games"
+        "OC Trait": [
+            "Tsundere",
+            "Yandere"
         ],
-        "More posts": [
-            "DDD_more"
+        "Style": [
+            "Humor",
+            "Plot",
+            "Suspense"
+        ],
+        "Background": [
+            "Modern",
+            "Technology",
+            "Fantasy"
+        ],
+        "Main Story CP": [
+        ],
+        "Word Count": [
+            "Under 5k",
+            "5k-20k",
+            "20k-50k",
+            "50k-1m",
+            "1m-3m",
+            "Over 3m"
         ]
     },
     "tags": {
-        "DDD_Members": {
+        "Sweet": {
             "posts": [
-                "20260911-02",
-                "20260911-01",
-                "20260825-01",
-                "20260823-02",
-                "20260823-01"
+                "20260921-01_S_LittleBunny"
             ]
         },
-        "DDD_Golden": {
+        "Mischievous": {
             "posts": [
-                "20260911-01",
-                "20260830-01",
-                "20260831-01",
-                "20260829-01",
-                "20260829-01",
-                "20260826-01",
-                "20260825-02",
-                "20260823-03"
+                "20260921-01_S_LittleBunny"
             ]
         },
-        "DDD_White": {
+        "Tsundere": {
             "posts": [
-                "20260829-02",
-                "20260829-01",
-                "20260826-01",
-                "20260823-02"
+                "20260921-01_S_LittleBunny"
             ]
         },
-        "DDD_Cyan": {
+        "Humor": {
             "posts": [
-                "20260829-01",
-                "20260823-04",
-                "20260823-02"
+                "20260921-01_S_LittleBunny"
             ]
         },
-        "DDD_Red": {
+        "Modern": {
             "posts": [
-                "20260830-01",
-                "20260831-01",
-                "20260828-01",
-                "20260823-05"
+                "20260921-01_S_LittleBunny"
             ]
         },
-        "DDD_Dark": {
+        "Under 5k": {
             "posts": [
-                "20260903-01",
-                "20260829-02",
-                "20260828-01"
-            ]
-        },
-        "DDD_Teehee": {
-            "posts": [
-                "20260831-01",
-                "20260829-02",
-                "20260826-01",
-                "20260823-02"
-            ]
-        },
-        "DDD_Games": {
-            "posts": [
-                "20260830-01",
-                "20260829-01",
-                "20260828-01",
-                "20260825-02",
-                "20260825-01"
-            ]
-        },
-        "DDD_LightHorror": {
-            "posts": [
-                "20260823-05",
-                "20260823-04",
-                "20260823-03"
-            ]
-        },
-        "DDD_more": {
-            "posts": []
-        },
-        "DDD_Night": {
-            "posts": [
-                "20260911-02",
-                "20260911-01"
+                "20260921-01_S_LittleBunny"
             ]
         }
     }

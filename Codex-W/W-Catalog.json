@@ -2,58 +2,53 @@
     "_comment": "=== Here's Will be list _.json in SELECT ===",
     "selector": {
         "print_posts": [
-            "Official",
+            "Feature",
+            "IP Characters",
             "Policy"
         ]
     },
     "_comment_catalog": "=== Tell Which Post belong to What Catalog ===",
     "catalogs": {
-        "Official": {
-            "posts": [
-                "_Introduction",
-                "_Characters"
-            ]
-        },
-        "Games": {
-            "posts": [
-                "20260830-01",
-                "20260829-01",
-                "20260828-01",
-                "20260825-02",
-                "20260825-01"
-            ]
-        },
-        "Writing": {
-            "children": {
-                "Short": {
-                    "posts": [
-                        "20260823-05",
-                        "20260823-04",
-                        "20260823-03"
-                    ]
-                },
-                "Drama": {
-                    "posts": [
-                        "20260823-01"
-                    ]
-                }
+    "Feature": {
+        "posts": [
+            "_Introduction",
+            "_Characters"
+        ]
+    },
+    "IP Characters": {
+        "posts": [
+            "_DDDStudio",
+            "_IcyArte"
+        ]
+    },
+    "IP Characters": {
+        "children": {
+            "DDDStudio": {
+                "posts": [
+                    "_DDDStudio"
+                ]
+            },
+            "IcyArte": {
+                "posts": [
+                    "_IcyArte"
+                ]
             }
-        },
-        "Gallery": {
+        }
+    },
+        "Novels": {
             "children": {
-                "Scenes": {
+                "Single : Shorts": {
                     "posts": [
-                        "20260911-02",
-                        "20260911-01",
-                        "20260903-01",
-                        "20260831-01",
-                        "20260829-02",
-                        "20260826-01",
-                        "20260823-02"
+                        "20260921-01_S_LittleBunny"
                     ]
                 },
-                "Other": {
-                    "posts": []
+                "IP : Loading Night": {
+                    "posts": [
+                    ]
+                },
+                "IP : Icy & Arte": {
+                    "posts": [
+                    ]
                 }
             }
         },

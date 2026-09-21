@@ -75,8 +75,24 @@ a {text-decoration: none;}
 /* burger / summon */ .burger {}
 .summon {}
 
-/* footer */ footer {height: 100px;}
+/* footer */
+footer {
+    height: 100px;
+    letter-spacing: 2px;
+}
 
+.footer-info::after  {
+    content: "R15+";
+    display: inline-block;
+    margin: 0 5px;
+    padding: 1px 5px;
+    /* border: 1px solid #ffffff; */
+    font-size: 9px;
+    background-color: #fa6699;
+    color: #ffffff;
+    border-radius: 100%;    
+    letter-spacing: 0px;
+}
 
 /* ------------ */
 /*  Index.html  */
