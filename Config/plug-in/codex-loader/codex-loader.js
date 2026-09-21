@@ -1009,9 +1009,35 @@ appendResultHeader(title);
             );
 
 
+        const catalogs =
+            data?.catalogs || {};
+
+
+        /*
+         * Only show Catalog entries that contain
+         * at least one Post somewhere in their tree.
+         */
+        const visibleCatalogs =
+            Object.fromEntries(
+                Object.entries(catalogs)
+                    .filter(([, node]) =>
+                        catalogHasPosts(node)
+                    )
+            );
+
+
+        if (Object.keys(visibleCatalogs).length === 0) {
+            catalogRoot.hidden = true;
+            return;
+        }
+
+
+        catalogRoot.hidden = false;
+
+
         await appendCatalogs(
             select,
-            data?.catalogs || {},
+            visibleCatalogs,
             "",
             0,
             printPosts
@@ -1089,6 +1115,12 @@ appendResultHeader(title);
                 catalogs
             )
         ) {
+            /* Skip empty Catalog branches. */
+            if (!catalogHasPosts(node)) {
+                continue;
+            }
+
+
             const path =
                 parentPath
                     ? `${parentPath}/${name}`
@@ -1149,6 +1181,33 @@ appendResultHeader(title);
                 );
             }
         }
+    }
+
+
+    function catalogHasPosts(node) {
+        if (!node || typeof node !== "object") {
+            return false;
+        }
+
+
+        if (
+            Array.isArray(node.posts) &&
+            node.posts.length > 0
+        ) {
+            return true;
+        }
+
+
+        if (
+            node.children &&
+            typeof node.children === "object"
+        ) {
+            return Object.values(node.children)
+                .some(child => catalogHasPosts(child));
+        }
+
+
+        return false;
     }
 
 
@@ -1264,12 +1323,38 @@ appendResultHeader(title);
         }
 
 
+        let visibleGroupCount = 0;
+
+
         for (
             const [groupName, tags]
             of Object.entries(
                 data?.groups || {}
             )
         ) {
+            if (!Array.isArray(tags)) {
+                continue;
+            }
+
+
+            /*
+             * A Tag is visible only when W-Tag.json
+             * actually maps it to at least one Post.
+             */
+            const visibleTags =
+                tags.filter(tag =>
+                    Array.isArray(
+                        data?.tags?.[tag]?.posts
+                    ) &&
+                    data.tags[tag].posts.length > 0
+                );
+
+
+            if (visibleTags.length === 0) {
+                continue;
+            }
+
+
             const group =
                 document.createElement(
                     "optgroup"
@@ -1280,26 +1365,30 @@ appendResultHeader(title);
                 `✥ ${groupName}`;
 
 
-            if (Array.isArray(tags)) {
-                tags.forEach(
-                    tag => {
-                        group.appendChild(
-                            createOption(
-                                tag,
-                                `#${tag}`,
-                                "tag",
-                                tag
-                            )
-                        );
-                    }
-                );
-            }
+            visibleTags.forEach(
+                tag => {
+                    group.appendChild(
+                        createOption(
+                            tag,
+                            `#${tag}`,
+                            "tag",
+                            tag
+                        )
+                    );
+                }
+            );
 
 
             select.appendChild(
                 group
             );
+
+            visibleGroupCount += 1;
         }
+
+
+        tagRoot.hidden =
+            visibleGroupCount === 0;
 
 
         select.addEventListener(

@@ -12,25 +12,29 @@
     "Feature": {
         "posts": [
             "_Introduction",
-            "_Characters"
+            "_IP-Story"
         ]
     },
     "IP Characters": {
         "posts": [
-            "_DDDStudio",
-            "_IcyArte"
+            "_D-Golden",
+            "_N-White",
+            "_D-Cyan",
+            "_E-Red",
+            "_L-Night",
+            "_D-Dark",
+            "_Icy",
+            "_Artemisia"
         ]
     },
     "IP Characters": {
         "children": {
             "DDDStudio": {
                 "posts": [
-                    "_DDDStudio"
                 ]
             },
             "IcyArte": {
                 "posts": [
-                    "_IcyArte"
                 ]
             }
         }
@@ -54,6 +58,7 @@
         },
         "Policy": {
             "posts": [
+                "_AI-&-Content-Policy",
                 "_Privacy-Policy",
                 "_Terms",
                 "_Fan-Content-Guidelines"
