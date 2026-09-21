@@ -106,6 +106,14 @@
 
 
         try {
+            if (
+                catalogQuery === "Favorite" &&
+                tagQuery === null
+            ) {
+                await renderFavoriteResult();
+                return;
+            }
+
             const requests = [];
 
 
@@ -214,6 +222,75 @@
         }
     }
 
+
+    async function renderFavoriteResult() {
+        clearResult();
+
+        appendResultHeader("♥︎ FAVORITE");
+
+        const favoriteIds = getFavoritePostIds();
+
+        if (favoriteIds.length === 0) {
+            renderMessage("No favorite posts.");
+            return;
+        }
+
+        const posts = await loadPostData(favoriteIds);
+
+        const postList =
+            document.createElement("div");
+
+        postList.className =
+            "codex-post-list";
+
+        for (const postId of favoriteIds) {
+            const post =
+                createPostElement(
+                    postId,
+                    posts.get(postId),
+                    0
+                );
+
+            if (post) {
+                postList.appendChild(post);
+            }
+        }
+
+        if (postList.children.length === 0) {
+            renderMessage("No favorite posts.");
+            return;
+        }
+
+        resultRoot.appendChild(postList);
+    }
+
+    function getFavoritePostIds() {
+        const prefix =
+            "yuri1.reader.favorite.";
+
+        const ids = [];
+
+        for (let index = 0; index < localStorage.length; index++) {
+            const key = localStorage.key(index);
+
+            if (!key || !key.startsWith(prefix)) {
+                continue;
+            }
+
+            if (localStorage.getItem(key) !== "true") {
+                continue;
+            }
+
+            const postId =
+                key.slice(prefix.length);
+
+            if (postId && !ids.includes(postId)) {
+                ids.push(postId);
+            }
+        }
+
+        return ids;
+    }
 
     async function renderCatalogResult(
         data,
@@ -660,6 +737,25 @@ appendResultHeader(title);
                 displayTitle;
         }
 
+        const doneKey =
+            `yuri1.reader.done.${postId}`;
+
+        if (
+            localStorage.getItem(doneKey) ===
+            "true"
+        ) {
+            const titleContainer =
+                post.querySelector(
+                    '[data-codex="post-title"]'
+                );
+
+            if (titleContainer) {
+                titleContainer.classList.add(
+                    "is-read-done"
+                );
+            }
+        }
+
 
         if (date) {
             const dateText =
@@ -974,6 +1070,18 @@ appendResultHeader(title);
 
 
         /*
+         * Favorite
+         */
+        select.appendChild(
+            createOption(
+                "Favorite",
+                "♥︎ FAVORITE",
+                "favorite",
+                "Favorite"
+            )
+        );
+
+        /*
          * Home
          */
         select.appendChild(
@@ -1057,6 +1165,16 @@ appendResultHeader(title);
                     return;
                 }
 
+
+                if (
+                    option.dataset.type ===
+                    "favorite"
+                ) {
+                    window.location.href =
+                        "Codex.html?catalog=Favorite";
+
+                    return;
+                }
 
                 if (
                     option.dataset.type ===

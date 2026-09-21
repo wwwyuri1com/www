@@ -175,3 +175,8 @@
     }
 
 }
+
+/* Read-done Post title in Codex */
+.codex-post-title.is-read-done {
+    color: #fa669990;
+}

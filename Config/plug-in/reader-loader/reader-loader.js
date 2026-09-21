@@ -13,6 +13,7 @@
     };
 
     const progressValue = loader.querySelector(".reader-progress-value");
+    const favoriteButton = loader.querySelector(".favorite");
     const saveButton = loader.querySelector(".save-progress");
     const clearButton = loader.querySelector(".clear-progress");
     const doneButton = loader.querySelector(".read-done");
@@ -96,6 +97,10 @@
         ? `yuri1.reader.done.${postId}`
         : null;
 
+    const favoriteKey = postId
+        ? `yuri1.reader.favorite.${postId}`
+        : null;
+
     let toastTimer = null;
     let toast = null;
     let autoSaveTimer = null;
@@ -153,6 +158,56 @@
         renderIcons();
     };
 
+    const isFavorite = () => {
+        if (!favoriteKey) return false;
+
+        return localStorage.getItem(favoriteKey) === "true";
+    };
+
+    const updateFavoriteButton = () => {
+        if (!favoriteButton) return;
+
+        const favorite = isFavorite();
+
+        favoriteButton.setAttribute(
+            "aria-label",
+            favorite ? "Remove from favorites" : "Add to favorites"
+        );
+
+        favoriteButton.setAttribute(
+            "title",
+            favorite ? "Remove from favorites" : "Add to favorites"
+        );
+
+        setButtonIcon(
+            favoriteButton,
+            favorite ? "heart-x" : "heart-plus"
+        );
+
+        favoriteButton.classList.toggle(
+            "is-active",
+            favorite
+        );
+    };
+
+    const toggleFavorite = () => {
+        if (!favoriteKey) return;
+
+        if (isFavorite()) {
+            localStorage.removeItem(favoriteKey);
+            showToast("Removed from favorites");
+        } else {
+            localStorage.setItem(
+                favoriteKey,
+                "true"
+            );
+
+            showToast("Added to favorites");
+        }
+
+        updateFavoriteButton();
+    };
+
     const isReadDone = () => {
         if (!doneKey) return false;
 
@@ -204,8 +259,13 @@
         );
 
         if (showNotice) {
+            const pinLabel =
+                postId && postId.startsWith("_")
+                    ? "Progress"
+                    : modeLabel[mode];
+
             showToast(
-                `${modeLabel[mode]} Pinned to ${percent}%`
+                `${pinLabel} Pinned to ${percent}%`
             );
         }
     };
@@ -364,6 +424,13 @@
         updateDoneButton();
     };
 
+    if (favoriteButton) {
+        favoriteButton.addEventListener(
+            "click",
+            toggleFavorite
+        );
+    }
+
     if (saveButton) {
         saveButton.addEventListener(
             "click",
@@ -413,6 +480,7 @@
     }
 
     renderIcons();
+    updateFavoriteButton();
     updateDoneButton();
     updateProgress();
 
