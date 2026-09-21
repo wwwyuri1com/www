@@ -15,12 +15,15 @@
     <!-- Candy -->
     <link rel="stylesheet" href="Config/plug-in/candy-loader/candy-loader.css">
     <script src="Config/plug-in/candy-loader/candy-loader.js" defer></script>
-    <!-- Post -->
-    <link rel="stylesheet" href="Config/plug-in/post-loader/post-loader.css">
-    <script src="Config/plug-in/post-loader/post-loader.js" defer></script>
     <!-- Codex -->
     <link rel="stylesheet" href="Config/plug-in/codex-loader/codex-loader.css">
     <script src="Config/plug-in/codex-loader/codex-loader.js" defer></script>
+    <!-- Post -->
+    <link rel="stylesheet" href="Config/plug-in/post-loader/post-loader.css">
+    <script src="Config/plug-in/post-loader/post-loader.js" defer></script>
+    <!-- Ai -->
+    <link rel="stylesheet" href="Config/plug-in/ai-loader/ai-loader.css">
+    <script src="Config/plug-in/ai-loader/ai-loader.js" defer></script>
 </head>
 
 <body>
@@ -28,7 +31,7 @@
 
   <header>
   <div class="logo"><a href="index.html"><img src="Config/img/icon-xs.png"></a></div>
-  <!-- 本業特有頁首 START -->
+  <!-- 本頁特有頁首 START -->
    <div class="codex-loader">
     <div id="codex-filter-catalog" class="codex-selector index">
       <select>
@@ -49,6 +52,11 @@
 <main-warper>
 
 <!-- 本頁特有內容 START -->
+ <!-- 預設及未點選狀態為全開,點下h會隱藏a,點下a會隱藏h -->
+<div id="ai-loader" class="ai-loader">
+    <div class="ai-btn h"></div>
+    <div class="ai-btn a"></div>
+</div>
 
 <div id="post-loader" class="post-loader">
 
