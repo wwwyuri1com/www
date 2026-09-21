@@ -80,6 +80,7 @@ footer {
     height: 100px;
     letter-spacing: 2px;
 }
+footer.post{height:40px;}
 
 .footer-info::after  {
     content: "R15+";

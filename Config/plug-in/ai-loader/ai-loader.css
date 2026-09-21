@@ -5,22 +5,27 @@
     width: 340px;
     left: 50%;
     transform: translateX(-50%);
-    box-sizing: border-box;
+    box-sizing: border-box;    
+}
+
+
+.ai-loader[hidden] {
+    display: none !important;
 }
 
 .ai-loader {
     position: absolute;
-    top: 18px;
+    top: 40px;
     right: 0;
     z-index: 1500;
     display: flex;
     align-items: flex-start;
-    gap: 6px;
+    gap: 5px;
 }
 
 .ai-btn {
-    width: 54px;
-    height: 54px;
+    width: 34px;
+    height: 34px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -29,22 +34,25 @@
     cursor: pointer;
     user-select: none;
     background: #ffffff;
-    border: 2px solid currentColor;
-    color: #696969;
+    border: 1px solid currentColor;
+    border-radius: 10%;
+    color: #69696920;
     transition: color 160ms ease, background-color 160ms ease;
+    box-shadow: 3px 2px 3px #fa669930;
 }
 
 .ai-btn::before {
     display: block;
-    font-size: 24px;
+    font-size: 18px;
     line-height: 1;
 }
 
 .ai-btn::after {
     display: block;
-    margin-top: 3px;
-    font-size: 9px;
+    margin-top: 1px;
+    font-size: 6.5px;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .ai-btn.a::before { content: "𝓐"; }
@@ -52,7 +60,7 @@
 .ai-btn.p::before { content: "𝓟"; }
 .ai-btn.p::after { content: "Prompt"; }
 .ai-btn.h::before { content: "𝓗"; }
-.ai-btn.h::after { content: "Handmade"; }
+.ai-btn.h::after { content: "Human"; }
 
 .ai-btn:hover {
     background: #f8f8f8;
@@ -64,6 +72,8 @@
 
 .post-text.post .llm {
     text-align: left;
+    font-size: 0.9rem;
+    line-height: 25px;
 }
 
 .post-text.post .ai-source-label {
@@ -76,8 +86,36 @@
 
 .post-text.post hr {
     margin: 28px 0;
-    border: 0;
-    border-top: 1px solid #eeeeee;
+}
+
+/* All mode: highlight user content */
+body:has(#ai-loader:not([hidden]):not([data-mode]),
+         #ai-loader[data-mode="all"]) .post-text.post .user {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    /* color: #fa6699; */
+    border: 1px solid #fa669910;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* H / P mode: lift the whole post text as one card */
+body:has(#ai-loader[data-mode="h"],
+         #ai-loader[data-mode="p"]) .post-text.post {
+    width: calc(100% - 14px);
+    margin-left: 7px;
+    margin-right: 7px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 0;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    /* color: #fa6699; */
+    border: 1px solid #fa669910;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 600px) {
@@ -86,21 +124,21 @@
     }
 
     .ai-loader {
-        top: 18px;
+        top: 40px;
         right: 0;
         gap: 5px;
     }
 
     .ai-btn {
-        width: 50px;
-        height: 50px;
+        width: 34px;
+        height: 34px;
     }
 
     .ai-btn::before {
-        font-size: 21px;
+        font-size: 18px;
     }
 
     .ai-btn::after {
-        font-size: 8px;
+        font-size: 6.5px;
     }
 }

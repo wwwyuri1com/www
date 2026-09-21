@@ -13,11 +13,12 @@ a:hover {    opacity: 0.65;}
 
 /* text-size */
 .xs, span {font-size: clamp(8px, 0.55vw, 9px);}
-.s, p {font-size: clamp(14px, 1vw, 16px);}
-.n, h3 {font-size: clamp(16px, 1.22vw, 19px);}
+.s, p {    font-size: calc(clamp(14px, 1vw, 16px) * 0.9);    text-align: left;    line-height: 25px;
+}.n, h3 {font-size: clamp(16px, 1.22vw, 19px);}
 .l, h2 {font-size: clamp(18px, 1.44vw, 23px);}
 .xl, h1 {font-size: clamp(22px, 1.67vw, 27px);}
 footer {color:#fa6699;}
+hr { border: 0;     border-top: 1px solid #fa669940;    box-shadow: 1px 1px 2px 0px #fa669940;}
 
 /* ===|  C  O  L  O  R |======================== */
 /* -------------- */

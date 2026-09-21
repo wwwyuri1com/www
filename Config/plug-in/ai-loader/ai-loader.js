@@ -59,12 +59,23 @@
     function getHLines(lines) {
         // Handmade view: hide instruction sections beginning with "！"
         // until the next / or \ separator. Separators themselves are hidden.
+        // "！END" is the one exception: show it as "（完結）".
         const result = [];
         let hidden = false;
 
         lines.forEach(line => {
             const trimmed = line.trim();
-            const isSeparator = trimmed === "/" || trimmed === "\\";
+            const isSeparator =
+                trimmed === "/" ||
+                trimmed === "\\" ||
+                trimmed === "／" ||
+                trimmed === "＼";
+
+            if (trimmed.toLowerCase() === "!end" || trimmed.toLowerCase() === "！end") {
+                result.push("（完結）");
+                hidden = false;
+                return;
+            }
 
             if (trimmed.startsWith("！")) {
                 hidden = true;
@@ -182,16 +193,16 @@
     }
 
     function setButtons(mode) {
-        const inactiveColor = "#696969";
-        const activeColor = "#242424";
+        const inactiveColor = "#69696970";
+        const activeColor = "#fa6699";
 
         aButton.style.color =
-            mode === "a" || mode === "all"
+            mode === "a"
                 ? activeColor
                 : inactiveColor;
 
         pButton.style.color =
-            mode === "p" || mode === "all"
+            mode === "p"
                 ? activeColor
                 : inactiveColor;
 
