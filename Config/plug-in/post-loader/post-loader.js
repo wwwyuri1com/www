@@ -404,49 +404,37 @@
     }
 
     function renderContent(container, value) {
-    container.textContent = "";
+        const target =
+            container.querySelector("p");
 
-    /*
-     * 文章排版規則：
-     *
-     * 整篇文章只使用一個 <p>。
-     * 每一個原始換行輸出為一個 <br>。
-     *
-     *   第一段。\n第二段。
-     *
-     * → <p>第一段。<br>第二段。</p>
-     *
-     *   第一段。\n\n第二段。
-     *
-     * → <p>第一段。<br><br>第二段。</p>
-     *
-     * 不再混用多個 <p> 的 margin 與 <br>。
-     * 使用 text nodes + createElement("br")，
-     * 不使用 innerHTML。
-     */
+        const normalized = String(value || "")
+            .replace(/\r\n|\r/g, "\n");
 
-    const p =
-        document.createElement("p");
+        // Store the source text as generic Post data.
+        // Optional plug-ins can interpret this without Post Loader knowing how.
+        container.dataset.rawContent = normalized;
 
-    const lines =
-        String(value || "")
-            .replace(/\r\n|\r/g, "\n")
-            .split("\n");
+        if (target) {
+            target.textContent = "";
 
-    lines.forEach((line, index) => {
-        p.appendChild(
-            document.createTextNode(line)
-        );
+            const lines = normalized.split("\n");
+            lines.forEach((line, index) => {
+                target.appendChild(
+                    document.createTextNode(line)
+                );
 
-        if (index < lines.length - 1) {
-            p.appendChild(
-                document.createElement("br")
-            );
+                if (index < lines.length - 1) {
+                    target.appendChild(
+                        document.createElement("br")
+                    );
+                }
+            });
         }
-    });
 
-    container.appendChild(p);
-}
+        document.dispatchEvent(
+            new CustomEvent("post:content-ready")
+        );
+    }
 
     function renderRelatedLinks(container, value) {
         const wrapper =

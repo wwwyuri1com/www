@@ -1,0 +1,106 @@
+/* AI Loader */
+/* Optional Post.html plug-in for AI / Prompt / Handmade views. */
+
+.ai-header {
+    width: 340px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+}
+
+.ai-loader {
+    position: absolute;
+    top: 18px;
+    right: 0;
+    z-index: 1500;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.ai-btn {
+    width: 54px;
+    height: 54px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    background: #ffffff;
+    border: 2px solid currentColor;
+    color: #696969;
+    transition: color 160ms ease, background-color 160ms ease;
+}
+
+.ai-btn::before {
+    display: block;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.ai-btn::after {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    line-height: 1;
+}
+
+.ai-btn.a::before { content: "𝓐"; }
+.ai-btn.a::after { content: "AI"; }
+.ai-btn.p::before { content: "𝓟"; }
+.ai-btn.p::after { content: "Prompt"; }
+.ai-btn.h::before { content: "𝓗"; }
+.ai-btn.h::after { content: "Handmade"; }
+
+.ai-btn:hover {
+    background: #f8f8f8;
+}
+
+.post-text.post .user {
+    text-align: justify;
+}
+
+.post-text.post .llm {
+    text-align: left;
+}
+
+.post-text.post .ai-source-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    letter-spacing: 0.9px;
+}
+
+.post-text.post hr {
+    margin: 28px 0;
+    border: 0;
+    border-top: 1px solid #eeeeee;
+}
+
+@media (max-width: 600px) {
+    .ai-header {
+        width: 340px;
+    }
+
+    .ai-loader {
+        top: 18px;
+        right: 0;
+        gap: 5px;
+    }
+
+    .ai-btn {
+        width: 50px;
+        height: 50px;
+    }
+
+    .ai-btn::before {
+        font-size: 21px;
+    }
+
+    .ai-btn::after {
+        font-size: 8px;
+    }
+}
