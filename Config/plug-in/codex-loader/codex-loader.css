@@ -12,7 +12,7 @@
 /* ------- Codex.html --------- */
 .codex-boss {    width: 100%;
     box-sizing: border-box;
-    padding-left: 24px;}
+    padding: 0 11px;}
 .codex-banshee {margin-top: 100px;}
 
 .codex-post {
@@ -42,10 +42,21 @@
     color: #242424;
 }
 
-.codex-post-date {
+.codex-post-meta {
     flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 75px 15px 15px;
+    column-gap: 5px;
+    align-items: center;
+    min-width: 115px;
+    height: 20px;
+}
+
+.codex-post-date {
+    width: 75px;
     text-align: right;
-    padding-right: 20px;
+    padding-right: 0;
+    white-space: nowrap;
 }
 /* -- Sp -- */
 /* ========================================
@@ -178,5 +189,76 @@
 
 /* Read-done Post title in Codex */
 .codex-post-title.is-read-done {
-    color: #fa669990;
+    color: #69696970;
+}
+
+/* Codex Post Status Indicators */
+.codex-post-status-slot {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #24242420;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.codex-post-status-slot.is-active {
+    color: #242424;
+}
+
+.codex-post-status-slot:hover {
+    opacity: 0.72;
+}
+
+.codex-post-status-icon {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.25;
+    flex-shrink: 0;
+    pointer-events: none;
+    display: block;
+}
+
+.codex-post-status-slot:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+}
+
+
+/* ========================================
+   Codex Favorite Box
+   Reuse the visual language of the Post
+   page's .user card without touching Select.
+   ======================================== */
+
+.codex-favo-box {
+    width: calc(100% - 14px);
+    margin: 0 7px 28px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #fa669910;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.codex-favo-title {
+    font-size: clamp(18px, 1.44vw, 23px);
+    line-height: 25px;
+    margin-bottom: 12px;
+}
+
+.codex-favo-list .codex-post:first-child {
+    border-top: 0;
+}
+
+.codex-favo-list .codex-post:last-child {
+    border-bottom-color: #fa669940;
 }
