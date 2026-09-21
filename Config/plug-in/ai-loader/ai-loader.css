@@ -142,3 +142,56 @@ body:has(#ai-loader[data-mode="h"],
         font-size: 6.5px;
     }
 }
+
+/* Current version status */
+.ai-version-status {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    padding: 5px 9px;
+    color: #696969;
+    font-size: 9px;
+    line-height: 1.2;
+    white-space: nowrap;
+    z-index: 1501;
+    pointer-events: none;
+    width: 110px;
+    text-align: center;
+    border-bottom: 1px solid #fa6699;
+}
+
+/* Hide only when there is no active version label. */
+.ai-version-status:empty {
+    display: none;
+}
+
+/* Connected downward arrow pointing to the active mode button. */
+.ai-version-status::after {
+    content: "";
+    position: absolute;
+
+    width: 0;
+    height: 0;
+
+    bottom: -5px;
+
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fa6699;
+}
+
+.ai-version-status[data-mode="a"]::after {
+    left: 14px;
+}
+
+.ai-version-status[data-mode="h"]::after {
+    left: 50%;
+    margin-left: -4px;
+}
+
+.ai-version-status[data-mode="p"]::after {
+    right: 14px;
+}
+

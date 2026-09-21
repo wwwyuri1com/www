@@ -9,6 +9,28 @@
 
     if (!postText || !aButton || !pButton || !hButton) return;
 
+    // Current version status
+    const status = document.createElement("div");
+    status.className = "ai-version-status";
+    loader.appendChild(status);
+
+    function showStatus(mode) {
+        const labels = {
+            a: "AI Expansion (en)",
+            h: "Human Draft (繁)",
+            p: "Human Prompt (繁)"
+        };
+
+        if (!labels[mode]) {
+            status.textContent = "";
+            status.removeAttribute("data-mode");
+            return;
+        }
+
+        status.textContent = labels[mode];
+        status.dataset.mode = mode;
+    }
+
     let blocks = [];
 
     function normalize(value) {
@@ -212,10 +234,16 @@
                 : inactiveColor;
     }
 
-    function setMode(mode) {
+    function setMode(mode, showVersionStatus = false) {
         renderAllBlocks(mode);
         loader.dataset.mode = mode;
         setButtons(mode);
+
+        if (showVersionStatus) {
+            showStatus(mode);
+        } else if (mode === "all") {
+            showStatus("all");
+        }
     }
 
     function toggleMode(mode) {
@@ -237,9 +265,23 @@
         setMode("all");
     }
 
-    aButton.addEventListener("click", () => toggleMode("a"));
-    pButton.addEventListener("click", () => toggleMode("p"));
-    hButton.addEventListener("click", () => toggleMode("h"));
+    aButton.addEventListener("click", () => {
+        const currentMode = loader.dataset.mode || "all";
+        const nextMode = currentMode === "a" ? "all" : "a";
+        setMode(nextMode, nextMode !== "all");
+    });
+
+    pButton.addEventListener("click", () => {
+        const currentMode = loader.dataset.mode || "all";
+        const nextMode = currentMode === "p" ? "all" : "p";
+        setMode(nextMode, nextMode !== "all");
+    });
+
+    hButton.addEventListener("click", () => {
+        const currentMode = loader.dataset.mode || "all";
+        const nextMode = currentMode === "h" ? "all" : "h";
+        setMode(nextMode, nextMode !== "all");
+    });
 
     document.addEventListener(
         "post:content-ready",
