@@ -1,0 +1,118 @@
+/* =========================================
+   Reader Loader
+   Footer controls for reading experience
+   ========================================= */
+
+.reader-loader {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 28px;
+}
+
+.reader-btn {
+    appearance: none;
+    border: 0;
+    padding: 2px;
+    margin: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reader-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.25;
+}
+
+.reader-btn:hover {
+    opacity: 0.72;
+}
+
+.reader-btn.is-active {
+    opacity: 1;
+}
+
+.reader-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+.reader-progress {
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    color: #fa6699;
+    font-size: 10px;
+    letter-spacing: 0;
+}
+
+.reader-progress-line {
+    display: block;
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+    transform: translateY(1px);
+}
+
+.reader-progress-value {
+    display: inline-block;
+    min-width: 26px;
+    text-align: right;
+}
+
+.reader-btn:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
+}
+
+.footer-info {
+    display: block;
+    flex: 0 0 auto;
+}
+
+
+/* Reader state notice
+   Reuses the Post notice positioning/animation, with a high-contrast
+   pink state color for messages shown during reading. */
+.reader-state-notice.post {
+    position: fixed;
+    bottom: 62px;
+    left: 50%;
+    z-index: 2000;
+
+    transform: translate(-50%, -50%);
+    padding: 6px 12px;
+
+    border: 1px solid #fa6699;
+    background: #fa6699;
+    color: #ffffff;
+    width: 340px;
+    text-align: center;
+
+    font-size: clamp(14px, 1vw, 16px);
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+
+.reader-state-notice.post.is-visible {
+    opacity: 1;
+}

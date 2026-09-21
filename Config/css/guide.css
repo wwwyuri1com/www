@@ -80,7 +80,16 @@ footer {
     height: 100px;
     letter-spacing: 2px;
 }
-footer.post{height:40px;}
+footer.post {
+    width: 340px;
+    max-width: calc(100vw - 20px);
+    height: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
 
 .footer-info::after  {
     content: "R15+";
