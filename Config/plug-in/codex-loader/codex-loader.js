@@ -77,6 +77,9 @@
             if (resultRoot) {
                 requests.push(
                     loadCodexResult()
+                        .then(() => {
+                            renderStatusIcons();
+                        })
                 );
             }
 
@@ -223,6 +226,69 @@
     }
 
 
+    async function renderFavoriteBox() {
+        const favoriteIds =
+            getFavoritePostIds();
+
+        if (favoriteIds.length === 0) {
+            return;
+        }
+
+        const posts =
+            await loadPostData(favoriteIds);
+
+        const visiblePosts = [];
+
+        for (const postId of favoriteIds) {
+            const post =
+                createPostElement(
+                    postId,
+                    posts.get(postId),
+                    0
+                );
+
+            if (post) {
+                visiblePosts.push(post);
+            }
+        }
+
+        if (visiblePosts.length === 0) {
+            return;
+        }
+
+        const box =
+            document.createElement("div");
+
+        box.className =
+            "codex-favo-box";
+
+        const title =
+            document.createElement("div");
+
+        title.className =
+            "codex-favo-title";
+
+        title.textContent =
+            "♥︎ FAVO";
+
+        box.appendChild(title);
+
+        const list =
+            document.createElement("div");
+
+        list.className =
+            "codex-favo-list";
+
+        for (const post of visiblePosts) {
+            list.appendChild(post);
+        }
+
+        box.appendChild(list);
+
+        resultRoot.appendChild(box);
+    }
+
+
     async function renderFavoriteResult() {
         clearResult();
 
@@ -299,9 +365,23 @@
         clearResult();
 
 
-const title = "▧ Codex";
+        /*
+         * Root Codex page:
+         * show the user's favorites as a small
+         * "user" style card above the normal Codex navigation.
+         * This does not modify the Select UI.
+         */
+        if (
+            catalogQuery === null &&
+            new URLSearchParams(window.location.search).get("tag") === null
+        ) {
+            await renderFavoriteBox();
+        }
 
-appendResultHeader(title);
+
+        const title = "𖤐 Codex";
+
+        appendResultHeader(title);
 
 
         let node =
@@ -405,6 +485,15 @@ appendResultHeader(title);
         depth,
         showTitle = true
     ) {
+        /*
+         * Keep Codex rendering consistent with the
+         * Catalog selector: empty Catalog branches
+         * are hidden instead of being rendered.
+         */
+        if (!catalogHasPosts(node)) {
+            return;
+        }
+
         const catalog =
             cloneTemplate(
                 catalogTemplate
@@ -652,6 +741,17 @@ appendResultHeader(title);
     }
 
 
+    function renderStatusIcons() {
+        if (
+            window.lucide &&
+            typeof window.lucide.createIcons ===
+                "function"
+        ) {
+            window.lucide.createIcons();
+        }
+    }
+
+
     function createPostElement(
         postId,
         data,
@@ -727,6 +827,11 @@ appendResultHeader(title);
         }
 
 
+        const titleContainer =
+            post.querySelector(
+                '[data-codex="post-title"]'
+            );
+
         if (titleLink) {
             titleLink.href =
                 `Post.html?id=${encodeURIComponent(
@@ -740,22 +845,177 @@ appendResultHeader(title);
         const doneKey =
             `yuri1.reader.done.${postId}`;
 
-        if (
-            localStorage.getItem(doneKey) ===
-            "true"
-        ) {
-            const titleContainer =
-                post.querySelector(
-                    '[data-codex="post-title"]'
-                );
+        const favoriteKey =
+            `yuri1.reader.favorite.${postId}`;
 
-            if (titleContainer) {
-                titleContainer.classList.add(
-                    "is-read-done"
-                );
-            }
+        let isReadDone =
+            localStorage.getItem(doneKey) ===
+            "true";
+
+        let isFavorite =
+            localStorage.getItem(favoriteKey) ===
+            "true";
+
+        if (
+            titleContainer &&
+            isReadDone
+        ) {
+            titleContainer.classList.add(
+                "is-read-done"
+            );
         }
 
+        /*
+         * Fixed right-side metadata: <date> <favorite> <read-done>.
+         * Both status buttons are always visible so every Codex row
+         * keeps the same alignment. Clicking an icon toggles its state.
+         */
+        const meta =
+            document.createElement("div");
+
+        meta.className =
+            "codex-post-meta";
+
+        post.appendChild(meta);
+
+        if (date) {
+            meta.appendChild(date);
+        }
+
+        const createStatusButton = (
+            type,
+            iconName,
+            key,
+            active,
+            activeLabel,
+            inactiveLabel
+        ) => {
+            const button =
+                document.createElement("button");
+
+            button.type =
+                "button";
+
+            button.className =
+                `codex-post-status-slot ${type}`;
+
+            button.setAttribute(
+                "aria-pressed",
+                String(active)
+            );
+
+            button.setAttribute(
+                "aria-label",
+                active ? activeLabel : inactiveLabel
+            );
+
+            button.setAttribute(
+                "title",
+                active ? activeLabel : inactiveLabel
+            );
+
+            const icon =
+                document.createElement("i");
+
+            icon.setAttribute(
+                "data-lucide",
+                iconName
+            );
+
+            icon.className =
+                "codex-post-status-icon";
+
+            button.appendChild(
+                icon
+            );
+
+            button.classList.toggle(
+                "is-active",
+                active
+            );
+
+            button.addEventListener(
+                "click",
+                event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const current =
+                        localStorage.getItem(key) ===
+                        "true";
+
+                    if (current) {
+                        localStorage.removeItem(key);
+                    } else {
+                        localStorage.setItem(
+                            key,
+                            "true"
+                        );
+                    }
+
+                    const next =
+                        !current;
+
+                    button.classList.toggle(
+                        "is-active",
+                        next
+                    );
+
+                    button.setAttribute(
+                        "aria-pressed",
+                        String(next)
+                    );
+
+                    const label =
+                        next
+                            ? activeLabel
+                            : inactiveLabel;
+
+                    button.setAttribute(
+                        "aria-label",
+                        label
+                    );
+
+                    button.setAttribute(
+                        "title",
+                        label
+                    );
+
+                    if (
+                        type ===
+                        "read-done" &&
+                        titleContainer
+                    ) {
+                        titleContainer.classList.toggle(
+                            "is-read-done",
+                            next
+                        );
+                    }
+                }
+            );
+
+            meta.appendChild(
+                button
+            );
+        };
+
+        createStatusButton(
+            "favorite",
+            "book-heart",
+            favoriteKey,
+            isFavorite,
+            "Remove from favorites",
+            "Add to favorites"
+        );
+
+        createStatusButton(
+            "read-done",
+            "book-check",
+            doneKey,
+            isReadDone,
+            "Mark as unread",
+            "Mark as read"
+        );
 
         if (date) {
             const dateText =
@@ -768,19 +1028,13 @@ appendResultHeader(title);
                 );
 
 
-            if (dateText) {
-
-                if (span) {
-                    span.textContent =
-                        dateText;
-
-                } else {
-                    date.textContent =
-                        dateText;
-                }
+            if (span) {
+                span.textContent =
+                    dateText;
 
             } else {
-                date.remove();
+                date.textContent =
+                    dateText;
             }
         }
 
@@ -852,7 +1106,7 @@ appendResultHeader(title);
             "index.html";
 
         homeLink.textContent =
-            "֎ Home";
+            "⛶ Home";
 
 
         homeHeader.appendChild(
@@ -885,7 +1139,7 @@ appendResultHeader(title);
             "Codex.html?catalog=All";
 
         codexLink.textContent =
-            "▧ Codex";
+            "𖤐 Codex";
 
 
         codexHeader.appendChild(
@@ -905,7 +1159,7 @@ appendResultHeader(title);
          */
         if (
             text &&
-            text !== "▧ Codex"
+            text !== "𖤐 Codex"
         ) {
             const currentHeader =
                 document.createElement(
@@ -1082,19 +1336,6 @@ appendResultHeader(title);
         );
 
         /*
-         * Home
-         */
-        select.appendChild(
-            createOption(
-                "Home",
-                "֎ Home",
-                "home",
-                "Home"
-            )
-        );
-
-
-        /*
          * Codex root.
          */
         select.appendChild(
@@ -1149,6 +1390,20 @@ appendResultHeader(title);
             "",
             0,
             printPosts
+        );
+
+
+        /*
+         * Home stays at the bottom so it is not confused
+         * with the content/navigation entries above.
+         */
+        select.appendChild(
+            createOption(
+                "Home",
+                "⛶ Home",
+                "home",
+                "Home"
+            )
         );
 
 

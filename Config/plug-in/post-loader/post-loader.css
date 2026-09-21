@@ -26,7 +26,6 @@
     margin-right: auto;
     padding: 0;
     padding-bottom: 10px;
-    margin-top:99px;
 }
 /* FOR Index.html */
 
@@ -75,7 +74,7 @@
 /* FOR Post.html */
 .post-date.post {letter-spacing:24px; text-align: center;}
 .post-title.post {}
-.post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 0 7px;}
+.post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 0 5px;}
 .post-related-link.post:hover {
     border: #cccccc 1px solid;
 }
