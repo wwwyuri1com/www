@@ -12,7 +12,17 @@ html, body {
     height: 100%;
 }
 
-body {min-height: 100vh;overflow-x: hidden;}
+/* Keep the layout width identical when a page/state gains or loses
+   enough content to require vertical scrolling. */
+html {
+    scrollbar-gutter: stable;
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
 
 img {
     display: block;
@@ -96,6 +106,9 @@ footer.post {
     flex-direction: column;
     justify-content: center;
     gap: 8px;
+}
+footer.codex { 
+    height:30px;
 }
 
 .footer-info::after  {

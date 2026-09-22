@@ -808,10 +808,16 @@
             image.alt =
                 displayTitle;
 
-            image.src =
-                `Codex-Img/${encodeURIComponent(
-                    postId
-                )}%20(1).jpg`;
+            let coverNumber = window.YURI1Cover
+                ? window.YURI1Cover.get(postId)
+                : 1;
+
+            const applyCover = number => {
+                coverNumber = number;
+                image.src = window.YURI1Cover
+                    ? window.YURI1Cover.src(postId, number)
+                    : `Codex-Img/${encodeURIComponent(postId)}%20(${number}).jpg`;
+            };
 
             image.loading =
                 "lazy";
@@ -821,9 +827,21 @@
 
             image.addEventListener(
                 "error",
-                () => imageBlock.remove(),
-                { once: true }
+                () => {
+                    if (coverNumber !== 1) {
+                        coverNumber = 1;
+                        if (window.YURI1Cover) {
+                            window.YURI1Cover.set(postId, 1);
+                        }
+                        applyCover(1);
+                        return;
+                    }
+
+                    imageBlock.remove();
+                }
             );
+
+            applyCover(coverNumber);
         }
 
 

@@ -88,7 +88,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 12px;
-    padding: 0 5px;
+    padding: 0 13px 0 5px;
     box-sizing: border-box;
 }
 
@@ -100,7 +100,7 @@
 .codex-tofu-item .post-image.tofu {
     width: 100%;
     height: 256px;
-    overflow: hidden;
+    overflow: visible;
     background: #24242420;
     box-sizing: border-box;
     box-shadow: 0px 1px 5px 0px #5451528c;
@@ -117,4 +117,47 @@
 
 .codex-tofu-item .tofu-title {
     display: none;
+}
+
+/* ----------------------------------------
+   Dual-cover exchange
+---------------------------------------- */
+
+.codex-tofu-item .post-image.tofu {
+    position: relative;
+}
+
+.codex-tofu-cover-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.codex-cover-swap {
+    position: absolute;
+    right: -8px;
+    bottom: -8px;
+    width: 46px;
+    height: 72px;
+    padding: 0;
+    border: 1px solid #ffffff10;
+    border-radius: 2px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 2px 6px #5451528c;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.codex-cover-swap img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+}
+
+.codex-cover-swap:hover {
+    opacity: 0.78;
 }
