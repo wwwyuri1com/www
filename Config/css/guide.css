@@ -137,3 +137,15 @@ footer.codex {
 .index {}
 .sub {}
 .post-tag {}
+
+/* ------------ */
+/* MOBILE ZOOM  */
+/* ------------ */
+
+@media (max-width: 600px) {
+    .out-warper {
+        zoom: 1.2;
+        width: calc(100% / 1.2);
+    }
+}
+
