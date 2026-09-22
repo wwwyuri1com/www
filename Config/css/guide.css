@@ -137,15 +137,35 @@ footer.codex {
 .index {}
 .sub {}
 .post-tag {}
-
-/* ------------ */
-/* MOBILE ZOOM  */
-/* ------------ */
-
+/* =========================================
+   Mobile — text readability only
+   Text inside the reading/content area is enlarged;
+   images and UI controls keep their original size.
+   ========================================= */
 @media (max-width: 600px) {
-    .out-warper {
-        zoom: 1.2;
-        width: calc(100% / 1.2);
+    main-warper {
+        font-size: 120%;
+    }
+
+    /* UI / controls: keep both control size and control text unchanged. */
+    .reader-loader,
+    .reader-loader *,
+    .ai-loader,
+    .ai-loader *,
+    .codex-selector,
+    .codex-selector *,
+    .codex-view-toggle,
+    .codex-view-toggle *,
+    .codex-view-button,
+    .codex-view-button *,
+    .codex-view-fallback,
+    .codex-view-fallback * {
+        font-size: inherit;
+    }
+
+    /* Footer text stays exactly as the desktop size. */
+    footer,
+    footer * {
+        font-size: inherit;
     }
 }
-

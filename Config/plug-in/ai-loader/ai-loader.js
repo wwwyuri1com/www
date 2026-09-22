@@ -247,7 +247,7 @@
     }
 
     function toggleMode(mode) {
-        const currentMode = loader.dataset.mode || "a";
+        const currentMode = loader.dataset.mode || "all";
         setMode(currentMode === mode ? "all" : mode);
     }
 
@@ -262,23 +262,23 @@
 
         if (loader.hidden) return;
 
-        setMode("a");
+        setMode("all");
     }
 
     aButton.addEventListener("click", () => {
-        const currentMode = loader.dataset.mode || "a";
+        const currentMode = loader.dataset.mode || "all";
         const nextMode = currentMode === "a" ? "all" : "a";
         setMode(nextMode, nextMode !== "all");
     });
 
     pButton.addEventListener("click", () => {
-        const currentMode = loader.dataset.mode || "a";
+        const currentMode = loader.dataset.mode || "all";
         const nextMode = currentMode === "p" ? "all" : "p";
         setMode(nextMode, nextMode !== "all");
     });
 
     hButton.addEventListener("click", () => {
-        const currentMode = loader.dataset.mode || "a";
+        const currentMode = loader.dataset.mode || "all";
         const nextMode = currentMode === "h" ? "all" : "h";
         setMode(nextMode, nextMode !== "all");
     });
