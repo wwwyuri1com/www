@@ -40,10 +40,10 @@
 
 <div class="reader-data-actions" aria-label="Website data">
   <button type="button" class="codex-view-button" data-reader-data-action="export" aria-label="Export website data" title="Export">
-    <i data-lucide="file-up"></i>
+    <i data-lucide="save"></i>
   </button>
   <button type="button" class="codex-view-button" data-reader-data-action="import" aria-label="Import website data" title="Import">
-    <i data-lucide="file-down"></i>
+    <i data-lucide="rotate-ccw"></i>
   </button>
 </div>
 
@@ -84,12 +84,14 @@
   <div class="reader-data-modal-backdrop" data-reader-data-close></div>
   <div class="reader-data-dialog" role="dialog" aria-modal="true" aria-labelledby="reader-data-modal-title">
     <div class="reader-data-dialog-title" id="reader-data-modal-title"></div>
+    <hr class="reader-data-dialog-divider">
     <img class="reader-data-dialog-preview" id="reader-data-modal-preview" hidden alt="">
     <div class="reader-data-dialog-body" id="reader-data-modal-body"></div>
     <div class="reader-data-dialog-time" id="reader-data-modal-time"></div>
+    <a class="reader-data-dialog-help" href="Post.html?id=_backup-card">How to Use</a>
     <div class="reader-data-dialog-actions">
-      <button type="button" class="reader-data-dialog-button secondary" data-reader-data-close>取消</button>
-      <button type="button" class="reader-data-dialog-button primary" data-reader-data-confirm>確定</button>
+      <button type="button" class="reader-data-dialog-button secondary" data-reader-data-close>Cancel</button>
+      <button type="button" class="reader-data-dialog-button primary" data-reader-data-confirm>OK</button>
     </div>
   </div>
 </div>

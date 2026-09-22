@@ -42,10 +42,20 @@
         }
 
         const BACKUP_VERSION = 1;
+        const BACKUP_CARD_SYSTEM_VERSION = '1.001';
         const BACKUP_SCOPE_PREFIXES = [
             'yuri1.reader.',
             'yuri1.codex.'
         ];
+
+        const CODE_GRID_WIDTH = 490;
+        const CODE_GRID_HEIGHT = 280;
+        const CODE_CELL_SIZE = 2;
+        const CODE_X = 412;
+        const CODE_Y = 2470;
+        const CODE_BORDER_CELLS = 2;
+        const CODE_INNER_WIDTH = CODE_GRID_WIDTH - CODE_BORDER_CELLS * 2;
+        const CODE_INNER_HEIGHT = CODE_GRID_HEIGHT - CODE_BORDER_CELLS * 2;
 
         let defaultCoverPromise = null;
 
@@ -58,12 +68,19 @@
                 minute: '2-digit'
             });
 
+        const cardStamp = date => {
+            const now = date instanceof Date ? date : new Date(date);
+            const pad = value => String(value).padStart(2, '0');
+            const hour = now.getHours();
+            const suffix = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = String(hour % 12 || 12).padStart(2, '0');
+
+            return `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${suffix} ${hour12}:${pad(now.getMinutes())}`;
+        };
+
         const fileStamp = () => {
             const now = new Date();
-
-            const pad = value =>
-                String(value).padStart(2, '0');
-
+            const pad = value => String(value).padStart(2, '0');
             return [
                 now.getFullYear(),
                 pad(now.getMonth() + 1),
@@ -76,126 +93,80 @@
         };
 
         const getStoredBackupCover = () => {
-            if (!window.YURI1BackupCover?.get) {
-                return null;
-            }
-
+            if (!window.YURI1BackupCover?.get) return null;
             return window.YURI1BackupCover.get();
         };
 
         const getNumericIdOrder = postId => {
-            const match = String(postId).match(
-                /^\d{8}-(\d+)/
-            );
-
-            return match
-                ? Number(match[1])
-                : -1;
+            const match = String(postId).match(/^\d{8}-(\d+)/);
+            return match ? Number(match[1]) : -1;
         };
 
         const getDefaultBackupCover = async () => {
-            if (defaultCoverPromise) {
-                return defaultCoverPromise;
-            }
+            if (defaultCoverPromise) return defaultCoverPromise;
 
             defaultCoverPromise = (async () => {
                 try {
-                    const response = await fetch(
-                        'Codex-W/W-Catalog.json'
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(
-                            `W-Catalog request failed (${response.status})`
-                        );
-                    }
+                    const response = await fetch('Codex-W/W-Catalog.json');
+                    if (!response.ok) throw new Error(`W-Catalog request failed (${response.status})`);
 
                     const data = await response.json();
                     const ids = new Set();
 
                     const collectPosts = node => {
-                        if (!node || typeof node !== 'object') {
-                            return;
-                        }
-
+                        if (!node || typeof node !== 'object') return;
                         if (Array.isArray(node.posts)) {
                             node.posts.forEach(postId => {
                                 if (postId) ids.add(String(postId));
                             });
                         }
-
-                        if (
-                            node.children &&
-                            typeof node.children === 'object'
-                        ) {
-                            Object.values(node.children)
-                                .forEach(collectPosts);
+                        if (node.children && typeof node.children === 'object') {
+                            Object.values(node.children).forEach(collectPosts);
                         }
                     };
 
-                    collectPosts(data?.catalogs);
+                    if (data?.catalogs && typeof data.catalogs === 'object') {
+                        Object.values(data.catalogs).forEach(collectPosts);
+                    }
 
                     const postData = [];
-
-                    await Promise.all(
-                        Array.from(ids).map(async postId => {
-                            try {
-                                const postResponse = await fetch(
-                                    `Codex-Text/${encodeURIComponent(postId)}.json`
-                                );
-
-                                if (!postResponse.ok) return;
-
-                                const post = await postResponse.json();
-
-                                if (!post || !post.id) return;
-
-                                postData.push({
-                                    postId: String(post.id),
-                                    date: String(post.date || ''),
-                                    number: getNumericIdOrder(post.id)
-                                });
-                            } catch {
-                                // Ignore missing/unreadable posts.
-                            }
-                        })
-                    );
+                    await Promise.all(Array.from(ids).map(async postId => {
+                        try {
+                            const postResponse = await fetch(
+                                `Codex-Text/${encodeURIComponent(postId)}.json`
+                            );
+                            if (!postResponse.ok) return;
+                            const post = await postResponse.json();
+                            if (!post || !post.id) return;
+                            postData.push({
+                                postId: String(post.id),
+                                date: String(post.date || ''),
+                                number: getNumericIdOrder(post.id)
+                            });
+                        } catch {
+                            // Ignore missing/unreadable posts.
+                        }
+                    }));
 
                     postData.sort((a, b) => {
-                        if (a.date !== b.date) {
-                            return b.date.localeCompare(a.date);
-                        }
-
-                        if (a.number !== b.number) {
-                            return b.number - a.number;
-                        }
-
+                        if (a.date !== b.date) return b.date.localeCompare(a.date);
+                        if (a.number !== b.number) return b.number - a.number;
                         return b.postId.localeCompare(a.postId);
                     });
 
                     const first = postData[0];
-
                     if (!first) return null;
 
                     return {
                         postId: first.postId,
                         imageNumber: 1,
                         src: window.YURI1Cover?.src
-                            ? window.YURI1Cover.src(
-                                first.postId,
-                                1
-                            )
-                            : `Codex-Img/${encodeURIComponent(
-                                first.postId
-                            )}%20(1).jpg`,
+                            ? window.YURI1Cover.src(first.postId, 1)
+                            : `Codex-Img/${encodeURIComponent(first.postId)}%20(1).jpg`,
                         isDefault: true
                     };
                 } catch (error) {
-                    console.warn(
-                        'YURI1 default Backup Card cover:',
-                        error
-                    );
-
+                    console.warn('YURI1 default Backup Card cover:', error);
                     return null;
                 }
             })();
@@ -205,37 +176,30 @@
 
         const getCurrentBackupCover = async () => {
             const stored = getStoredBackupCover();
-
-            if (stored) {
-                return {
-                    ...stored,
-                    isDefault: false
-                };
-            }
-
+            if (stored) return { ...stored, isDefault: false };
             return getDefaultBackupCover();
         };
 
         const closeDataModal = () => {
             modal.hidden = true;
-            modal.setAttribute(
-                'aria-hidden',
-                'true'
-            );
+            modal.setAttribute('aria-hidden', 'true');
         };
 
         const showDataModal = async action => {
             const isExport = action === 'export';
+            modal.dataset.readerDataAction = action;
 
             title.textContent = isExport
-                ? '下載網站進度備份圖卡'
-                : '匯入網站進度備份';
+                ? 'Download Backup Card'
+                : 'Restore Website Progress';
 
             body.textContent = isExport
-                ? '確定要下載目前的網站進度備份圖卡嗎？'
-                : '請選擇備份圖卡。\n\n注意！！匯入後將複寫目前網站進度，且無法撤銷此動作。';
+                ? 'Would you like to download a backup card of your current website progress?'
+                : 'Please select a backup card PNG.\n\nWARNING: Restoring will overwrite your current website progress and cannot be undone.';
 
-            time.textContent = stampNow();
+            time.textContent = isExport
+                ? `Backup Cover: ${((await getCurrentBackupCover())?.isDefault ? 'Newest' : 'Custom')}`
+                : 'Click OK to select backup card PNG';
 
             if (preview) {
                 preview.hidden = !isExport;
@@ -243,122 +207,324 @@
                 preview.alt = '';
 
                 if (isExport) {
-                    const cover =
-                        await getCurrentBackupCover();
-
+                    const cover = await getCurrentBackupCover();
                     if (cover) {
+                        // Use the cover record itself so a manually selected
+                        // image (including image 2, 3, ...) is reflected in the
+                        // export confirmation preview immediately.
                         preview.src = cover.src;
-                        preview.alt =
-                            `Current backup cover: ${cover.postId} (${cover.imageNumber})`;
+                        preview.alt = 'Current backup cover preview';
                     }
                 }
             }
 
             modal.hidden = false;
-            modal.setAttribute(
-                'aria-hidden',
-                'false'
-            );
-
+            modal.setAttribute('aria-hidden', 'false');
             return isExport;
         };
 
-        const buildBackupData = async () => {
+        const collectBackupStorage = () => {
             const storage = {};
-
-            for (
-                let index = 0;
-                index < localStorage.length;
-                index += 1
-            ) {
+            for (let index = 0; index < localStorage.length; index += 1) {
                 const key = localStorage.key(index);
-
                 if (!key) continue;
-
-                const shouldExport =
-                    BACKUP_SCOPE_PREFIXES.some(
-                        prefix => key.startsWith(prefix)
-                    );
-
-                if (!shouldExport) continue;
-
-                const value =
-                    localStorage.getItem(key);
-
-                if (value !== null) {
-                    storage[key] = value;
-                }
+                if (!BACKUP_SCOPE_PREFIXES.some(prefix => key.startsWith(prefix))) continue;
+                const value = localStorage.getItem(key);
+                if (value !== null) storage[key] = value;
             }
+            return storage;
+        };
 
-            const cover =
-                await getCurrentBackupCover();
-
+        const buildBackupData = async () => {
+            const cover = await getCurrentBackupCover();
             return {
                 format: 'YURI1-BACKUP-CARD',
                 version: BACKUP_VERSION,
-                kind: 'test-json',
+                systemVersion: BACKUP_CARD_SYSTEM_VERSION,
+                kind: 'png-card-data',
                 createdAt: new Date().toISOString(),
                 cover: cover
                     ? {
                         postId: cover.postId,
                         imageNumber: cover.imageNumber,
                         src: cover.src,
-                        isDefault: Boolean(
-                            cover.isDefault
-                        )
+                        isDefault: Boolean(cover.isDefault)
                     }
                     : null,
-                storage
+                storage: collectBackupStorage()
             };
         };
 
-        const downloadTextFile = (
-            filename,
-            text
-        ) => {
-            const blob = new Blob(
-                [text],
-                {
-                    type: 'application/json;charset=utf-8'
+        const crc32 = bytes => {
+            let crc = 0xffffffff;
+            for (const byte of bytes) {
+                crc ^= byte;
+                for (let bit = 0; bit < 8; bit += 1) {
+                    crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
                 }
+            }
+            return (crc ^ 0xffffffff) >>> 0;
+        };
+
+        const bytesToBits = bytes => {
+            const bits = [];
+            for (const byte of bytes) {
+                for (let bit = 7; bit >= 0; bit -= 1) {
+                    bits.push((byte >> bit) & 1);
+                }
+            }
+            return bits;
+        };
+
+        const bitsToBytes = bits => {
+            const bytes = [];
+            for (let index = 0; index + 7 < bits.length; index += 8) {
+                let value = 0;
+                for (let bit = 0; bit < 8; bit += 1) {
+                    value = (value << 1) | bits[index + bit];
+                }
+                bytes.push(value);
+            }
+            return new Uint8Array(bytes);
+        };
+
+        const uint32be = value => new Uint8Array([
+            (value >>> 24) & 0xff,
+            (value >>> 16) & 0xff,
+            (value >>> 8) & 0xff,
+            value & 0xff
+        ]);
+
+        const readUint32be = (bytes, offset) =>
+            (
+                (((bytes[offset] << 24) >>> 0) |
+                (bytes[offset + 1] << 16) |
+                (bytes[offset + 2] << 8) |
+                bytes[offset + 3]) >>> 0
             );
 
-            const url =
-                URL.createObjectURL(blob);
+        const concatBytes = arrays => {
+            const total = arrays.reduce((sum, array) => sum + array.length, 0);
+            const result = new Uint8Array(total);
+            let offset = 0;
+            arrays.forEach(array => {
+                result.set(array, offset);
+                offset += array.length;
+            });
+            return result;
+        };
 
-            const link =
-                document.createElement('a');
+        const gzipBytes = async bytes => {
+            if (typeof CompressionStream === 'undefined') return { codec: 0, bytes };
+            const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+            return { codec: 1, bytes: new Uint8Array(await new Response(stream).arrayBuffer()) };
+        };
 
+        const gunzipBytes = async bytes => {
+            if (typeof DecompressionStream === 'undefined') {
+                throw new Error('DecompressionStream is unavailable.');
+            }
+            const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+            return new Uint8Array(await new Response(stream).arrayBuffer());
+        };
+
+        const buildCodeBytes = async backup => {
+            const json = JSON.stringify(backup);
+            const source = new TextEncoder().encode(json);
+            const compressed = await gzipBytes(source);
+
+            const magic = new TextEncoder().encode('Y1BC');
+            const header = concatBytes([
+                magic,
+                new Uint8Array([BACKUP_VERSION, compressed.codec, 0, 0]),
+                uint32be(compressed.bytes.length),
+                uint32be(crc32(compressed.bytes))
+            ]);
+
+            return concatBytes([header, compressed.bytes]);
+        };
+
+        const loadImage = src => new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error(`Image load failed: ${src}`));
+            image.src = src;
+        });
+
+        const drawCover = (ctx, image, x, y, width, height) => {
+            const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+            const drawWidth = image.naturalWidth * scale;
+            const drawHeight = image.naturalHeight * scale;
+            const drawX = x + (width - drawWidth) / 2;
+            const drawY = y + (height - drawHeight) / 2;
+            ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+        };
+
+        const drawDataCode = (ctx, bytes) => {
+            const matrix = Array.from(
+                { length: CODE_GRID_HEIGHT },
+                () => Array(CODE_GRID_WIDTH).fill(0)
+            );
+
+            const bits = bytesToBits(bytes);
+            const capacity = CODE_INNER_WIDTH * CODE_INNER_HEIGHT;
+
+            if (bits.length > capacity) {
+                throw new Error('Backup data is too large for the Backup Card code.');
+            }
+
+            let bitIndex = 0;
+            for (
+                let row = CODE_BORDER_CELLS;
+                row < CODE_GRID_HEIGHT - CODE_BORDER_CELLS;
+                row += 1
+            ) {
+                for (
+                    let col = CODE_BORDER_CELLS;
+                    col < CODE_GRID_WIDTH - CODE_BORDER_CELLS;
+                    col += 1
+                ) {
+                    if (bitIndex < bits.length) {
+                        matrix[row][col] = bits[bitIndex];
+                    } else {
+                        const seed = (
+                            row * 1103515245 +
+                            col * 12345 +
+                            bytes.length * 97
+                        ) >>> 0;
+                        matrix[row][col] =
+                            (seed ^ (seed >>> 11) ^ (seed >>> 19)) & 1;
+                    }
+                    bitIndex += 1;
+                }
+            }
+
+            for (
+                let index = CODE_BORDER_CELLS;
+                index < CODE_GRID_WIDTH - CODE_BORDER_CELLS;
+                index += 4
+            ) {
+                matrix[CODE_BORDER_CELLS - 1][index] =
+                    index % 8 === 0 ? 1 : 0;
+            }
+
+            for (
+                let index = CODE_BORDER_CELLS;
+                index < CODE_GRID_HEIGHT - CODE_BORDER_CELLS;
+                index += 4
+            ) {
+                matrix[index][CODE_BORDER_CELLS - 1] =
+                    index % 8 === 0 ? 1 : 0;
+            }
+
+            const codeWidth = CODE_GRID_WIDTH * CODE_CELL_SIZE;
+            const codeHeight = CODE_GRID_HEIGHT * CODE_CELL_SIZE;
+
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(CODE_X, CODE_Y, codeWidth, codeHeight);
+            ctx.fillStyle = '#111111';
+
+            for (let row = 0; row < CODE_GRID_HEIGHT; row += 1) {
+                for (let col = 0; col < CODE_GRID_WIDTH; col += 1) {
+                    if (!matrix[row][col]) continue;
+                    ctx.fillRect(
+                        CODE_X + col * CODE_CELL_SIZE,
+                        CODE_Y + row * CODE_CELL_SIZE,
+                        CODE_CELL_SIZE,
+                        CODE_CELL_SIZE
+                    );
+                }
+            }
+
+            ctx.restore();
+        };
+
+        const createBackupCardCanvas = async backup => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1805;
+            canvas.height = 3200;
+
+            const ctx = canvas.getContext('2d', { alpha: false });
+            if (!ctx) throw new Error('Canvas is unavailable.');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = true;
+
+            const cover = backup.cover || await getCurrentBackupCover();
+            if (!cover?.src) throw new Error('Backup cover is unavailable.');
+
+            const coverImage = await loadImage(cover.src);
+            // Match the SaveCard V2 composition: one large cover, a prominent
+            // timestamp directly below it, the Y1 data code centered beneath,
+            // then the small identity / warning row at the bottom.
+            drawCover(ctx, coverImage, 263, 44, 1280, 2275);
+
+            ctx.fillStyle = '#111111';
+            ctx.textBaseline = 'alphabetic';
+            ctx.font = '72px Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(cardStamp(new Date(backup.createdAt)), 902, 2432);
+
+            const codeBytes = await buildCodeBytes(backup);
+            drawDataCode(ctx, codeBytes);
+
+            const logo = await loadImage('Config/img/icon-s.png');
+            ctx.drawImage(logo, 205, 3045, 135, 135);
+
+            ctx.fillStyle = '#fa6699';
+            ctx.textAlign = 'left';
+            ctx.font = '62px Georgia, serif';
+            ctx.fillText('Backup Card', 380, 3158);
+
+            ctx.font = '21px Georgia, serif';
+            ctx.fillText('Please keep the original image unchanged.', 820, 3128);
+            ctx.fillText('Editing, cropping, resizing, or compression may', 820, 3155);
+            ctx.fillText('make the backup unreadable. / system ver ' + BACKUP_CARD_SYSTEM_VERSION + ' / © YURI NO1 · www.yuri1.com', 820, 3182);
+
+            ctx.textAlign = 'left';
+
+            return canvas;
+        };
+
+        const canvasToBlob = canvas => new Promise((resolve, reject) => {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('Canvas PNG generation failed.'));
+            }, 'image/png');
+        });
+
+        const downloadBlob = (filename, blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
             link.href = url;
             link.download = filename;
             link.style.display = 'none';
-
             document.body.appendChild(link);
             link.click();
             link.remove();
-
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 1000);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
         };
 
         const exportBackup = async () => {
-            const backup =
-                await buildBackupData();
-
-            const json =
-                JSON.stringify(
-                    backup,
-                    null,
-                    2
+            try {
+                const backup = await buildBackupData();
+                const canvas = await createBackupCardCanvas(backup);
+                const blob = await canvasToBlob(canvas);
+                downloadBlob(
+                    `YURI1_BackupCard_${fileStamp()}.png`,
+                    blob
                 );
-
-            downloadTextFile(
-                `YURI1_Backup_${fileStamp()}.json`,
-                json
-            );
-
-            closeDataModal();
+                closeDataModal();
+            } catch (error) {
+                console.warn('YURI1 Backup Card export:', error);
+                if (typeof window.readerToast === 'function') {
+                    window.readerToast('備份圖卡建立失敗，請稍後再試。');
+                } else {
+                    window.alert('備份圖卡建立失敗，請稍後再試。');
+                }
+            }
         };
 
         const isBackupObjectValid = data => {
@@ -458,61 +624,103 @@
             }
         };
 
-        const chooseImportFile = () => {
-            const input =
-                document.createElement('input');
+        const decodeBackupCardPng = async file => {
+            const imageUrl = URL.createObjectURL(file);
+            try {
+                const image = await loadImage(imageUrl);
+                if (image.naturalWidth !== 1805 || image.naturalHeight !== 3200) {
+                    throw new Error('Invalid Backup Card dimensions.');
+                }
 
+                const canvas = document.createElement('canvas');
+                canvas.width = 1805;
+                canvas.height = 3200;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(image, 0, 0);
+
+                const imageData = ctx.getImageData(
+                    CODE_X,
+                    CODE_Y,
+                    CODE_GRID_WIDTH * CODE_CELL_SIZE,
+                    CODE_GRID_HEIGHT * CODE_CELL_SIZE
+                );
+
+                const bits = [];
+                for (let row = CODE_BORDER_CELLS; row < CODE_GRID_HEIGHT - CODE_BORDER_CELLS; row += 1) {
+                    for (let col = CODE_BORDER_CELLS; col < CODE_GRID_WIDTH - CODE_BORDER_CELLS; col += 1) {
+                        const px = Math.floor((col + 0.5) * CODE_CELL_SIZE);
+                        const py = Math.floor((row + 0.5) * CODE_CELL_SIZE);
+                        const offset = (py * imageData.width + px) * 4;
+                        const luminance = (
+                            imageData.data[offset] * 0.299 +
+                            imageData.data[offset + 1] * 0.587 +
+                            imageData.data[offset + 2] * 0.114
+                        );
+                        bits.push(luminance < 128 ? 1 : 0);
+                    }
+                }
+
+                const bytes = bitsToBytes(bits);
+                const magic = new TextDecoder().decode(bytes.slice(0, 4));
+                if (magic !== 'Y1BC') throw new Error('Invalid Y1 Backup Card code.');
+
+                const version = bytes[4];
+                const codec = bytes[5];
+                const length = readUint32be(bytes, 8);
+                const expectedCrc = readUint32be(bytes, 12);
+
+                if (version !== BACKUP_VERSION) throw new Error('Unsupported Backup Card version.');
+                if (length <= 0 || 16 + length > bytes.length) throw new Error('Invalid Backup Card length.');
+
+                const payload = bytes.slice(16, 16 + length);
+                if (crc32(payload) !== expectedCrc) throw new Error('Backup Card data is damaged.');
+
+                const decodedBytes = codec === 1 ? await gunzipBytes(payload) : payload;
+                const json = new TextDecoder().decode(decodedBytes);
+                const data = JSON.parse(json);
+
+                if (!isBackupObjectValid(data)) throw new Error('Invalid YURI1 backup data.');
+                return data;
+            } finally {
+                URL.revokeObjectURL(imageUrl);
+            }
+        };
+
+        const chooseImportFile = () => {
+            const input = document.createElement('input');
             input.type = 'file';
-            input.accept =
-                '.json,application/json,image/png,image/jpeg';
+            input.accept = '.png,image/png,.json,application/json';
             input.style.display = 'none';
 
-            input.addEventListener(
-                'change',
-                async () => {
-                    const file = input.files?.[0];
+            input.addEventListener('change', async () => {
+                const file = input.files?.[0];
+                if (!file) {
+                    input.remove();
+                    return;
+                }
 
-                    if (!file) {
-                        input.remove();
-                        return;
-                    }
+                try {
+                    let data;
 
-                    try {
-                        const text =
-                            await file.text();
-
-                        const data =
-                            JSON.parse(text);
-
-                        if (
-                            !isBackupObjectValid(data)
-                        ) {
-                            throw new Error(
-                                'Invalid YURI1 backup data.'
-                            );
+                    if (file.type === 'image/png' || file.name.toLowerCase().endsWith('.png')) {
+                        data = await decodeBackupCardPng(file);
+                    } else {
+                        data = JSON.parse(await file.text());
+                        if (!isBackupObjectValid(data)) {
+                            throw new Error('Invalid YURI1 backup data.');
                         }
-
-                        applyImportedBackup(data);
-                        closeDataModal();
-
-                        // Reload once so every current module immediately
-                        // reflects the restored local data.
-                        window.location.reload();
-                    } catch (error) {
-                        console.warn(
-                            'YURI1 backup import:',
-                            error
-                        );
-
-                        showImportError(
-                            '備份資料無法讀取或格式不正確。'
-                        );
-                    } finally {
-                        input.remove();
                     }
-                },
-                { once: true }
-            );
+
+                    applyImportedBackup(data);
+                    closeDataModal();
+                    window.location.reload();
+                } catch (error) {
+                    console.warn('YURI1 backup import:', error);
+                    showImportError('備份資料無法讀取或格式不正確。');
+                } finally {
+                    input.remove();
+                }
+            }, { once: true });
 
             document.body.appendChild(input);
             input.click();
@@ -551,11 +759,9 @@
                         modal.dataset.readerDataAction ===
                         'export';
 
-                    // The current modal implementation does not keep the
-                    // action on the root, so infer it from the title.
                     const exportMode =
-                        title.textContent ===
-                        '下載網站進度備份圖卡';
+                        modal.dataset.readerDataAction ===
+                        'export';
 
                     if (exportMode) {
                         await exportBackup();
@@ -668,7 +874,7 @@
     const immersiveButton = document.querySelector(".immersive-toggle");
 
     const getCurrentMode = () => {
-        const mode = aiLoader?.dataset.mode || "all";
+        const mode = aiLoader?.dataset.mode || "a";
 
         return ["all", "a", "h", "p"].includes(mode)
             ? mode

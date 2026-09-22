@@ -255,6 +255,7 @@ body.is-immersive .immersive-toggle:not(.is-peeked) {
 .reader-data-dialog-preview {
     display: block;
     width: 76px;
+    height: auto;
     padding: 0;
     margin: 0 auto 14px;
     object-fit: cover;
@@ -378,4 +379,25 @@ body.is-immersive .immersive-toggle:not(.is-peeked) {
 
 .reader-cover-notice.post.is-visible {
     opacity: 1;
+}
+
+
+
+.reader-data-dialog-divider {
+    border: 0;
+    border-top: 1px solid #fa669930;
+    margin: 12px 0 14px;
+}
+
+.reader-data-dialog-help {
+    display: block;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 12px;
+    color: #888888;
+    text-decoration: underline;
+}
+
+.reader-data-dialog-help:hover {
+    color: #fa6699;
 }

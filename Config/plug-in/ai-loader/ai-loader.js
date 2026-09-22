@@ -262,7 +262,7 @@
 
         if (loader.hidden) return;
 
-        setMode("all");
+        setMode("a");
     }
 
     aButton.addEventListener("click", () => {
