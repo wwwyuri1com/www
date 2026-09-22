@@ -9,50 +9,35 @@
     },
     "_comment_catalog": "=== Tell Which Post belong to What Catalog ===",
     "catalogs": {
-    "Feature": {
-        "posts": [
-            "_Introduction",
-            "_IP-Story"
-        ]
-    },
-    "IP Characters": {
-        "posts": [
-            "_D-Golden",
-            "_N-White",
-            "_D-Cyan",
-            "_E-Red",
-            "_L-Night",
-            "_D-Dark",
-            "_Icy",
-            "_Artemisia"
-        ]
-    },
-    "IP Characters": {
-        "children": {
-            "DDDStudio": {
-                "posts": [
-                ]
-            },
-            "IcyArte": {
-                "posts": [
-                ]
+        "Feature": {
+            "posts": [
+                "_Introduction",
+                "_IP-Story"
+            ]
+        },
+        "IP Characters": {
+            "children": {
+                "DDDStudio": {
+                    "posts": []
+                },
+                "IcyArte": {
+                    "posts": []
+                }
             }
-        }
-    },
+        },
         "Novels": {
             "children": {
                 "Single : Shorts": {
                     "posts": [
-                        "20260921-01_S_LittleBunny"
+                        "20260924-02_S_LadyL",
+                        "20260924-01_S_LittleBunny"
                     ]
                 },
                 "IP : Loading Night": {
-                    "posts": [
-                    ]
+                    "posts": []
                 },
                 "IP : Icy & Arte": {
-                    "posts": [
-                    ]
+                    "posts": []
                 }
             }
         },

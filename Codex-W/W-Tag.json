@@ -9,10 +9,13 @@
         ],
         "OC Trait": [
             "Tsundere",
-            "Yandere"
+            "Yandere",
+            "Gap Moe",
+            "Girlboss"
         ],
         "Style": [
             "Humor",
+            "Sexual Humor",            
             "Plot",
             "Suspense"
         ],
@@ -21,8 +24,7 @@
             "Technology",
             "Fantasy"
         ],
-        "Main Story CP": [
-        ],
+        "Main Story CP": [],
         "Word Count": [
             "Under 5k",
             "5k-20k",
@@ -35,6 +37,7 @@
     "tags": {
         "Sweet": {
             "posts": [
+                "20260922-01_S_LadyL",
                 "20260921-01_S_LittleBunny"
             ]
         },
@@ -55,12 +58,43 @@
         },
         "Modern": {
             "posts": [
+                "20260922-01_S_LadyL",
                 "20260921-01_S_LittleBunny"
             ]
         },
         "Under 5k": {
             "posts": [
-                "20260921-01_S_LittleBunny"
+                "20260921-01_S_LittleBunny",
+                "20260922-01_S_LadyL"
+            ]
+        },
+        "Wild": {
+            "posts": [
+                "20260922-01_S_LadyL"
+            ]
+        },
+        "5k-20k": {
+            "posts": [
+            ]
+        },
+        "Sexual Humor": {
+            "posts": [
+                "20260922-01_S_LadyL"
+            ]
+        },
+        "Spicy": {
+            "posts": [
+                "20260922-01_S_LadyL"
+            ]
+        },
+        "Gap Moe": {
+            "posts": [
+                "20260922-01_S_LadyL"
+            ]
+        },
+        "Girlboss": {
+            "posts": [
+                "20260922-01_S_LadyL"
             ]
         }
     }
