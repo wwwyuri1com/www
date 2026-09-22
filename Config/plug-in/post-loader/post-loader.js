@@ -33,7 +33,7 @@
         });
 
     async function renderPost(data) {
-        const catalog = root.querySelector(".post-catalog.post");
+        const catalog = document.querySelector(".post-catalog.post");
         const images = root.querySelector(".post-images.post");
         const date = root.querySelector(".post-date.post");
         const title = root.querySelector(".post-title.post");
@@ -102,6 +102,25 @@
         const getLinkWrapper = document.createElement("span");
         getLinkWrapper.appendChild(getLink);
         container.appendChild(getLinkWrapper);
+
+        // 置頂返回：Top（最右側），獨立放進 span。
+        let topWrapper = container.querySelector(".post-top-wrapper.post");
+        if (!topWrapper) {
+            topWrapper = document.createElement("span");
+            topWrapper.className = "post-top-wrapper post";
+
+            const topLink = document.createElement("a");
+            topLink.className = "post-top-link post";
+            topLink.href = "#";
+            topLink.textContent = "◌ TOP";
+            topLink.addEventListener("click", event => {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            topWrapper.appendChild(topLink);
+            container.appendChild(topWrapper);
+        }
 
         try {
             // Catalog 的正式來源是 W-Catalog。

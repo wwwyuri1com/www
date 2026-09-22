@@ -27,6 +27,9 @@
     <script src="Config/plug-in/post-loader/post-loader.js" defer></script>
     <!-- Cover Memory -->
     <script src="Config/js/cover-memory.js" defer></script>
+    <!-- Reader -->
+    <link rel="stylesheet" href="Config/plug-in/reader-loader/reader-loader.css">
+    <script src="Config/plug-in/reader-loader/reader-loader.js" defer></script>
     <!-- Tofu -->
     <link rel="stylesheet" href="Config/plug-in/tofu-loader/tofu-loader.css">
     <script src="Config/plug-in/tofu-loader/tofu-loader.js" defer></script>
@@ -35,6 +38,14 @@
 <body>
 <div class="out-warper"><!-- out-warper lock max-width -->
 
+<div class="reader-data-actions" aria-label="Website data">
+  <button type="button" class="codex-view-button" data-reader-data-action="export" aria-label="Export website data" title="Export">
+    <i data-lucide="file-up"></i>
+  </button>
+  <button type="button" class="codex-view-button" data-reader-data-action="import" aria-label="Import website data" title="Import">
+    <i data-lucide="file-down"></i>
+  </button>
+</div>
 
 <main-warper>
   <header>
@@ -48,6 +59,7 @@
       <i data-lucide="layout-grid"></i><span class="codex-view-fallback" aria-hidden="true">▦</span>
     </button>
   </div>
+
 
   <!-- 本業特有頁首 START -->
    <div class="codex-loader">
@@ -66,6 +78,22 @@
 </div>
 
 </header>
+
+<!-- Website data reminder -->
+<div class="reader-data-modal" id="reader-data-modal" hidden aria-hidden="true">
+  <div class="reader-data-modal-backdrop" data-reader-data-close></div>
+  <div class="reader-data-dialog" role="dialog" aria-modal="true" aria-labelledby="reader-data-modal-title">
+    <div class="reader-data-dialog-title" id="reader-data-modal-title"></div>
+    <img class="reader-data-dialog-preview" id="reader-data-modal-preview" hidden alt="">
+    <div class="reader-data-dialog-body" id="reader-data-modal-body"></div>
+    <div class="reader-data-dialog-time" id="reader-data-modal-time"></div>
+    <div class="reader-data-dialog-actions">
+      <button type="button" class="reader-data-dialog-button secondary" data-reader-data-close>取消</button>
+      <button type="button" class="reader-data-dialog-button primary" data-reader-data-confirm>確定</button>
+    </div>
+  </div>
+</div>
+
 <!-- 本頁特有內容 START -->
  <div class="codex-boss">
  <div class="codex-loader codex-banshee">

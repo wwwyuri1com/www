@@ -84,18 +84,48 @@
 
 /* Post catalog / Get post link */
 .post-catalog.post {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    max-width: calc(100vw - 20px);
+    height: 40px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    padding: 0 4px;
+    background: #ffffff;
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+    overflow: hidden;
+    z-index: 1001;
 }
 
-.post-catalog.post > span {
+.post-catalog.post > span:first-of-type {
+    flex: 1 1 auto;
     min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .post-catalog.post > span:last-child {
     flex: 0 0 auto;
     margin-left: auto;
+}
+
+.post-top-wrapper.post {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.post-top-link.post {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    cursor: pointer;
+    line-height: 25px;
 }
 
 .post-get-link.post {
