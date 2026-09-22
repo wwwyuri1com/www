@@ -75,6 +75,19 @@
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
         }
+
+        // Keep the toggle visibly usable even if the external icon library is unavailable.
+        buttons.forEach(button => {
+            if (button.querySelector("svg")) return;
+            if (!button.querySelector(".codex-view-fallback")) {
+                const fallback = document.createElement("span");
+                fallback.className = "codex-view-fallback";
+                fallback.textContent =
+                    button.dataset.viewMode === "grid" ? "▦" : "☰";
+                fallback.setAttribute("aria-hidden", "true");
+                button.appendChild(fallback);
+            }
+        });
     }
 
     function buildGrid() {
@@ -87,12 +100,14 @@
 
         posts.forEach(post => {
             const postId = post.dataset.postId;
-            const image = post.querySelector('[data-codex="post-image-link"]');
-            const titleLink = post.querySelector('[data-codex="post-link"]');
 
-            if (!postId) {
+            // IDs beginning with "_" are internal/system entries.
+            // Keep them in List (Notofu), but never expose them in Tofu Grid.
+            if (!postId || postId.startsWith("_")) {
                 return;
             }
+            const image = post.querySelector('[data-codex="post-image-link"]');
+            const titleLink = post.querySelector('[data-codex="post-link"]');
 
             const item = document.createElement('div');
             item.className = 'codex-tofu-item';

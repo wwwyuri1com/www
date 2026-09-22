@@ -99,7 +99,7 @@ footer.post {
 }
 
 .footer-info::after  {
-    content: "R15+";
+    content: "R16+";
     display: inline-block;
     margin: 0 5px;
     padding: 1px 5px;
