@@ -25,7 +25,9 @@
     <!-- Post -->
     <link rel="stylesheet" href="Config/plug-in/post-loader/post-loader.css">
     <script src="Config/plug-in/post-loader/post-loader.js" defer></script>
-    <!-- Ai -->
+    <!-- Tofu -->
+    <link rel="stylesheet" href="Config/plug-in/tofu-loader/tofu-loader.css">
+    <script src="Config/plug-in/tofu-loader/tofu-loader.js" defer></script>
 </head>
 
 <body>
@@ -35,6 +37,16 @@
 <main-warper>
   <header>
   <div class="logo"><a href="index.html"><img src="Config/img/icon-xs.png"></a></div>
+
+  <div class="codex-view-toggle" aria-label="View mode">
+    <button type="button" class="codex-view-button" data-view-mode="list" aria-label="List View" title="List View">
+      <i data-lucide="list"></i>
+    </button>
+    <button type="button" class="codex-view-button" data-view-mode="grid" aria-label="Grid View" title="Grid View">
+      <i data-lucide="layout-grid"></i>
+    </button>
+  </div>
+
   <!-- 本業特有頁首 START -->
    <div class="codex-loader">
     <div id="codex-filter-catalog" class="codex-selector index">
@@ -55,6 +67,9 @@
 <!-- 本頁特有內容 START -->
  <div class="codex-boss">
  <div class="codex-loader codex-banshee">
+    <!-- normal -->
+     <div class="codex-tofu" data-codex="tofu-grid"></div>
+     <div class="codex-notofu">
 <!-- Now Create By JS 
      Codex Navigation 
     <div class="codex-header" data-codex="home">
@@ -127,7 +142,7 @@
     <div class="codex-results"
          data-codex="results">
     </div>
-
+</div>
 </div>
 </div>
 <!-- 本頁特有內容 END -->

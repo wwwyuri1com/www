@@ -1,0 +1,101 @@
+/* ========================================
+   Tofu View
+======================================== */
+
+.codex-view-toggle {
+    position: absolute;
+    top: 43px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1001;
+}
+
+.codex-view-button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #24242450;
+    cursor: pointer;
+}
+
+.codex-view-button.is-active {
+    color: #fa696969;
+}
+
+.codex-view-button:hover {
+    opacity: 0.72;
+}
+
+.codex-view-button:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+}
+
+.codex-view-button svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.5;
+    pointer-events: none;
+}
+
+/* ----------------------------------------
+   View switching
+---------------------------------------- */
+
+.codex-tofu,
+.codex-notofu {
+    width: 100%;
+}
+
+.codex-tofu.is-hidden,
+.codex-notofu.is-hidden {
+    display: none !important;
+}
+
+/* ----------------------------------------
+   Tofu grid
+---------------------------------------- */
+
+.codex-tofu-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+.codex-tofu-item {
+    width: 100%;
+    min-width: 0;
+}
+
+.codex-tofu-item .post-image.tofu {
+    width: 100%;
+    height: 256px;
+    overflow: hidden;
+    background: #000000;
+    box-sizing: border-box;
+}
+
+.codex-tofu-item .post-image.tofu img.post.tofu {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.codex-tofu-item .tofu-title {
+    display: none;
+}
