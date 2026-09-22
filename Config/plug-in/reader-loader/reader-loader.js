@@ -17,6 +17,7 @@
     const saveButton = loader.querySelector(".save-progress");
     const clearButton = loader.querySelector(".clear-progress");
     const doneButton = loader.querySelector(".read-done");
+    const immersiveButton = document.querySelector(".immersive-toggle");
 
     const getCurrentMode = () => {
         const mode = aiLoader?.dataset.mode || "all";
@@ -404,6 +405,120 @@
         });
     };
 
+
+    const isImmersive = () =>
+        document.body.classList.contains("is-immersive");
+
+    const updateImmersiveButton = () => {
+        if (!immersiveButton) return;
+
+        const active = isImmersive();
+
+        immersiveButton.setAttribute(
+            "aria-label",
+            active ? "Exit immersive mode" : "Enter immersive mode"
+        );
+
+        immersiveButton.setAttribute(
+            "title",
+            active ? "Exit immersive mode" : "Enter immersive mode"
+        );
+
+        setButtonIcon(
+            immersiveButton,
+            active ? "minimize-2" : "maximize-2"
+        );
+    };
+
+
+    const setImmersiveControlPeek = (peek) => {
+        if (!immersiveButton) return;
+        immersiveButton.classList.toggle("is-peeked", peek);
+    };
+
+    const setImmersive = (active) => {
+        // Preserve the reader's visual position instead of hard-locking
+        // scrollY. Header/footer layout changes can trigger browser
+        // scroll anchoring, so keep the post content itself at the same
+        // viewport coordinate throughout the 200ms transition.
+        const anchor = document.getElementById("post-loader");
+        const anchorTop = anchor ? anchor.getBoundingClientRect().top : null;
+        const transitionMs = 220;
+        const root = document.documentElement;
+        const body = document.body;
+        const previousRootAnchor = root.style.overflowAnchor;
+        const previousBodyAnchor = body.style.overflowAnchor;
+        let rafId = 0;
+
+        root.style.overflowAnchor = "none";
+        body.style.overflowAnchor = "none";
+
+        document.body.classList.toggle("is-immersive", active);
+        if (active) {
+            setImmersiveControlPeek(true);
+            setTimeout(() => {
+                if (isImmersive()) setImmersiveControlPeek(false);
+            }, 220);
+        } else {
+            immersiveButton?.classList.remove("is-peeked");
+        }
+        updateImmersiveButton();
+        updateProgress();
+
+        const compensateScroll = () => {
+            if (anchor && anchorTop !== null) {
+                const currentTop = anchor.getBoundingClientRect().top;
+                const delta = currentTop - anchorTop;
+                if (Math.abs(delta) > 0.01) {
+                    window.scrollBy(0, delta);
+                }
+            }
+            rafId = window.requestAnimationFrame(compensateScroll);
+        };
+
+        rafId = window.requestAnimationFrame(compensateScroll);
+
+        window.setTimeout(() => {
+            window.cancelAnimationFrame(rafId);
+
+            if (anchor && anchorTop !== null) {
+                const currentTop = anchor.getBoundingClientRect().top;
+                const delta = currentTop - anchorTop;
+                if (Math.abs(delta) > 0.01) {
+                    window.scrollBy(0, delta);
+                }
+            }
+
+            root.style.overflowAnchor = previousRootAnchor;
+            body.style.overflowAnchor = previousBodyAnchor;
+            updateProgress();
+        }, transitionMs);
+    };
+
+
+    // On both mouse and touch devices, use a normal click for the tucked
+    // control area. This avoids pointerdown + click double activation on mobile.
+    document.addEventListener("click", (event) => {
+        if (!isImmersive()) return;
+        if (event.target === immersiveButton || immersiveButton?.contains(event.target)) {
+            return;
+        }
+
+        const x = event.clientX;
+        const y = event.clientY;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Match the visual control's original right/bottom area, with a
+        // comfortable invisible touch/click target around it.
+        const rightEdge = Math.max(0, (viewportWidth - 360) / 2) + 72;
+        const bottomEdge = 68;
+
+        if (x >= viewportWidth - rightEdge && y >= viewportHeight - bottomEdge) {
+            setImmersive(false);
+        }
+    });
+
     const toggleReadDone = () => {
         if (!doneKey) return;
 
@@ -451,6 +566,16 @@
             toggleReadDone
         );
     }
+    if (immersiveButton) {
+        immersiveButton.addEventListener(
+            "click",
+            (event) => {
+                event.stopPropagation();
+                setImmersive(!isImmersive());
+            }
+        );
+    }
+
 
     // AI loader changes its data-mode whenever
     // A / H / P / ALL is selected.
@@ -480,6 +605,7 @@
     }
 
     renderIcons();
+    updateImmersiveButton();
     updateFavoriteButton();
     updateDoneButton();
     updateProgress();
@@ -504,6 +630,7 @@
         () => {
             updateProgress();
             scheduleAutoSave();
+            if (isImmersive()) setImmersiveControlPeek(false);
         },
         { passive: true }
     );

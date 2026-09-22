@@ -116,3 +116,70 @@
 .reader-state-notice.post.is-visible {
     opacity: 1;
 }
+
+
+/* Immersive reading mode */
+.immersive-toggle {
+    display: inline-flex;
+    position: fixed;
+    right: max(11px, calc((100vw - 360px) / 2 + 11px));
+    bottom: 10px;
+    z-index: 3000;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    border-radius: 6px;
+    background: #fa6699;
+    color: #ffffff;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 12%);
+    backdrop-filter: blur(3px);
+}
+
+.immersive-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Prevent browser scroll anchoring from fighting the immersive transition. */
+html,
+body {
+    overflow-anchor: none;
+}
+
+/* Very short transition so immersive mode does not snap between states. */
+.ai-header,
+footer.post {
+    transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+body.is-immersive .ai-header,
+body.is-immersive footer.post {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+main-warper {
+    transition: min-height 200ms ease, padding-top 200ms ease, padding-bottom 200ms ease;
+}
+
+body.is-immersive main-warper {
+    min-height: 100vh;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+body.is-immersive .out-warper {
+    min-height: 100vh;
+}
+
+/* Immersive control tuck/peek */
+body.is-immersive .immersive-toggle {
+    transition: bottom 0.18s ease;
+}
+body.is-immersive .immersive-toggle.is-peeked {
+    bottom: 10px;
+}
+body.is-immersive .immersive-toggle:not(.is-peeked) {
+    bottom: -25px;
+}
