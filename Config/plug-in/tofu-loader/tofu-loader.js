@@ -107,6 +107,11 @@
         grid.className = 'codex-tofu-grid';
         tofuRoot.appendChild(grid);
 
+        // A favorite post may also appear in the normal Codex result list.
+        // Tofu should render the same post only once, while keeping the
+        // separate FAVO box intact. The first occurrence wins.
+        const seenPostIds = new Set();
+
         posts.forEach(post => {
             const postId = post.dataset.postId;
 
@@ -116,6 +121,11 @@
                 return;
             }
 
+            if (seenPostIds.has(postId)) {
+                return;
+            }
+
+            seenPostIds.add(postId);
             renderTofuItem(post, grid);
         });
     }
