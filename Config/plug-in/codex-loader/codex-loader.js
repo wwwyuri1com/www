@@ -383,6 +383,15 @@
 
         appendResultHeader(title);
 
+        const hidePosts =
+            new Set(
+                Array.isArray(
+                    data?.selector?.hide_posts
+                )
+                    ? data.selector.hide_posts
+                    : []
+            );
+
 
         let node =
             data?.catalogs || {};
@@ -416,10 +425,15 @@
             await renderCatalogNodes(
                 node,
                 "",
-                true
+                true,
+                hidePosts
             );
 
         } else {
+            /*
+             * Direct catalog view is the explicit exception:
+             * hidden Catalogs show their Posts here.
+             */
             await renderCatalogNode(
                 getLastPathPart(
                     catalogQuery
@@ -427,7 +441,8 @@
                 node,
                 catalogQuery,
                 0,
-                true
+                true,
+                false
             );
         }
     }
@@ -436,7 +451,8 @@
     async function renderCatalogNodes(
         nodes,
         parentPath = "",
-        showAllRoots = false
+        showAllRoots = false,
+        hidePosts = new Set()
     ) {
         if (showAllRoots) {
 
@@ -449,7 +465,8 @@
                     node,
                     name,
                     0,
-                    true
+                    true,
+                    hidePosts.has(name)
                 );
             }
 
@@ -483,7 +500,8 @@
         node,
         path,
         depth,
-        showTitle = true
+        showTitle = true,
+        hideDirectPosts = false
     ) {
         /*
          * Keep Codex rendering consistent with the
@@ -548,7 +566,8 @@
 
         if (
             postList &&
-            posts.length > 0
+            posts.length > 0 &&
+            !hideDirectPosts
         ) {
             const postData =
                 await loadPostData(posts);
@@ -609,7 +628,8 @@
                         ? `${path}/${childName}`
                         : childName,
                     depth + 1,
-                    true
+                    true,
+                    hideDirectPosts
                 );
             }
         }
@@ -1375,6 +1395,20 @@
                     : []
             );
 
+        /*
+         * Catalogs listed here keep their Catalog entry,
+         * but never print their Posts in the SELECT.
+         * This applies to every Post ID, with or without "_".
+         */
+        const hidePosts =
+            new Set(
+                Array.isArray(
+                    data?.selector?.hide_posts
+                )
+                    ? data.selector.hide_posts
+                    : []
+            );
+
 
         const catalogs =
             data?.catalogs || {};
@@ -1407,7 +1441,8 @@
             visibleCatalogs,
             "",
             0,
-            printPosts
+            printPosts,
+            hidePosts
         );
 
 
@@ -1498,7 +1533,8 @@
         catalogs,
         parentPath,
         depth,
-        printPosts
+        printPosts,
+        hidePosts
     ) {
         for (
             const [name, node]
@@ -1530,6 +1566,7 @@
 
             if (
                 printPosts.has(path) &&
+                !hidePosts.has(path) &&
                 Array.isArray(
                     node?.posts
                 )
@@ -1568,7 +1605,8 @@
                     node.children,
                     path,
                     depth + 1,
-                    printPosts
+                    printPosts,
+                    hidePosts
                 );
             }
         }

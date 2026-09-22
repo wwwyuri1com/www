@@ -25,6 +25,20 @@
         buttons.forEach(button => {
             button.addEventListener('click', () => {
                 const mode = button.dataset.viewMode;
+
+                // On a direct Catalog page whose only Posts are intentionally
+                // hidden from Tofu (for example IDs beginning with "_"),
+                // clicking Tofu should not look like a broken button.
+                // Return to the main Codex page instead.
+                if (mode === 'grid' && isTofuHiddenOnlyCatalog()) {
+                    // This Catalog has no Tofu-visible Posts. Return to the
+                    // main Codex page, but explicitly keep the user's intent
+                    // to use Tofu/Grid so the button does not appear broken.
+                    localStorage.setItem(viewModeKey, 'grid');
+                    window.location.href = 'Codex.html';
+                    return;
+                }
+
                 if (mode === 'grid') {
                     showGrid();
                 } else {
@@ -53,6 +67,31 @@
         observer.observe(resultRoot, {
             childList: true,
             subtree: true
+        });
+    }
+
+    function isTofuHiddenOnlyCatalog() {
+        const catalogQuery =
+            new URLSearchParams(window.location.search).get('catalog');
+
+        if (
+            !catalogQuery ||
+            catalogQuery === 'All' ||
+            catalogQuery === 'Favorite'
+        ) {
+            return false;
+        }
+
+        const posts =
+            resultRoot.querySelectorAll('.codex-post[data-post-id]');
+
+        if (!posts.length) {
+            return false;
+        }
+
+        return Array.from(posts).every(post => {
+            const postId = post.dataset.postId || '';
+            return postId.startsWith('_');
         });
     }
 
@@ -126,11 +165,64 @@
             }
 
             seenPostIds.add(postId);
-            renderTofuItem(post, grid);
+        });
+
+        // If the selected Catalog contains only Posts that Tofu intentionally
+        // hides (for example IDs beginning with "_"), an empty Grid looks
+        // broken to users. Fall back to List instead of showing a blank page.
+        // This applies to direct Catalog views; the root/Favorite views keep
+        // their existing behavior.
+        const catalogQuery =
+            new URLSearchParams(window.location.search).get("catalog");
+
+        if (
+            catalogQuery &&
+            catalogQuery !== "All" &&
+            catalogQuery !== "Favorite" &&
+            posts.length > 0 &&
+            !Array.from(posts).some(post => {
+                const postId = post.dataset.postId || "";
+                return postId && !postId.startsWith("_");
+            })
+        ) {
+            showList();
+            return;
+        }
+
+        // Render cards in the same order as the Codex result list.
+        // Cover-count/storage reads are async, so appending each card directly
+        // from renderTofuItem() can otherwise make the first Tofu rebuild
+        // finish in a different order.
+        const orderedPosts = [];
+        const seenForRender = new Set();
+
+        posts.forEach(post => {
+            const postId = post.dataset.postId;
+
+            if (!postId || postId.startsWith("_")) {
+                return;
+            }
+
+            if (seenForRender.has(postId)) {
+                return;
+            }
+
+            seenForRender.add(postId);
+            orderedPosts.push(post);
+        });
+
+        const items = await Promise.all(
+            orderedPosts.map(post => renderTofuItem(post))
+        );
+
+        items.forEach(item => {
+            if (item) {
+                grid.appendChild(item);
+            }
         });
     }
 
-    async function renderTofuItem(post, grid) {
+    async function renderTofuItem(post) {
         const postId = post.dataset.postId;
         const image = post.querySelector('[data-codex="post-image-link"]');
         const titleLink = post.querySelector('[data-codex="post-link"]');
@@ -253,7 +345,7 @@
         }
 
         item.appendChild(imageBlock);
-        grid.appendChild(item);
+        return item;
     }
 
 })();

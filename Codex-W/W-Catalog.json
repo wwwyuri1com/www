@@ -3,7 +3,9 @@
     "selector": {
         "print_posts": [
             "Feature",
-            "IP Characters",
+            "IP Characters"
+        ],
+        "hide_posts": [
             "Policy"
         ]
     },
