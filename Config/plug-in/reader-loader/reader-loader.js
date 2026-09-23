@@ -42,7 +42,7 @@
         }
 
         const BACKUP_VERSION = 1;
-        const BACKUP_CARD_SYSTEM_VERSION = '1.001';
+        const BACKUP_CARD_SYSTEM_VERSION = '1.002';
         const BACKUP_SCOPE_PREFIXES = [
             'yuri1.reader.',
             'yuri1.codex.'
@@ -251,7 +251,15 @@
                         isDefault: Boolean(cover.isDefault)
                     }
                     : null,
-                storage: collectBackupStorage()
+                storage: collectBackupStorage(),
+                preferences: {
+                    darkMode: isReaderDark(),
+                    font: {
+                        english: getReaderPref(READER_FONT_KEYS.en, "system"),
+                        chinese: getReaderPref(READER_FONT_KEYS.zh, "system"),
+                        size: getReaderPref(READER_FONT_KEYS.size, "m")
+                    }
+                }
             };
         };
 
@@ -598,6 +606,17 @@
             // Preserve an explicit Backup Card cover. If the exported cover
             // was the automatic newest-post default, keep the imported state
             // unpinned so the default can follow future content changes.
+            const preferences = data.preferences;
+            if (preferences?.font) {
+                const font = preferences.font;
+                if (typeof font.english === "string") localStorage.setItem(READER_FONT_KEYS.en, font.english);
+                if (typeof font.chinese === "string") localStorage.setItem(READER_FONT_KEYS.zh, font.chinese);
+                if (typeof font.size === "string") localStorage.setItem(READER_FONT_KEYS.size, font.size);
+            }
+            if (typeof preferences?.darkMode === "boolean") {
+                localStorage.setItem(READER_FONT_KEYS.dark, preferences.darkMode ? "1" : "0");
+            }
+
             const cover = data.cover;
 
             if (cover?.isDefault) {
@@ -865,6 +884,338 @@
             window.lucide.createIcons();
         }
     };
+
+
+    /* =========================================
+       Post reading preferences
+       Behavior lives here; Post Loader remains content-only.
+       ========================================= */
+    const READER_FONT_KEYS = {
+        en: "yuri1.reader.font.english",
+        zh: "yuri1.reader.font.chinese",
+        size: "yuri1.reader.font.size",
+        dark: "yuri1.reader.dark-mode"
+    };
+
+    const READER_FONT_OPTIONS = {
+        en: [],
+        zh: [],
+        size: []
+    };
+
+    const DEFAULT_READER_FONT_OPTIONS = {
+        en: [
+            { value: "system", label: "{ SYSTEM DEFAULT }", googleFamily: "", fallback: "sans-serif" },
+            { value: "libre", label: "Libre Baskerville", googleFamily: "Libre Baskerville", fallback: "serif" },
+            { value: "lato", label: "Lato", googleFamily: "Lato", fallback: "sans-serif" },
+            { value: "dotgothic", label: "DotGothic16", googleFamily: "DotGothic16", fallback: "sans-serif" },
+            { value: "nanum", label: "Nanum Gothic Coding", googleFamily: "Nanum Gothic Coding", fallback: "monospace" }
+        ],
+        zh: [
+            { value: "system", label: "{ SYSTEM DEFAULT }", googleFamily: "", fallback: "sans-serif" },
+            { value: "noto-serif", label: "Noto Serif Traditional Chinese", googleFamily: "Noto Serif TC", fallback: "serif" },
+            { value: "noto-sans", label: "Noto Sans Traditional Chinese", googleFamily: "Noto Sans TC", fallback: "sans-serif" }
+        ],
+        size: [
+            { value: "xs", label: "XS", scale: 0.8 },
+            { value: "s", label: "S", scale: 1.0 },
+            { value: "m", label: "M", scale: 1.1 },
+            { value: "l", label: "L", scale: 1.2 },
+            { value: "xl", label: "XL", scale: 1.4 }
+        ]
+    };
+
+    let readerFontConfigPromise = null;
+
+    const loadReaderFontConfig = async () => {
+        if (readerFontConfigPromise) return readerFontConfigPromise;
+
+        readerFontConfigPromise = (async () => {
+            try {
+                const response = await fetch("Config/json/font.json");
+                if (!response.ok) throw new Error(`Font config request failed (${response.status})`);
+                const data = await response.json();
+
+                const normalize = (items, fallback) => (Array.isArray(items) && items.length ? items : fallback).map(item => ({
+                    value: String(item.value),
+                    label: String(item.name ?? item.label ?? item.value),
+                    googleFamily: String(item.googleFamily ?? ""),
+                    fallback: String(item.fallback ?? "sans-serif"),
+                    ...(item.scale !== undefined ? { scale: Number(item.scale) } : {})
+                }));
+
+                READER_FONT_OPTIONS.en = normalize(data.english, DEFAULT_READER_FONT_OPTIONS.en);
+                READER_FONT_OPTIONS.zh = normalize(data.chinese, DEFAULT_READER_FONT_OPTIONS.zh);
+                READER_FONT_OPTIONS.size = normalize(data.size, DEFAULT_READER_FONT_OPTIONS.size);
+
+                const families = new Map();
+                [...READER_FONT_OPTIONS.en, ...READER_FONT_OPTIONS.zh].forEach(option => {
+                    if (option.googleFamily) families.set(option.googleFamily, option.googleFamily);
+                });
+
+                families.forEach(family => {
+                    const exists = Array.from(document.querySelectorAll('link[data-yuri1-google-font]'))
+                        .some(link => link.dataset.yuri1GoogleFont === family);
+                    if (exists) return;
+
+                    const link = document.createElement("link");
+                    link.rel = "stylesheet";
+                    link.dataset.yuri1GoogleFont = family;
+                    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replace(/%20/g, "+")}&display=swap`;
+                    document.head.appendChild(link);
+                });
+            } catch (error) {
+                console.warn("YURI1 font config:", error);
+                READER_FONT_OPTIONS.en = DEFAULT_READER_FONT_OPTIONS.en;
+                READER_FONT_OPTIONS.zh = DEFAULT_READER_FONT_OPTIONS.zh;
+                READER_FONT_OPTIONS.size = DEFAULT_READER_FONT_OPTIONS.size;
+            }
+
+            return READER_FONT_OPTIONS;
+        })();
+
+        return readerFontConfigPromise;
+    };
+
+    const readerPrefButtons = document.querySelectorAll(
+        "[data-reader-pref]"
+    );
+
+    const getReaderPref = (key, fallback) =>
+        localStorage.getItem(key) || fallback;
+
+    const setReaderPref = (key, value) => {
+        localStorage.setItem(key, value);
+    };
+
+    const isReaderDark = () =>
+        getReaderPref(READER_FONT_KEYS.dark, "0") === "1";
+
+    const applyReaderDarkMode = () => {
+        const active = isReaderDark();
+        document.body.classList.toggle("reader-dark", active);
+        const button = document.querySelector(
+            '[data-reader-pref="dark"]'
+        );
+        if (button) {
+            button.classList.toggle("is-active", active);
+            button.setAttribute(
+                "aria-pressed",
+                active ? "true" : "false"
+            );
+            button.setAttribute(
+                "title",
+                active ? "Turn off dark mode" : "Turn on dark mode"
+            );
+        }
+    };
+
+    void loadReaderFontConfig();
+
+    const classifyReaderText = root => {
+        if (!root) return;
+
+        const targets = root.matches?.(".user, .llm, p")
+            ? [root]
+            : Array.from(root.querySelectorAll(".user, .llm, p"));
+
+        targets.forEach(block => {
+            const text = block.textContent || "";
+            const cjk = (text.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g) || []).length;
+            const latin = (text.match(/[A-Za-z]/g) || []).length;
+            block.dataset.readerFontLang = cjk > latin ? "zh" : "en";
+        });
+    };
+
+    const applyReaderFontSettings = () => {
+        const en = getReaderPref(READER_FONT_KEYS.en, "system");
+        const zh = getReaderPref(READER_FONT_KEYS.zh, "system");
+        const size = getReaderPref(READER_FONT_KEYS.size, "m");
+
+        document.body.dataset.readerFontEn = en;
+        document.body.dataset.readerFontZh = zh;
+        document.body.dataset.readerFontSize = size;
+
+        classifyReaderText(document.querySelector(".post-text.post"));
+        applyReaderDarkMode();
+    };
+
+    const createFontOption = (option) => {
+        const element = document.createElement("option");
+        element.value = option.value;
+        element.textContent = option.label;
+        if (option.googleFamily) {
+            element.style.fontFamily = `"${option.googleFamily}", ${option.fallback || "sans-serif"}`;
+        } else {
+            element.style.removeProperty("font-family");
+        }
+        return element;
+    };
+
+    const ensureFontModal = async () => {
+        await loadReaderFontConfig();
+        let modal = document.getElementById("reader-font-modal");
+        if (modal) return modal;
+
+        modal = document.createElement("div");
+        modal.className = "reader-data-modal";
+        modal.id = "reader-font-modal";
+        modal.hidden = true;
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `
+            <div class="reader-data-modal-backdrop" data-reader-font-close></div>
+            <div class="reader-data-dialog" role="dialog" aria-modal="true" aria-labelledby="reader-font-modal-title">
+                <div class="reader-data-dialog-title" id="reader-font-modal-title">Reading Font</div>
+                <hr class="reader-data-dialog-divider">
+                <div class="reader-font-field">
+                    <label for="reader-font-en">English Font Type</label>
+                    <select id="reader-font-en"></select>
+                </div>
+                <div class="reader-font-field">
+                    <label for="reader-font-zh">Chinese Font Type</label>
+                    <select id="reader-font-zh"></select>
+                </div>
+                <div class="reader-font-field">
+                    <label for="reader-font-size">Font Size</label>
+                    <select id="reader-font-size"></select>
+                </div>
+                <div class="reader-font-preview" id="reader-font-preview">www.yuri1.com</div>
+                <div class="reader-data-dialog-actions">
+                    <button type="button" class="reader-data-dialog-button primary" data-reader-font-close>OK</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const enSelect = modal.querySelector("#reader-font-en");
+        const zhSelect = modal.querySelector("#reader-font-zh");
+        const sizeSelect = modal.querySelector("#reader-font-size");
+
+        READER_FONT_OPTIONS.en.forEach(option => enSelect.appendChild(createFontOption(option)));
+        READER_FONT_OPTIONS.zh.forEach(option => zhSelect.appendChild(createFontOption(option)));
+        READER_FONT_OPTIONS.size.forEach(option => sizeSelect.appendChild(createFontOption(option)));
+
+        const close = () => {
+            modal.hidden = true;
+            modal.setAttribute("aria-hidden", "true");
+        };
+
+        const save = () => {
+            setReaderPref(READER_FONT_KEYS.en, enSelect.value);
+            setReaderPref(READER_FONT_KEYS.zh, zhSelect.value);
+            setReaderPref(READER_FONT_KEYS.size, sizeSelect.value);
+            applyReaderFontSettings();
+            close();
+        };
+
+        modal.querySelectorAll("[data-reader-font-close]").forEach(button => {
+            button.addEventListener("click", save);
+        });
+
+        const preview = modal.querySelector("#reader-font-preview");
+
+        const fontFamilyFor = (value, lang) => {
+            const list = lang === "zh" ? READER_FONT_OPTIONS.zh : READER_FONT_OPTIONS.en;
+            const option = list.find(item => item.value === value);
+            if (!option || !option.googleFamily) return "";
+            return `"${option.googleFamily}", ${option.fallback || (lang === "zh" ? "serif" : "sans-serif")}`;
+        };
+
+        const sizeFactorFor = value => {
+            const option = READER_FONT_OPTIONS.size.find(item => item.value === value);
+            return Number.isFinite(option?.scale) ? option.scale : 1.1;
+        };
+
+        const updateSelectFont = () => {
+            enSelect.style.fontFamily = fontFamilyFor(enSelect.value, "en");
+            zhSelect.style.fontFamily = fontFamilyFor(zhSelect.value, "zh");
+        };
+
+        const updatePreview = () => {
+            const scale = sizeFactorFor(sizeSelect.value);
+            const enFamily = fontFamilyFor(enSelect.value, "en");
+            const zhFamily = fontFamilyFor(zhSelect.value, "zh");
+
+            preview.innerHTML = `
+                <span class="reader-font-preview-en">www.yuri1.com</span>
+                <br>
+                <span class="reader-font-preview-en reader-font-preview-note">Only applies to article text</span>
+                <br>
+                <span class="reader-font-preview-zh">僅作用於文章內文</span>
+            `;
+
+            const en = preview.querySelector(".reader-font-preview-en");
+            const note = preview.querySelector(".reader-font-preview-note");
+            const zh = preview.querySelector(".reader-font-preview-zh");
+
+            if (en) {
+                if (enFamily) en.style.fontFamily = enFamily;
+                else en.style.removeProperty("font-family");
+                en.style.fontSize = `${16 * scale}px`;
+            }
+            if (note) {
+                if (enFamily) note.style.fontFamily = enFamily;
+                else note.style.removeProperty("font-family");
+                note.style.fontSize = `${12 * scale}px`;
+            }
+            if (zh) {
+                if (zhFamily) zh.style.fontFamily = zhFamily;
+                else zh.style.removeProperty("font-family");
+                zh.style.fontSize = `${16 * scale}px`;
+            }
+
+            updateSelectFont();
+        };
+
+        enSelect.addEventListener("change", updatePreview);
+        zhSelect.addEventListener("change", updatePreview);
+        sizeSelect.addEventListener("change", updatePreview);
+
+        modal._readerRefresh = () => {
+            enSelect.value = getReaderPref(READER_FONT_KEYS.en, "system");
+            zhSelect.value = getReaderPref(READER_FONT_KEYS.zh, "system");
+            sizeSelect.value = getReaderPref(READER_FONT_KEYS.size, "m");
+            updatePreview();
+        };
+
+        modal._readerClose = close;
+        modal._readerSave = save;
+        return modal;
+    };
+
+    const openReaderFontModal = async () => {
+        const modal = await ensureFontModal();
+        modal._readerRefresh?.();
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
+    };
+
+    readerPrefButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const action = button.dataset.readerPref;
+            if (action === "dark") {
+                const next = isReaderDark() ? "0" : "1";
+                setReaderPref(READER_FONT_KEYS.dark, next);
+                applyReaderDarkMode();
+                return;
+            }
+            if (action === "font") {
+                void openReaderFontModal();
+            }
+        });
+    });
+
+    document.addEventListener("post:content-ready", () => {
+        applyReaderFontSettings();
+    });
+
+    document.addEventListener("keydown", event => {
+        const modal = document.getElementById("reader-font-modal");
+        if (event.key === "Escape" && modal && !modal.hidden) {
+            modal._readerClose?.();
+        }
+    });
 
     const progressValue = loader.querySelector(".reader-progress-value");
     const favoriteButton = loader.querySelector(".favorite");
@@ -1587,6 +1938,7 @@
 
     renderIcons();
     initCoverControls();
+    applyReaderFontSettings();
     updateImmersiveButton();
     updateFavoriteButton();
     updateDoneButton();

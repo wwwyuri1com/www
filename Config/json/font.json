@@ -1,0 +1,166 @@
+{
+    "_comment": "YURI1 Reader Fonts — Google Fonts only. SYSTEM DEFAULT loads no custom font.",
+    "english": [
+        {
+            "value": "system",
+            "name": "{ SYSTEM DEFAULT }",
+            "googleFamily": "",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "arsenal-sc",
+            "name": "Arsenal SC",
+            "googleFamily": "Arsenal SC",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "balthazar",
+            "name": "Balthazar",
+            "googleFamily": "Balthazar",
+            "fallback": "serif"
+        },
+        {
+            "value": "caveat",
+            "name": "Caveat",
+            "googleFamily": "Caveat",
+            "fallback": "cursive"
+        },
+        {
+            "value": "darker-grotesque",
+            "name": "Darker Grotesque",
+            "googleFamily": "Darker Grotesque",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "dotgothic",
+            "name": "DotGothic16",
+            "googleFamily": "DotGothic16",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "inconsolata",
+            "name": "Inconsolata",
+            "googleFamily": "Inconsolata",
+            "fallback": "monospace"
+        },
+        {
+            "value": "lato",
+            "name": "Lato",
+            "googleFamily": "Lato",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "libre",
+            "name": "Libre Baskerville",
+            "googleFamily": "Libre Baskerville",
+            "fallback": "serif"
+        },
+        {
+            "value": "nanum",
+            "name": "Nanum Gothic Coding",
+            "googleFamily": "Nanum Gothic Coding",
+            "fallback": "monospace"
+        },
+        {
+            "value": "nanum-pen-script",
+            "name": "Nanum Pen Script",
+            "googleFamily": "Nanum Pen Script",
+            "fallback": "cursive"
+        },
+        {
+            "value": "silkscreen",
+            "name": "Silkscreen",
+            "googleFamily": "Silkscreen",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "source-code-pro",
+            "name": "Source Code Pro",
+            "googleFamily": "Source Code Pro",
+            "fallback": "monospace"
+        },
+        {
+            "value": "tauri",
+            "name": "Tauri",
+            "googleFamily": "Tauri",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "zen-kurenaido",
+            "name": "Zen Kurenaido",
+            "googleFamily": "Zen Kurenaido",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "zilla-slab-highlight",
+            "name": "Zilla Slab Highlight",
+            "googleFamily": "Zilla Slab Highlight",
+            "fallback": "serif"
+        }
+    ],
+    "chinese": [
+        {
+            "value": "system",
+            "name": "{ SYSTEM DEFAULT }",
+            "googleFamily": "",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "chiron-goround-tc",
+            "name": "Chiron GoRound TC",
+            "googleFamily": "Chiron GoRound TC",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "huninn",
+            "name": "Huninn",
+            "googleFamily": "Huninn",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "lxgw-wenkai-tc",
+            "name": "LXGW WenKai TC",
+            "googleFamily": "LXGW WenKai TC",
+            "fallback": "cursive"
+        },
+        {
+            "value": "noto-sans",
+            "name": "Noto Sans Traditional Chinese",
+            "googleFamily": "Noto Sans TC",
+            "fallback": "sans-serif"
+        },
+        {
+            "value": "noto-serif",
+            "name": "Noto Serif Traditional Chinese",
+            "googleFamily": "Noto Serif TC",
+            "fallback": "serif"
+        }
+    ],
+    "size": [
+        {
+            "value": "xs",
+            "name": "XS",
+            "scale": 0.8
+        },
+        {
+            "value": "s",
+            "name": "S",
+            "scale": 1.0
+        },
+        {
+            "value": "m",
+            "name": "M",
+            "scale": 1.1
+        },
+        {
+            "value": "l",
+            "name": "L",
+            "scale": 1.2
+        },
+        {
+            "value": "xl",
+            "name": "XL",
+            "scale": 1.4
+        }
+    ]
+}
