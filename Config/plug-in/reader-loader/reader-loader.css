@@ -531,8 +531,8 @@ body.reader-dark .post-text.post em {
    Keep this selector narrow so unrelated loader/UI components never inherit it. */
 body.reader-dark:has(#ai-loader:not([hidden]):not([data-mode]),
                       #ai-loader[data-mode="all"]) .post-text.post .user {
-    background-color: #111111;
-    color: #999999;
+    background-color: #ffffff20;
+    color: #ffffff90;
     border-color: #99999920;
     box-shadow: none;
 }
@@ -543,78 +543,84 @@ body.reader-dark .post-text.post hr {
 }
 
 /* =========================================
-   Post font application — scoped to post-text.post
+   Post font application — block-level only
    ========================================= */
-body[data-reader-font-en="libre"] .post-text.post [data-reader-font-lang="en"],
-body[data-reader-font-en="libre"] .post-text.post[data-reader-font-lang="en"] {
-    font-family: "Libre Baskerville", serif;
+.post-text.post [data-reader-font-lang="en"] {
+    font-family: var(--reader-font-family-en, inherit);
 }
 
-body[data-reader-font-en="lato"] .post-text.post [data-reader-font-lang="en"],
-body[data-reader-font-en="lato"] .post-text.post[data-reader-font-lang="en"] {
-    font-family: "Lato", sans-serif;
+.post-text.post [data-reader-font-lang="zh"] {
+    font-family: var(--reader-font-family-zh, inherit);
 }
 
-body[data-reader-font-en="dotgothic"] .post-text.post [data-reader-font-lang="en"],
-body[data-reader-font-en="dotgothic"] .post-text.post[data-reader-font-lang="en"] {
-    font-family: "DotGothic16", sans-serif;
-}
-
-body[data-reader-font-en="nanum"] .post-text.post [data-reader-font-lang="en"],
-body[data-reader-font-en="nanum"] .post-text.post[data-reader-font-lang="en"] {
-    font-family: "Nanum Gothic Coding", monospace;
-}
-
-body[data-reader-font-zh="noto-serif"] .post-text.post [data-reader-font-lang="zh"],
-body[data-reader-font-zh="noto-serif"] .post-text.post[data-reader-font-lang="zh"] {
-    font-family: "Noto Serif TC", serif;
-}
-
-body[data-reader-font-zh="noto-sans"] .post-text.post [data-reader-font-lang="zh"],
-body[data-reader-font-zh="noto-sans"] .post-text.post[data-reader-font-lang="zh"] {
-    font-family: "Noto Sans TC", sans-serif;
-}
-
-
-/* SYSTEM DEFAULT: use the browser/user-agent default, not YURI1's theme font. */
-body[data-reader-font-en="system"] .post-text.post [data-reader-font-lang="en"],
-body[data-reader-font-en="system"] .post-text.post[data-reader-font-lang="en"] {
+/* SYSTEM DEFAULT: restore the original / browser-side font resolution. */
+body[data-reader-font-en="system"] .post-text.post [data-reader-font-lang="en"] {
     font-family: revert !important;
 }
 
-body[data-reader-font-zh="system"] .post-text.post [data-reader-font-lang="zh"],
-body[data-reader-font-zh="system"] .post-text.post[data-reader-font-lang="zh"] {
+body[data-reader-font-zh="system"] .post-text.post [data-reader-font-lang="zh"] {
     font-family: revert !important;
 }
 
-/* SYSTEM DEFAULT intentionally sets no custom font family. */
-
-body[data-reader-font-size="xs"] .post-text.post > p,
-body[data-reader-font-size="xs"] .post-text.post > div {
+body[data-reader-font-en-size="xs"] .post-text.post [data-reader-font-lang="en"] {
     font-size: calc(0.9rem * var(--reader-device-scale) * 0.8);
 }
-body[data-reader-font-size="s"] .post-text.post > p,
-body[data-reader-font-size="s"] .post-text.post > div {
+body[data-reader-font-en-size="s"] .post-text.post [data-reader-font-lang="en"] {
     font-size: calc(0.9rem * var(--reader-device-scale) * 1.0);
 }
-body[data-reader-font-size="m"] .post-text.post > p,
-body[data-reader-font-size="m"] .post-text.post > div {
+body[data-reader-font-en-size="m"] .post-text.post [data-reader-font-lang="en"] {
     font-size: calc(0.9rem * var(--reader-device-scale) * 1.1);
 }
-body[data-reader-font-size="l"] .post-text.post > p,
-body[data-reader-font-size="l"] .post-text.post > div {
+body[data-reader-font-en-size="l"] .post-text.post [data-reader-font-lang="en"] {
     font-size: calc(0.9rem * var(--reader-device-scale) * 1.2);
 }
-body[data-reader-font-size="xl"] .post-text.post > p,
-body[data-reader-font-size="xl"] .post-text.post > div {
+body[data-reader-font-en-size="xl"] .post-text.post [data-reader-font-lang="en"] {
     font-size: calc(0.9rem * var(--reader-device-scale) * 1.4);
 }
+
+body[data-reader-font-zh-size="xs"] .post-text.post [data-reader-font-lang="zh"] {
+    font-size: calc(0.9rem * var(--reader-device-scale) * 0.8);
+}
+body[data-reader-font-zh-size="s"] .post-text.post [data-reader-font-lang="zh"] {
+    font-size: calc(0.9rem * var(--reader-device-scale) * 1.0);
+}
+body[data-reader-font-zh-size="m"] .post-text.post [data-reader-font-lang="zh"] {
+    font-size: calc(0.9rem * var(--reader-device-scale) * 1.1);
+}
+body[data-reader-font-zh-size="l"] .post-text.post [data-reader-font-lang="zh"] {
+    font-size: calc(0.9rem * var(--reader-device-scale) * 1.2);
+}
+body[data-reader-font-zh-size="xl"] .post-text.post [data-reader-font-lang="zh"] {
+    font-size: calc(0.9rem * var(--reader-device-scale) * 1.4);
+}
+
+body[data-reader-font-en-line="tight"] .post-text.post [data-reader-font-lang="en"] { line-height: 1.4; }
+body[data-reader-font-en-line="normal"] .post-text.post [data-reader-font-lang="en"] { line-height: 1.6; }
+body[data-reader-font-en-line="loose"] .post-text.post [data-reader-font-lang="en"] { line-height: 1.8; }
+body[data-reader-font-en-line="wide"] .post-text.post [data-reader-font-lang="en"] { line-height: 2; }
+body[data-reader-font-en-line="extra-wide"] .post-text.post [data-reader-font-lang="en"] { line-height: 2.25; }
+
+body[data-reader-font-zh-line="tight"] .post-text.post [data-reader-font-lang="zh"] { line-height: 1.4; }
+body[data-reader-font-zh-line="normal"] .post-text.post [data-reader-font-lang="zh"] { line-height: 1.6; }
+body[data-reader-font-zh-line="loose"] .post-text.post [data-reader-font-lang="zh"] { line-height: 1.8; }
+body[data-reader-font-zh-line="wide"] .post-text.post [data-reader-font-lang="zh"] { line-height: 2; }
+body[data-reader-font-zh-line="extra-wide"] .post-text.post [data-reader-font-lang="zh"] { line-height: 2.25; }
 
 /* =========================================
    Font Settings modal — reuses Reader data dialog styling
    ========================================= */
 .reader-font-field {
     margin-top: 12px;
+}
+
+.reader-font-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+}
+
+.reader-font-section-divider {
+    margin: 18px 0 4px;
 }
 
 .reader-font-field label {

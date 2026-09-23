@@ -42,11 +42,25 @@
         }
 
         const BACKUP_VERSION = 1;
-        const BACKUP_CARD_SYSTEM_VERSION = '1.002';
+        const BACKUP_CARD_SYSTEM_VERSION = '1.008';
         const BACKUP_SCOPE_PREFIXES = [
             'yuri1.reader.',
             'yuri1.codex.'
         ];
+        // Backup module owns these storage keys directly. Do not reference
+        // Reader module declarations here: Codex.html does not initialize
+        // the later Reader block, so those constants may never be reached.
+        const BACKUP_COVER_STORAGE_KEY = 'yuri1.reader.backup-cover';
+        const BACKUP_READER_FONT_KEYS = {
+            en: 'yuri1.reader.font.english',
+            zh: 'yuri1.reader.font.chinese',
+            enSize: 'yuri1.reader.font.size.english',
+            zhSize: 'yuri1.reader.font.size.chinese',
+            enLine: 'yuri1.reader.font.line-height.english',
+            zhLine: 'yuri1.reader.font.line-height.chinese',
+            legacySize: 'yuri1.reader.font.size',
+            dark: 'yuri1.reader.dark-mode'
+        };
 
         const CODE_GRID_WIDTH = 490;
         const CODE_GRID_HEIGHT = 280;
@@ -102,13 +116,20 @@
             return match ? Number(match[1]) : -1;
         };
 
+        // The automatic Backup Card cover is always the newest catalog post.
+        // It is independent from the currently opened post and from the cover
+        // remembered for each post.
         const getDefaultBackupCover = async () => {
             if (defaultCoverPromise) return defaultCoverPromise;
 
             defaultCoverPromise = (async () => {
                 try {
-                    const response = await fetch('Codex-W/W-Catalog.json');
-                    if (!response.ok) throw new Error(`W-Catalog request failed (${response.status})`);
+                    const response = await fetch('Codex-W/W-Catalog.json', {
+                        cache: 'no-store'
+                    });
+                    if (!response.ok) {
+                        throw new Error(`W-Catalog request failed (${response.status})`);
+                    }
 
                     const data = await response.json();
                     const ids = new Set();
@@ -129,33 +150,20 @@
                         Object.values(data.catalogs).forEach(collectPosts);
                     }
 
-                    const postData = [];
-                    await Promise.all(Array.from(ids).map(async postId => {
-                        try {
-                            const postResponse = await fetch(
-                                `Codex-Text/${encodeURIComponent(postId)}.json`
-                            );
-                            if (!postResponse.ok) return;
-                            const post = await postResponse.json();
-                            if (!post || !post.id) return;
-                            postData.push({
-                                postId: String(post.id),
-                                date: String(post.date || ''),
-                                number: getNumericIdOrder(post.id)
-                            });
-                        } catch {
-                            // Ignore missing/unreadable posts.
-                        }
+                    const posts = Array.from(ids).map(postId => ({
+                        postId,
+                        date: (postId.match(/^(\d{8})-/) || [])[1] || '',
+                        number: getNumericIdOrder(postId)
                     }));
 
-                    postData.sort((a, b) => {
+                    posts.sort((a, b) => {
                         if (a.date !== b.date) return b.date.localeCompare(a.date);
                         if (a.number !== b.number) return b.number - a.number;
                         return b.postId.localeCompare(a.postId);
                     });
 
-                    const first = postData[0];
-                    if (!first) return null;
+                    const first = posts[0];
+                    if (!first) throw new Error('No catalog post is available.');
 
                     return {
                         postId: first.postId,
@@ -167,7 +175,16 @@
                     };
                 } catch (error) {
                     console.warn('YURI1 default Backup Card cover:', error);
-                    return null;
+                    // Emergency-only cover. Normal fallback is always the newest
+                    // catalog post; this record is used only when the catalog
+                    // itself cannot be read at all.
+                    return {
+                        postId: null,
+                        imageNumber: 1,
+                        src: 'Config/img/cover-def.jpg',
+                        isDefault: true,
+                        emergency: true
+                    };
                 }
             })();
 
@@ -236,7 +253,19 @@
         };
 
         const buildBackupData = async () => {
-            const cover = await getCurrentBackupCover();
+            const cover = await getCurrentBackupCover().catch(error => {
+                console.warn('YURI1 Backup Card cover resolver:', error);
+                return null;
+            });
+
+            const safeGet = (key, fallback) => {
+                try {
+                    return localStorage.getItem(key) || fallback;
+                } catch {
+                    return fallback;
+                }
+            };
+
             return {
                 format: 'YURI1-BACKUP-CARD',
                 version: BACKUP_VERSION,
@@ -253,11 +282,20 @@
                     : null,
                 storage: collectBackupStorage(),
                 preferences: {
-                    darkMode: isReaderDark(),
+                    darkMode: document.body.classList.contains('reader-dark'),
                     font: {
-                        english: getReaderPref(READER_FONT_KEYS.en, "system"),
-                        chinese: getReaderPref(READER_FONT_KEYS.zh, "system"),
-                        size: getReaderPref(READER_FONT_KEYS.size, "m")
+                        english: safeGet('yuri1.reader.font.english', 'system'),
+                        chinese: safeGet('yuri1.reader.font.chinese', 'system'),
+                        englishSize: safeGet(
+                            'yuri1.reader.font.size.english',
+                            safeGet('yuri1.reader.font.size', 'm')
+                        ),
+                        chineseSize: safeGet(
+                            'yuri1.reader.font.size.chinese',
+                            safeGet('yuri1.reader.font.size', 'm')
+                        ),
+                        englishLine: safeGet('yuri1.reader.font.line-height.english', 'system'),
+                        chineseLine: safeGet('yuri1.reader.font.line-height.chinese', 'system')
                     }
                 }
             };
@@ -460,10 +498,36 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.imageSmoothingEnabled = true;
 
-            const cover = backup.cover || await getCurrentBackupCover();
-            if (!cover?.src) throw new Error('Backup cover is unavailable.');
+            let cover = backup.cover;
+            let coverImage = null;
 
-            const coverImage = await loadImage(cover.src);
+            // Custom cover is used only when the user explicitly selected one.
+            // When it is unavailable, fall back to the newest catalog post.
+            if (cover?.src) {
+                try {
+                    coverImage = await loadImage(cover.src);
+                } catch (error) {
+                    console.warn('YURI1 custom Backup Card cover unavailable; using newest.', error);
+                }
+            }
+
+            if (!coverImage) {
+                const newest = await getDefaultBackupCover().catch(() => null);
+                if (newest?.src) {
+                    try {
+                        coverImage = await loadImage(newest.src);
+                        cover = newest;
+                    } catch (error) {
+                        console.warn('YURI1 newest Backup Card cover unavailable.', error);
+                    }
+                }
+            }
+
+            // Last-resort emergency image only when the newest cover itself
+            // cannot be resolved. This is not the normal default behavior.
+            if (!coverImage) {
+                coverImage = await loadImage('Config/img/cover-def.jpg');
+            }
             // Match the SaveCard V2 composition: one large cover, a prominent
             // timestamp directly below it, the Y1 data code centered beneath,
             // then the small identity / warning row at the bottom.
@@ -496,12 +560,28 @@
             return canvas;
         };
 
-        const canvasToBlob = canvas => new Promise((resolve, reject) => {
-            canvas.toBlob(blob => {
-                if (blob) resolve(blob);
-                else reject(new Error('Canvas PNG generation failed.'));
-            }, 'image/png');
-        });
+        const canvasToBlob = async canvas => {
+            if (typeof canvas.toBlob === 'function') {
+                const blob = await new Promise((resolve, reject) => {
+                    try {
+                        canvas.toBlob(result => {
+                            if (result) resolve(result);
+                            else reject(new Error('Canvas PNG generation failed.'));
+                        }, 'image/png');
+                    } catch (error) {
+                        reject(error);
+                    }
+                }).catch(() => null);
+
+                if (blob) return blob;
+            }
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const response = await fetch(dataUrl);
+            const blob = await response.blob();
+            if (!blob) throw new Error('Canvas PNG generation failed.');
+            return blob;
+        };
 
         const downloadBlob = (filename, blob) => {
             const url = URL.createObjectURL(blob);
@@ -560,102 +640,187 @@
         };
 
         const applyImportedBackup = data => {
-            const incoming =
-                data.storage || {};
+            const incoming = data?.storage && typeof data.storage === 'object'
+                ? data.storage
+                : {};
 
-            const incomingKeys =
-                Object.keys(incoming);
-
-            // Full overwrite of Reader/Codex user data.
-            for (
-                let index = localStorage.length - 1;
-                index >= 0;
-                index -= 1
-            ) {
-                const key =
-                    localStorage.key(index);
-
-                if (!key) continue;
-
-                const shouldClear =
-                    BACKUP_SCOPE_PREFIXES.some(
-                        prefix => key.startsWith(prefix)
-                    );
-
-                if (shouldClear) {
-                    localStorage.removeItem(key);
+            const validIncoming = {};
+            Object.keys(incoming).forEach(key => {
+                if (!BACKUP_SCOPE_PREFIXES.some(prefix => key.startsWith(prefix))) {
+                    return;
                 }
-            }
 
-            incomingKeys.forEach(key => {
                 const value = incoming[key];
-
-                if (
-                    typeof value === 'string' &&
-                    BACKUP_SCOPE_PREFIXES.some(
-                        prefix => key.startsWith(prefix)
-                    )
-                ) {
-                    localStorage.setItem(
-                        key,
-                        value
-                    );
+                if (typeof value === 'string') {
+                    validIncoming[key] = value;
                 }
             });
 
-            // Preserve an explicit Backup Card cover. If the exported cover
-            // was the automatic newest-post default, keep the imported state
-            // unpinned so the default can follow future content changes.
-            const preferences = data.preferences;
-            if (preferences?.font) {
-                const font = preferences.font;
-                if (typeof font.english === "string") localStorage.setItem(READER_FONT_KEYS.en, font.english);
-                if (typeof font.chinese === "string") localStorage.setItem(READER_FONT_KEYS.zh, font.chinese);
-                if (typeof font.size === "string") localStorage.setItem(READER_FONT_KEYS.size, font.size);
-            }
-            if (typeof preferences?.darkMode === "boolean") {
-                localStorage.setItem(READER_FONT_KEYS.dark, preferences.darkMode ? "1" : "0");
+            // Build a complete rollback snapshot before changing anything.
+            const previous = {};
+            for (let index = 0; index < localStorage.length; index += 1) {
+                const key = localStorage.key(index);
+                if (!key) continue;
+                if (!BACKUP_SCOPE_PREFIXES.some(prefix => key.startsWith(prefix))) continue;
+                const value = localStorage.getItem(key);
+                if (value !== null) previous[key] = value;
             }
 
-            const cover = data.cover;
+            try {
+                // The storage object is the single source of truth for the
+                // current backup format. Preferences are already included
+                // there, so do not write them a second time from the
+                // presentation-only preferences object.
+                Object.keys(previous).forEach(key => localStorage.removeItem(key));
+                Object.keys(validIncoming).forEach(key => {
+                    localStorage.setItem(key, validIncoming[key]);
+                });
 
-            if (cover?.isDefault) {
-                localStorage.removeItem(
-                    'yuri1.reader.backup-cover'
+                // Legacy compatibility: very old backups may not contain the
+                // split font keys in storage, so fill only keys that are
+                // actually missing. Never overwrite the imported storage
+                // values with the duplicated preferences snapshot.
+                const preferences = data?.preferences;
+                const font = preferences?.font;
+
+                if (font && typeof font === 'object') {
+                    const legacySize =
+                        typeof font.size === 'string'
+                            ? font.size
+                            : 'm';
+
+                    const fallbackValues = [
+                        [BACKUP_READER_FONT_KEYS.en, font.english],
+                        [BACKUP_READER_FONT_KEYS.zh, font.chinese],
+                        [
+                            BACKUP_READER_FONT_KEYS.enSize,
+                            typeof font.englishSize === 'string'
+                                ? font.englishSize
+                                : legacySize
+                        ],
+                        [
+                            BACKUP_READER_FONT_KEYS.zhSize,
+                            typeof font.chineseSize === 'string'
+                                ? font.chineseSize
+                                : legacySize
+                        ],
+                        [BACKUP_READER_FONT_KEYS.enLine, font.englishLine],
+                        [BACKUP_READER_FONT_KEYS.zhLine, font.chineseLine]
+                    ];
+
+                    fallbackValues.forEach(([key, value]) => {
+                        if (
+                            typeof value === 'string' &&
+                            localStorage.getItem(key) === null
+                        ) {
+                            localStorage.setItem(key, value);
+                        }
+                    });
+
+                    if (
+                        typeof preferences.darkMode === 'boolean' &&
+                        localStorage.getItem(BACKUP_READER_FONT_KEYS.dark) === null
+                    ) {
+                        localStorage.setItem(
+                            BACKUP_READER_FONT_KEYS.dark,
+                            preferences.darkMode ? '1' : '0'
+                        );
+                    }
+                }
+
+                // Keep the explicit/custom cover in sync even for legacy
+                // backups where the cover key was not present in storage.
+                const cover = data?.cover;
+
+                if (
+                    cover?.isDefault === true
+                ) {
+                    localStorage.removeItem(BACKUP_COVER_STORAGE_KEY);
+                } else if (
+                    cover?.postId &&
+                    Number.isInteger(Number(cover.imageNumber)) &&
+                    Number(cover.imageNumber) > 0 &&
+                    localStorage.getItem(BACKUP_COVER_STORAGE_KEY) === null
+                ) {
+                    localStorage.setItem(
+                        BACKUP_COVER_STORAGE_KEY,
+                        JSON.stringify({
+                            postId: String(cover.postId),
+                            imageNumber: Number(cover.imageNumber),
+                            savedAt: Date.now()
+                        })
+                    );
+                }
+            } catch (error) {
+                // Restore the pre-import state so a failed restore can never
+                // leave localStorage partially overwritten.
+                Object.keys(BACKUP_SCOPE_PREFIXES.length ? previous : {}).forEach(
+                    key => {
+                        try {
+                            localStorage.removeItem(key);
+                        } catch {}
+                    }
                 );
-            } else if (
-                cover?.postId &&
-                Number.isInteger(
-                    Number(cover.imageNumber)
-                ) &&
-                Number(cover.imageNumber) > 0
-            ) {
-                localStorage.setItem(
-                    'yuri1.reader.backup-cover',
-                    JSON.stringify({
-                        postId: String(cover.postId),
-                        imageNumber: Number(
-                            cover.imageNumber
-                        ),
-                        savedAt: Date.now()
-                    })
-                );
+
+                Object.keys(previous).forEach(key => {
+                    try {
+                        localStorage.setItem(key, previous[key]);
+                    } catch {}
+                });
+
+                throw error;
             }
         };
 
         const decodeBackupCardPng = async file => {
-            const imageUrl = URL.createObjectURL(file);
+            let image = null;
+            let imageUrl = null;
+
             try {
-                const image = await loadImage(imageUrl);
-                if (image.naturalWidth !== 1805 || image.naturalHeight !== 3200) {
+                if (
+                    typeof createImageBitmap === 'function'
+                ) {
+                    try {
+                        image = await createImageBitmap(file);
+                    } catch (error) {
+                        console.warn('YURI1 Backup Card createImageBitmap fallback:', error);
+                    }
+                }
+
+                if (!image) {
+                    imageUrl = URL.createObjectURL(file);
+                    image = await loadImage(imageUrl);
+                }
+
+                if (
+                    image.width !== 1805 &&
+                    image.naturalWidth !== 1805
+                ) {
+                    throw new Error('Invalid Backup Card dimensions.');
+                }
+
+                if (
+                    image.height !== 3200 &&
+                    image.naturalHeight !== 3200
+                ) {
                     throw new Error('Invalid Backup Card dimensions.');
                 }
 
                 const canvas = document.createElement('canvas');
                 canvas.width = 1805;
                 canvas.height = 3200;
-                const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                ctx.drawImage(image, 0, 0);
+
+                const ctx = canvas.getContext(
+                    '2d',
+                    { willReadFrequently: true }
+                );
+
+                if (!ctx) {
+                    throw new Error('Backup Card canvas is unavailable.');
+                }
+
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(image, 0, 0, 1805, 3200);
 
                 const imageData = ctx.getImageData(
                     CODE_X,
@@ -665,43 +830,104 @@
                 );
 
                 const bits = [];
-                for (let row = CODE_BORDER_CELLS; row < CODE_GRID_HEIGHT - CODE_BORDER_CELLS; row += 1) {
-                    for (let col = CODE_BORDER_CELLS; col < CODE_GRID_WIDTH - CODE_BORDER_CELLS; col += 1) {
-                        const px = Math.floor((col + 0.5) * CODE_CELL_SIZE);
-                        const py = Math.floor((row + 0.5) * CODE_CELL_SIZE);
-                        const offset = (py * imageData.width + px) * 4;
-                        const luminance = (
+
+                for (
+                    let row = CODE_BORDER_CELLS;
+                    row < CODE_GRID_HEIGHT - CODE_BORDER_CELLS;
+                    row += 1
+                ) {
+                    for (
+                        let col = CODE_BORDER_CELLS;
+                        col < CODE_GRID_WIDTH - CODE_BORDER_CELLS;
+                        col += 1
+                    ) {
+                        const px = Math.floor(
+                            (col + 0.5) * CODE_CELL_SIZE
+                        );
+                        const py = Math.floor(
+                            (row + 0.5) * CODE_CELL_SIZE
+                        );
+                        const offset =
+                            (py * imageData.width + px) * 4;
+
+                        const luminance =
                             imageData.data[offset] * 0.299 +
                             imageData.data[offset + 1] * 0.587 +
-                            imageData.data[offset + 2] * 0.114
-                        );
+                            imageData.data[offset + 2] * 0.114;
+
                         bits.push(luminance < 128 ? 1 : 0);
                     }
                 }
 
                 const bytes = bitsToBytes(bits);
-                const magic = new TextDecoder().decode(bytes.slice(0, 4));
-                if (magic !== 'Y1BC') throw new Error('Invalid Y1 Backup Card code.');
+                const magic = new TextDecoder().decode(
+                    bytes.slice(0, 4)
+                );
+
+                if (magic !== 'Y1BC') {
+                    throw new Error(
+                        'Invalid Y1 Backup Card code.'
+                    );
+                }
 
                 const version = bytes[4];
                 const codec = bytes[5];
                 const length = readUint32be(bytes, 8);
                 const expectedCrc = readUint32be(bytes, 12);
 
-                if (version !== BACKUP_VERSION) throw new Error('Unsupported Backup Card version.');
-                if (length <= 0 || 16 + length > bytes.length) throw new Error('Invalid Backup Card length.');
+                if (version !== BACKUP_VERSION) {
+                    throw new Error(
+                        'Unsupported Backup Card version.'
+                    );
+                }
 
-                const payload = bytes.slice(16, 16 + length);
-                if (crc32(payload) !== expectedCrc) throw new Error('Backup Card data is damaged.');
+                if (
+                    length <= 0 ||
+                    16 + length > bytes.length
+                ) {
+                    throw new Error(
+                        'Invalid Backup Card length.'
+                    );
+                }
 
-                const decodedBytes = codec === 1 ? await gunzipBytes(payload) : payload;
-                const json = new TextDecoder().decode(decodedBytes);
+                const payload = bytes.slice(
+                    16,
+                    16 + length
+                );
+
+                if (crc32(payload) !== expectedCrc) {
+                    throw new Error(
+                        'Backup Card data is damaged.'
+                    );
+                }
+
+                const decodedBytes =
+                    codec === 1
+                        ? await gunzipBytes(payload)
+                        : payload;
+
+                const json =
+                    new TextDecoder().decode(decodedBytes);
+
                 const data = JSON.parse(json);
 
-                if (!isBackupObjectValid(data)) throw new Error('Invalid YURI1 backup data.');
+                if (!isBackupObjectValid(data)) {
+                    throw new Error(
+                        'Invalid YURI1 backup data.'
+                    );
+                }
+
                 return data;
             } finally {
-                URL.revokeObjectURL(imageUrl);
+                try {
+                    if (typeof image?.close === 'function') {
+                        image.close();
+                    }
+                } catch {}
+
+                if (imageUrl) {
+                    URL.revokeObjectURL(imageUrl);
+                }
             }
         };
 
@@ -735,7 +961,13 @@
                     window.location.reload();
                 } catch (error) {
                     console.warn('YURI1 backup import:', error);
-                    showImportError('備份資料無法讀取或格式不正確。');
+                    const reason = String(error?.message || error || '');
+                    const isDecodeFailure = /Backup Card|Y1 Backup Card|YURI1 backup data|dimensions|gzip|JSON|version|CRC|damaged/i.test(reason);
+                    showImportError(
+                        isDecodeFailure
+                            ? '備份圖卡無法讀取或圖卡內容已損壞。'
+                            : '備份資料無法套用，原本的網站資料已保留。'
+                    );
                 } finally {
                     input.remove();
                 }
@@ -893,7 +1125,11 @@
     const READER_FONT_KEYS = {
         en: "yuri1.reader.font.english",
         zh: "yuri1.reader.font.chinese",
-        size: "yuri1.reader.font.size",
+        enSize: "yuri1.reader.font.size.english",
+        zhSize: "yuri1.reader.font.size.chinese",
+        enLine: "yuri1.reader.font.line-height.english",
+        zhLine: "yuri1.reader.font.line-height.chinese",
+        legacySize: "yuri1.reader.font.size",
         dark: "yuri1.reader.dark-mode"
     };
 
@@ -922,6 +1158,14 @@
             { value: "m", label: "M", scale: 1.1 },
             { value: "l", label: "L", scale: 1.2 },
             { value: "xl", label: "XL", scale: 1.4 }
+        ],
+        lineHeight: [
+            { value: "system", label: "{ SYSTEM DEFAULT }", css: "" },
+            { value: "tight", label: "1.4", css: "1.4" },
+            { value: "normal", label: "1.6", css: "1.6" },
+            { value: "loose", label: "1.8", css: "1.8" },
+            { value: "wide", label: "2.0", css: "2" },
+            { value: "extra-wide", label: "2.25", css: "2.25" }
         ]
     };
 
@@ -947,6 +1191,13 @@
                 READER_FONT_OPTIONS.en = normalize(data.english, DEFAULT_READER_FONT_OPTIONS.en);
                 READER_FONT_OPTIONS.zh = normalize(data.chinese, DEFAULT_READER_FONT_OPTIONS.zh);
                 READER_FONT_OPTIONS.size = normalize(data.size, DEFAULT_READER_FONT_OPTIONS.size);
+                READER_FONT_OPTIONS.lineHeight = Array.isArray(data.lineHeight) && data.lineHeight.length
+                    ? data.lineHeight.map(item => ({
+                        value: String(item.value),
+                        label: String(item.name ?? item.label ?? item.value),
+                        css: String(item.css ?? "")
+                    }))
+                    : DEFAULT_READER_FONT_OPTIONS.lineHeight;
 
                 const families = new Map();
                 [...READER_FONT_OPTIONS.en, ...READER_FONT_OPTIONS.zh].forEach(option => {
@@ -969,6 +1220,7 @@
                 READER_FONT_OPTIONS.en = DEFAULT_READER_FONT_OPTIONS.en;
                 READER_FONT_OPTIONS.zh = DEFAULT_READER_FONT_OPTIONS.zh;
                 READER_FONT_OPTIONS.size = DEFAULT_READER_FONT_OPTIONS.size;
+                READER_FONT_OPTIONS.lineHeight = DEFAULT_READER_FONT_OPTIONS.lineHeight;
             }
 
             return READER_FONT_OPTIONS;
@@ -1010,7 +1262,23 @@
         }
     };
 
-    void loadReaderFontConfig();
+    const getReaderFontOption = (value, lang) => {
+        const list = lang === "zh"
+            ? READER_FONT_OPTIONS.zh
+            : READER_FONT_OPTIONS.en;
+        return list.find(item => item.value === value) || null;
+    };
+
+    const getReaderFontFamily = (value, lang) => {
+        const option = getReaderFontOption(value, lang);
+        if (!option || !option.googleFamily) return "";
+        return `"${option.googleFamily}", ${option.fallback || (lang === "zh" ? "serif" : "sans-serif")}`;
+    };
+
+    const getReaderFontScale = value => {
+        const option = READER_FONT_OPTIONS.size.find(item => item.value === value);
+        return Number.isFinite(option?.scale) ? option.scale : 1.1;
+    };
 
     const classifyReaderText = root => {
         if (!root) return;
@@ -1021,20 +1289,44 @@
 
         targets.forEach(block => {
             const text = block.textContent || "";
-            const cjk = (text.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g) || []).length;
+            const cjk = (text.match(/[\u2e80-\u2fff\u3000-\u303f\u3040-\u30ff\u3100-\u312f\u3130-\u318f\u31a0-\u31bf\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g) || []).length;
             const latin = (text.match(/[A-Za-z]/g) || []).length;
             block.dataset.readerFontLang = cjk > latin ? "zh" : "en";
         });
     };
 
-    const applyReaderFontSettings = () => {
+    const applyReaderFontSettings = async () => {
+        await loadReaderFontConfig();
+
         const en = getReaderPref(READER_FONT_KEYS.en, "system");
         const zh = getReaderPref(READER_FONT_KEYS.zh, "system");
-        const size = getReaderPref(READER_FONT_KEYS.size, "m");
+        const legacySize = getReaderPref(READER_FONT_KEYS.legacySize, "m");
+        const enSize = getReaderPref(READER_FONT_KEYS.enSize, legacySize);
+        const zhSize = getReaderPref(READER_FONT_KEYS.zhSize, legacySize);
+        const enLine = getReaderPref(READER_FONT_KEYS.enLine, "system");
+        const zhLine = getReaderPref(READER_FONT_KEYS.zhLine, "system");
 
         document.body.dataset.readerFontEn = en;
         document.body.dataset.readerFontZh = zh;
-        document.body.dataset.readerFontSize = size;
+        document.body.dataset.readerFontEnSize = enSize;
+        document.body.dataset.readerFontZhSize = zhSize;
+        document.body.dataset.readerFontEnLine = enLine;
+        document.body.dataset.readerFontZhLine = zhLine;
+
+        const enFamily = getReaderFontFamily(en, "en");
+        const zhFamily = getReaderFontFamily(zh, "zh");
+
+        if (enFamily) {
+            document.body.style.setProperty("--reader-font-family-en", enFamily);
+        } else {
+            document.body.style.removeProperty("--reader-font-family-en");
+        }
+
+        if (zhFamily) {
+            document.body.style.setProperty("--reader-font-family-zh", zhFamily);
+        } else {
+            document.body.style.removeProperty("--reader-font-family-zh");
+        }
 
         classifyReaderText(document.querySelector(".post-text.post"));
         applyReaderDarkMode();
@@ -1071,13 +1363,30 @@
                     <label for="reader-font-en">English Font Type</label>
                     <select id="reader-font-en"></select>
                 </div>
+                <div class="reader-font-row">
+                    <div class="reader-font-field">
+                        <label for="reader-font-size-en">English Font Size</label>
+                        <select id="reader-font-size-en"></select>
+                    </div>
+                    <div class="reader-font-field">
+                        <label for="reader-font-line-en">English Line Height</label>
+                        <select id="reader-font-line-en"></select>
+                    </div>
+                </div>
+                <hr class="reader-font-section-divider">
                 <div class="reader-font-field">
                     <label for="reader-font-zh">Chinese Font Type</label>
                     <select id="reader-font-zh"></select>
                 </div>
-                <div class="reader-font-field">
-                    <label for="reader-font-size">Font Size</label>
-                    <select id="reader-font-size"></select>
+                <div class="reader-font-row">
+                    <div class="reader-font-field">
+                        <label for="reader-font-size-zh">Chinese Font Size</label>
+                        <select id="reader-font-size-zh"></select>
+                    </div>
+                    <div class="reader-font-field">
+                        <label for="reader-font-line-zh">Chinese Line Height</label>
+                        <select id="reader-font-line-zh"></select>
+                    </div>
                 </div>
                 <div class="reader-font-preview" id="reader-font-preview">www.yuri1.com</div>
                 <div class="reader-data-dialog-actions">
@@ -1090,11 +1399,21 @@
 
         const enSelect = modal.querySelector("#reader-font-en");
         const zhSelect = modal.querySelector("#reader-font-zh");
-        const sizeSelect = modal.querySelector("#reader-font-size");
+        const enSizeSelect = modal.querySelector("#reader-font-size-en");
+        const zhSizeSelect = modal.querySelector("#reader-font-size-zh");
+        const enLineSelect = modal.querySelector("#reader-font-line-en");
+        const zhLineSelect = modal.querySelector("#reader-font-line-zh");
 
         READER_FONT_OPTIONS.en.forEach(option => enSelect.appendChild(createFontOption(option)));
         READER_FONT_OPTIONS.zh.forEach(option => zhSelect.appendChild(createFontOption(option)));
-        READER_FONT_OPTIONS.size.forEach(option => sizeSelect.appendChild(createFontOption(option)));
+        READER_FONT_OPTIONS.size.forEach(option => {
+            enSizeSelect.appendChild(createFontOption(option));
+            zhSizeSelect.appendChild(createFontOption(option));
+        });
+        READER_FONT_OPTIONS.lineHeight.forEach(option => {
+            enLineSelect.appendChild(createFontOption(option));
+            zhLineSelect.appendChild(createFontOption(option));
+        });
 
         const close = () => {
             modal.hidden = true;
@@ -1104,8 +1423,12 @@
         const save = () => {
             setReaderPref(READER_FONT_KEYS.en, enSelect.value);
             setReaderPref(READER_FONT_KEYS.zh, zhSelect.value);
-            setReaderPref(READER_FONT_KEYS.size, sizeSelect.value);
-            applyReaderFontSettings();
+            setReaderPref(READER_FONT_KEYS.enSize, enSizeSelect.value);
+            setReaderPref(READER_FONT_KEYS.zhSize, zhSizeSelect.value);
+            setReaderPref(READER_FONT_KEYS.enLine, enLineSelect.value);
+            setReaderPref(READER_FONT_KEYS.zhLine, zhLineSelect.value);
+            localStorage.removeItem(READER_FONT_KEYS.legacySize);
+            void applyReaderFontSettings();
             close();
         };
 
@@ -1127,13 +1450,27 @@
             return Number.isFinite(option?.scale) ? option.scale : 1.1;
         };
 
+        const lineHeightFor = value => {
+            const option = READER_FONT_OPTIONS.lineHeight.find(item => item.value === value);
+            return option?.css || "";
+        };
+
         const updateSelectFont = () => {
-            enSelect.style.fontFamily = fontFamilyFor(enSelect.value, "en");
-            zhSelect.style.fontFamily = fontFamilyFor(zhSelect.value, "zh");
+            const enFamily = fontFamilyFor(enSelect.value, "en");
+            const zhFamily = fontFamilyFor(zhSelect.value, "zh");
+
+            if (enFamily) enSelect.style.fontFamily = enFamily;
+            else enSelect.style.removeProperty("font-family");
+
+            if (zhFamily) zhSelect.style.fontFamily = zhFamily;
+            else zhSelect.style.removeProperty("font-family");
         };
 
         const updatePreview = () => {
-            const scale = sizeFactorFor(sizeSelect.value);
+            const enScale = sizeFactorFor(enSizeSelect.value);
+            const zhScale = sizeFactorFor(zhSizeSelect.value);
+            const enLine = lineHeightFor(enLineSelect.value);
+            const zhLine = lineHeightFor(zhLineSelect.value);
             const enFamily = fontFamilyFor(enSelect.value, "en");
             const zhFamily = fontFamilyFor(zhSelect.value, "zh");
 
@@ -1152,17 +1489,21 @@
             if (en) {
                 if (enFamily) en.style.fontFamily = enFamily;
                 else en.style.removeProperty("font-family");
-                en.style.fontSize = `${16 * scale}px`;
+                en.style.fontSize = `${16 * enScale}px`;
+                if (enLine) en.style.lineHeight = enLine;
+                else en.style.removeProperty("line-height");
             }
             if (note) {
                 if (enFamily) note.style.fontFamily = enFamily;
                 else note.style.removeProperty("font-family");
-                note.style.fontSize = `${12 * scale}px`;
+                note.style.fontSize = `${12 * enScale}px`;
             }
             if (zh) {
                 if (zhFamily) zh.style.fontFamily = zhFamily;
                 else zh.style.removeProperty("font-family");
-                zh.style.fontSize = `${16 * scale}px`;
+                zh.style.fontSize = `${16 * zhScale}px`;
+                if (zhLine) zh.style.lineHeight = zhLine;
+                else zh.style.removeProperty("line-height");
             }
 
             updateSelectFont();
@@ -1170,12 +1511,20 @@
 
         enSelect.addEventListener("change", updatePreview);
         zhSelect.addEventListener("change", updatePreview);
-        sizeSelect.addEventListener("change", updatePreview);
+        enSizeSelect.addEventListener("change", updatePreview);
+        zhSizeSelect.addEventListener("change", updatePreview);
+        enLineSelect.addEventListener("change", updatePreview);
+        zhLineSelect.addEventListener("change", updatePreview);
 
         modal._readerRefresh = () => {
             enSelect.value = getReaderPref(READER_FONT_KEYS.en, "system");
             zhSelect.value = getReaderPref(READER_FONT_KEYS.zh, "system");
-            sizeSelect.value = getReaderPref(READER_FONT_KEYS.size, "m");
+
+            const legacySize = getReaderPref(READER_FONT_KEYS.legacySize, "m");
+            enSizeSelect.value = getReaderPref(READER_FONT_KEYS.enSize, legacySize);
+            zhSizeSelect.value = getReaderPref(READER_FONT_KEYS.zhSize, legacySize);
+            enLineSelect.value = getReaderPref(READER_FONT_KEYS.enLine, "system");
+            zhLineSelect.value = getReaderPref(READER_FONT_KEYS.zhLine, "system");
             updatePreview();
         };
 
@@ -1207,7 +1556,7 @@
     });
 
     document.addEventListener("post:content-ready", () => {
-        applyReaderFontSettings();
+        void applyReaderFontSettings();
     });
 
     document.addEventListener("keydown", event => {
@@ -1924,6 +2273,7 @@
                     )
                 ) {
                     restoreCurrentMode();
+                    void applyReaderFontSettings();
                 }
             });
 
@@ -1938,7 +2288,7 @@
 
     renderIcons();
     initCoverControls();
-    applyReaderFontSettings();
+    void applyReaderFontSettings();
     updateImmersiveButton();
     updateFavoriteButton();
     updateDoneButton();
