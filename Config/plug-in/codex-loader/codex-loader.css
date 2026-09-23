@@ -263,3 +263,10 @@
 .codex-favo-list .codex-post:last-child {
     border-bottom-color: #fa669940;
 }
+
+/* Catalog separator controlled by selector.separator_before */
+.codex-catalog-divider {
+    border: 0;
+    border-top: 1px dashed #cccccc;
+    margin: 14px 11px;
+}

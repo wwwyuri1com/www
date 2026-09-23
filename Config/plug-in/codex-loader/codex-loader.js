@@ -392,6 +392,15 @@
                     : []
             );
 
+        const separatorBefore =
+            new Set(
+                Array.isArray(
+                    data?.selector?.separator_before
+                )
+                    ? data.selector.separator_before
+                    : []
+            );
+
 
         let node =
             data?.catalogs || {};
@@ -426,7 +435,8 @@
                 node,
                 "",
                 true,
-                hidePosts
+                hidePosts,
+                separatorBefore
             );
 
         } else {
@@ -452,7 +462,8 @@
         nodes,
         parentPath = "",
         showAllRoots = false,
-        hidePosts = new Set()
+        hidePosts = new Set(),
+        separatorBefore = new Set()
     ) {
         if (showAllRoots) {
 
@@ -466,7 +477,8 @@
                     name,
                     0,
                     true,
-                    hidePosts.has(name)
+                    hidePosts.has(name),
+                    separatorBefore.has(name)
                 );
             }
 
@@ -501,8 +513,19 @@
         path,
         depth,
         showTitle = true,
-        hideDirectPosts = false
+        hideDirectPosts = false,
+        separatorBefore = false
     ) {
+        if (separatorBefore) {
+            const divider =
+                document.createElement("hr");
+
+            divider.className =
+                "codex-catalog-divider";
+
+            resultRoot.appendChild(divider);
+        }
+
         /*
          * Keep Codex rendering consistent with the
          * Catalog selector: empty Catalog branches
@@ -1409,6 +1432,15 @@
                     : []
             );
 
+        const separatorBefore =
+            new Set(
+                Array.isArray(
+                    data?.selector?.separator_before
+                )
+                    ? data.selector.separator_before
+                    : []
+            );
+
 
         const catalogs =
             data?.catalogs || {};
@@ -1442,7 +1474,8 @@
             "",
             0,
             printPosts,
-            hidePosts
+            hidePosts,
+            separatorBefore
         );
 
 
@@ -1534,7 +1567,8 @@
         parentPath,
         depth,
         printPosts,
-        hidePosts
+        hidePosts,
+        separatorBefore
     ) {
         for (
             const [name, node]
@@ -1554,14 +1588,39 @@
                     : name;
 
 
-            select.appendChild(
+            /*
+             * A separator is represented by an OPTGROUP label,
+             * not by a selectable OPTION. This keeps the native
+             * SELECT behavior while giving separator_before the
+             * same visual meaning in the dropdown.
+             */
+            let catalogOption =
                 createOption(
                     path,
                     `${indent(depth)}✧ ${name}`,
                     "catalog",
                     path
-                )
-            );
+                );
+
+            if (separatorBefore.has(path)) {
+                const separatorGroup =
+                    document.createElement("optgroup");
+
+                separatorGroup.label =
+                    "────────────────";
+
+                separatorGroup.appendChild(
+                    catalogOption
+                );
+
+                select.appendChild(
+                    separatorGroup
+                );
+            } else {
+                select.appendChild(
+                    catalogOption
+                );
+            }
 
 
             if (
@@ -1606,7 +1665,8 @@
                     path,
                     depth + 1,
                     printPosts,
-                    hidePosts
+                    hidePosts,
+                    separatorBefore
                 );
             }
         }

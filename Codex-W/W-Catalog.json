@@ -1,11 +1,14 @@
 {
     "_comment": "=== Here's Will be list _.json in SELECT ===",
     "selector": {
-        "print_posts": [
+        "print_posts": [],
+        "hide_posts": [
+            "Policy",
             "Feature",
             "IP Characters"
         ],
-        "hide_posts": [
+        "separator_before": [
+            "Novels",
             "Policy"
         ]
     },
@@ -33,6 +36,11 @@
                     "posts": [
                         "20260924-02_S_LadyL",
                         "20260924-01_S_LittleBunny"
+                    ]
+                },
+                "IP : DDD Presents": {
+                    "posts": [
+                        "20260924-03_D_AI-Lover-CYAN-V0001"
                     ]
                 },
                 "IP : Loading Night": {

@@ -5,17 +5,19 @@
             "Spicy",
             "Wild",
             "Mischievous",
-            "NG"
+            "Flirting"
         ],
         "OC Trait": [
             "Tsundere",
             "Yandere",
             "Gap Moe",
-            "Girlboss"
+            "Duplicity",
+            "Girlboss",
+            "GL Awakening"
         ],
         "Style": [
             "Humor",
-            "Sexual Humor",            
+            "Sexual Humor",
             "Plot",
             "Suspense"
         ],
@@ -25,6 +27,12 @@
             "Fantasy"
         ],
         "Main Story CP": [],
+        "Intimacy Context Level": [
+            "Intimacy-Surface",
+            "Intimacy-Suggestive",
+            "Intimacy-Candid",
+            "Intimacy-Very Pervasive"
+        ],
         "Word Count": [
             "Under 5k",
             "5k-20k",
@@ -37,64 +45,87 @@
     "tags": {
         "Sweet": {
             "posts": [
-                "20260922-01_S_LadyL",
-                "20260921-01_S_LittleBunny"
+                "20260924-03_D_AI-Lover-CYAN-V0001",
+                "20260924-02_S_LadyL",
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Mischievous": {
             "posts": [
-                "20260921-01_S_LittleBunny"
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Tsundere": {
             "posts": [
-                "20260921-01_S_LittleBunny"
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Humor": {
             "posts": [
-                "20260921-01_S_LittleBunny"
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Modern": {
             "posts": [
-                "20260922-01_S_LadyL",
-                "20260921-01_S_LittleBunny"
+                "20260924-02_S_LadyL",
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Under 5k": {
             "posts": [
-                "20260921-01_S_LittleBunny",
-                "20260922-01_S_LadyL"
+                "20260924-03_D_AI-Lover-CYAN-V0001",
+                "20260924-01_S_LittleBunny",
+                "20260924-02_S_LadyL"
             ]
         },
         "Wild": {
             "posts": [
-                "20260922-01_S_LadyL"
+                "20260924-02_S_LadyL"
             ]
         },
         "5k-20k": {
-            "posts": [
-            ]
+            "posts": []
         },
         "Sexual Humor": {
             "posts": [
-                "20260922-01_S_LadyL"
+                "20260924-03_D_AI-Lover-CYAN-V0001",
+                "20260924-02_S_LadyL"
             ]
         },
         "Spicy": {
             "posts": [
-                "20260922-01_S_LadyL"
+                "20260924-03_D_AI-Lover-CYAN-V0001",
+                "20260924-02_S_LadyL"
             ]
         },
         "Gap Moe": {
             "posts": [
-                "20260922-01_S_LadyL"
+                "20260924-02_S_LadyL"
+            ]
+        },
+        "Duplicity": {
+            "posts": [
+                "20260924-01_S_LittleBunny"
             ]
         },
         "Girlboss": {
             "posts": [
-                "20260922-01_S_LadyL"
+                "20260924-02_S_LadyL"
+            ]
+        },
+        "GL Awakening": {
+            "posts": [
+                "20260924-03_D_AI-Lover-CYAN-V0001"
+            ]
+        },
+        "Technology": {
+            "posts": [
+                "20260924-03_D_AI-Lover-CYAN-V0001"
+            ]
+        },
+        "Intimacy-Very Pervasive": {
+            "posts": [
+                "20260924-03_D_AI-Lover-CYAN-V0001"
             ]
         }
     }
