@@ -542,7 +542,7 @@
             const codeBytes = await buildCodeBytes(backup);
             drawDataCode(ctx, codeBytes);
 
-            const logo = await loadImage('Config/img/icon-s.png');
+            const logo = await loadImage('Config/img/icon-xs.png');
             ctx.drawImage(logo, 205, 3045, 135, 135);
 
             ctx.fillStyle = '#fa6699';

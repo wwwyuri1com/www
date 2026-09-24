@@ -202,13 +202,13 @@ body.is-immersive .immersive-toggle:not(.is-peeked) {
    ========================================= */
 
 .reader-data-actions {
-    position: absolute;
+    position: fixed;
     top: 43px;
-    left: 10px;
+    left: max(10px, calc((100vw - 360px) / 2 + 10px));
     display: flex;
     align-items: center;
     gap: 8px;
-    z-index: 1001;
+    z-index: 1500;
 }
 
 .reader-data-modal[hidden] {
@@ -517,8 +517,28 @@ body.reader-dark .reader-data-dialog-button.primary {
 }
 
 body.reader-dark .post-text.post {
-    background-color: #111111;
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
     color: #999999;
+    box-shadow: none;
+    clip-path: none;
+}
+
+/* Extend the dark reading surface horizontally, but only for the
+   vertical height of post-text itself. This keeps the fixed header/footer
+   and other page sections visually unchanged. */
+body.reader-dark .post-text.post::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    background-color: #111111;
+    pointer-events: none;
 }
 
 body.reader-dark .post-text.post a,

@@ -66,6 +66,60 @@ a {text-decoration: none;}
 
 /* out-warper = DDD domain */ .out-warper {position: relative;width: 100%;min-height: 100vh;margin-left: auto;margin-right: auto;}
 
+/* Post page full-width background wrappers.
+   The wrappers own the viewport-wide background; the actual header/footer
+   layout stays constrained to the existing 340px reading width. */
+.post-header-wrap,
+.post-footer-wrap {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    z-index: 1000;
+}
+
+.post-header-wrap {
+    top: 0;
+    height: 100px;
+}
+
+.post-footer-wrap {
+    bottom: 0;
+    height: 80px;
+}
+
+.post-header-wrap > header,
+.post-footer-wrap > footer {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: 340px;
+    max-width: calc(100vw - 20px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post-header-wrap > header {
+    height: 100px;
+}
+
+.post-footer-wrap > footer.post {
+    height: 80px;
+}
+
+/* Keep the reading surface dark without using a viewport-spilling pseudo-element.
+   Header/footer wrappers above remain explicitly white. */
+body.reader-dark {
+    background: #111111;
+}
+
+body.reader-dark .post-text.post::before {
+    display: none;
+}
+
 /* header */ header {
     top: 0;
     left: 0;
@@ -137,3 +191,17 @@ footer.codex {
 .index {}
 .sub {}
 .post-tag {}
+
+/* Post header/footer wrapper alignment fixes.
+   The wrapper is full-width; the actual 340px layout stays centered inside it. */
+.post-header-wrap > header.ai-header,
+.post-footer-wrap > footer.post {
+    left: auto;
+    transform: none;
+}
+
+/* Extend only the breadcrumb row's white background to the viewport edges. */
+.post-catalog.post {
+    box-shadow: 0 0 0 100vmax #ffffff;
+    clip-path: inset(0 -100vmax);
+}

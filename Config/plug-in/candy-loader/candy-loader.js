@@ -7,6 +7,73 @@
 
     const catalogPath = "Codex-W/W-Catalog.json";
 
+    loadNewestCover()
+        .catch(error => {
+            console.warn("Candy Loader: unable to load newest cover.", error);
+        });
+
+    async function loadNewestCover() {
+        const boss = document.querySelector(".candy-boss");
+        if (!boss) return;
+
+        try {
+            const response = await fetch(catalogPath, {
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `W-Catalog request failed (${response.status})`
+                );
+            }
+
+            const data = await response.json();
+            const postIds = new Set();
+
+            collectPosts(
+                data?.catalogs || {},
+                postIds
+            );
+
+            const posts = [...postIds].map(postId => ({
+                postId,
+                date: (String(postId).match(/^(\d{8})-/) || [])[1] || "",
+                number: getNumericIdOrder(postId)
+            }));
+
+            posts.sort((a, b) => {
+                if (a.date !== b.date) {
+                    return b.date.localeCompare(a.date);
+                }
+
+                if (a.number !== b.number) {
+                    return b.number - a.number;
+                }
+
+                return b.postId.localeCompare(a.postId);
+            });
+
+            const newest = posts[0];
+            if (!newest) {
+                throw new Error("No catalog post is available.");
+            }
+
+            const src = window.YURI1Cover?.src
+                ? window.YURI1Cover.src(newest.postId, 1)
+                : `Codex-Img/${encodeURIComponent(newest.postId)}%20(1).jpg`;
+
+            boss.style.backgroundImage = `url("${src}")`;
+        } catch (error) {
+            // Keep cover-def.jpg as the emergency fallback only.
+            throw error;
+        }
+    }
+
+    function getNumericIdOrder(postId) {
+        const match = String(postId).match(/^\d{8}-(\d+)/);
+        return match ? Number(match[1]) : -1;
+    }
+
     loadPosts()
         .then(posts => {
             renderPosts(posts);

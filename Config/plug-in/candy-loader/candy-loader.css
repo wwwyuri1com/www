@@ -65,16 +65,16 @@
     overflow-y: auto;
     background-image: url(../../img/cover-def.jpg);
     background-size: cover;
-    background-position: center;
+    background-position: center top;
     background-repeat: no-repeat;
-
+    margin-top:100px;
     z-index: 1;
 }
 
 /* The transparent staging area reserves the cover height.
    The page itself remains normally scrollable. */
 .candy-banshee {
-    height: 500px;
+    height: 330px;
 }
 
 /* River is part of normal document flow. */

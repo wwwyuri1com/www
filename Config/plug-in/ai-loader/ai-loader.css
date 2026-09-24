@@ -75,6 +75,7 @@
     /*font-size: 0.9rem;*/
     line-height: 25px;
     padding:10px;
+    letter-spacing: normal;
 }
 
 .post-text.post .ai-source-label {
