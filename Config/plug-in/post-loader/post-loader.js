@@ -240,7 +240,7 @@
 
         try {
             // W-Catalog 是上一篇／下一篇的唯一來源。
-            // 只統計符合 YYYYMMDD-0x 的 Post ID。
+            // 只統計開頭符合 YYYYMMDD-## 的 Post ID，後面的 JSON 名稱不參與排序。
             const response = await fetch("Codex-W/W-Catalog.json");
 
             if (!response.ok) {
@@ -253,12 +253,13 @@
             const postIds = collectReadmorePostIds(data?.catalogs || {});
 
             postIds.sort((a, b) => {
-                const [dateA, numberA] = a.split("-");
-                const [dateB, numberB] = b.split("-");
+                const keyA = getReadmoreSortKey(a);
+                const keyB = getReadmoreSortKey(b);
 
                 return (
-                    dateA.localeCompare(dateB) ||
-                    Number(numberA) - Number(numberB)
+                    keyA.date.localeCompare(keyB.date) ||
+                    keyA.number - keyB.number ||
+                    a.localeCompare(b)
                 );
             });
 
@@ -300,7 +301,9 @@
     }
 
     function collectReadmorePostIds(catalogs, result = []) {
-        const pattern = /^(\d{8})-(0[1-9])$/;
+        // Readmore ordering only uses the leading YYYYMMDD-## part of the Post ID.
+        // Example: 20260924-02_S_LadyL -> 20260924 / 02
+        const pattern = /^(\d{8})-(\d{2})(?:_|$)/;
 
         for (const node of Object.values(catalogs || {})) {
             if (Array.isArray(node?.posts)) {
@@ -319,6 +322,19 @@
         }
 
         return result;
+    }
+
+    function getReadmoreSortKey(postId) {
+        const match = String(postId).match(/^(\d{8})-(\d{2})(?:_|$)/);
+
+        if (!match) {
+            return { date: "", number: Number.MAX_SAFE_INTEGER };
+        }
+
+        return {
+            date: match[1],
+            number: Number(match[2])
+        };
     }
 
     function createReadmoreLink(postId, text, className) {

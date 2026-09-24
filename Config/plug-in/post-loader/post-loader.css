@@ -18,6 +18,9 @@
    .post-next-link.post
 */
 
+/* HIDDEN */
+.post-readmore.post {display:none!important;}
+
 /* EVERYWHERE SUMMON */
 .post-loader {
     width: 100%;
@@ -74,7 +77,7 @@
 /* FOR Post.html */
 .post-date.post {letter-spacing:24px; text-align: center;}
 .post-title.post {}
-.post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 0 5px;}
+.post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 20px 0;}
 .post-related-link.post:hover {
     border: #cccccc 1px solid;
 }
@@ -137,17 +140,20 @@
 .post-link-notice.post {
     position: fixed;
     top: 50%;
-    left: 50%;
+    left: 0;
+    right: 0;
     z-index: 2000;
 
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
+    width: auto;
+    max-width: none;
+    box-sizing: border-box;
     padding: 6px 12px;
 
     border: 1px solid rgb(255 255 255 / 70%);
     background: rgb(255 255 255 / 100%);
     color: #696969;
-    width:340px;
-    text-align:center;
+    text-align: center;
 
     font-size: clamp(14px, 1vw, 16px);
     line-height: 1.2;
