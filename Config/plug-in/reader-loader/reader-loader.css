@@ -155,14 +155,18 @@ footer.post,
 
 body.is-immersive .ai-header,
 body.is-immersive footer.post,
-body.is-immersive .reader-post-preferences {
+body.is-immersive .reader-post-preferences,
+body.is-immersive .post-header-wrap,
+body.is-immersive .post-footer-wrap {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
 
+/* Keep the page geometry switch instant so immersive mode does not
+   produce an extra scrollbar jump while the JS keeps the reading anchor stable. */
 main-warper {
-    transition: min-height 200ms ease, padding-top 200ms ease, padding-bottom 200ms ease;
+    transition: none;
 }
 
 /* Post catalog occupies a second fixed row below the header. */
@@ -560,6 +564,34 @@ body.reader-dark:has(#ai-loader:not([hidden]):not([data-mode]),
 body.reader-dark .post-text.post hr {
     border-top-color: #99999940;
     box-shadow: none;
+}
+
+/* =========================================
+   Reader Dark Mode — Post metadata
+   ========================================= */
+body.reader-dark .post-date.post,
+body.reader-dark .post-title.post,
+body.reader-dark .post-tag.post,
+body.reader-dark .post-related.post,
+body.reader-dark .post-readmore.post {
+    color: #999999;
+}
+
+body.reader-dark .post-title.post h2,
+body.reader-dark .post-tag.post a,
+body.reader-dark .post-related.post a,
+body.reader-dark .post-readmore.post a,
+body.reader-dark .post-readmore.post span {
+    color: #999999;
+}
+
+body.reader-dark .post-related.post {
+    border-color: #99999940;
+}
+
+body.reader-dark .post-readmore.post,
+body.reader-dark .post-tag.post {
+    border-top-color: #99999940;
 }
 
 /* =========================================
