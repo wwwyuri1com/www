@@ -155,9 +155,17 @@
         blockElement.textContent = "";
 
         lines.forEach((line, index) => {
+            // A standalone --- is a horizontal rule in every reading mode.
+            if (line.trim() === "---") {
+                blockElement.appendChild(
+                    document.createElement("hr")
+                );
+                return;
+            }
+
             appendInlineText(blockElement, line, parseMarkup);
 
-            if (index < lines.length - 1) {
+            if (index < lines.length - 1 && lines[index + 1].trim() !== "---") {
                 blockElement.appendChild(
                     document.createElement("br")
                 );

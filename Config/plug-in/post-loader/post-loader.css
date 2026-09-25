@@ -75,7 +75,7 @@
 .post-text.codex {}
 
 /* FOR Post.html */
-.post-date.post {letter-spacing:24px; text-align: center;}
+.post-date.post {letter-spacing:normal; text-align: center;}
 .post-title.post {}
 .post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 20px 0;}
 .post-related-link.post:hover {
@@ -83,6 +83,12 @@
 }
 .post-related {
     border: #ffffff 1px solid;
+}
+
+
+/* Generated content paragraphs keep the original Post text spacing. */
+.post-content-block.post {
+    margin: 0;
 }
 
 /* Post catalog / Get post link */
@@ -190,6 +196,31 @@
 
 .post-prev-link.post,
 .post-next-link.post {
+    white-space: nowrap;
+}
+
+/* Back to Codex / containing catalog navigation */
+.post-backto.post {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 15px;
+    margin-bottom: 10px;
+    border-top: 1px dashed #eeeeee;
+}
+
+.post-backto.post > span {
+    min-width: 0;
+}
+
+.post-backto.post > span:last-child {
+    margin-left: auto;
+    text-align: right;
+}
+
+.post-backto-codex.post,
+.post-backto-parent.post {
     white-space: nowrap;
 }
 

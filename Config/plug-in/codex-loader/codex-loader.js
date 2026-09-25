@@ -1589,12 +1589,26 @@
 
 
             /*
-             * A separator is represented by an OPTGROUP label,
-             * not by a selectable OPTION. This keeps the native
-             * SELECT behavior while giving separator_before the
-             * same visual meaning in the dropdown.
+             * Use a disabled OPTION for separators instead of
+             * OPTGROUP, so the Catalog itself keeps its normal
+             * depth and the separator does not wrap on mobile.
              */
-            let catalogOption =
+            if (separatorBefore.has(path)) {
+                const separatorOption =
+                    document.createElement("option");
+
+                separatorOption.disabled =
+                    true;
+
+                separatorOption.textContent =
+                    "────────────";
+
+                select.appendChild(
+                    separatorOption
+                );
+            }
+
+            const catalogOption =
                 createOption(
                     path,
                     `${indent(depth)}✧ ${name}`,
@@ -1602,25 +1616,9 @@
                     path
                 );
 
-            if (separatorBefore.has(path)) {
-                const separatorGroup =
-                    document.createElement("optgroup");
-
-                separatorGroup.label =
-                    "────────────────";
-
-                separatorGroup.appendChild(
-                    catalogOption
-                );
-
-                select.appendChild(
-                    separatorGroup
-                );
-            } else {
-                select.appendChild(
-                    catalogOption
-                );
-            }
+            select.appendChild(
+                catalogOption
+            );
 
 
             if (

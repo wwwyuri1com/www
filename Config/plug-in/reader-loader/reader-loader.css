@@ -579,7 +579,8 @@ body.reader-dark .post-date.post,
 body.reader-dark .post-title.post,
 body.reader-dark .post-tag.post,
 body.reader-dark .post-related.post,
-body.reader-dark .post-readmore.post {
+body.reader-dark .post-readmore.post,
+body.reader-dark .post-backto.post {
     color: #999999;
 }
 
@@ -587,7 +588,9 @@ body.reader-dark .post-title.post h2,
 body.reader-dark .post-tag.post a,
 body.reader-dark .post-related.post a,
 body.reader-dark .post-readmore.post a,
-body.reader-dark .post-readmore.post span {
+body.reader-dark .post-readmore.post span,
+body.reader-dark .post-backto.post a,
+body.reader-dark .post-backto.post span {
     color: #999999;
 }
 
@@ -596,7 +599,8 @@ body.reader-dark .post-related.post {
 }
 
 body.reader-dark .post-readmore.post,
-body.reader-dark .post-tag.post {
+body.reader-dark .post-tag.post,
+body.reader-dark .post-backto.post {
     border-top-color: #99999940;
 }
 

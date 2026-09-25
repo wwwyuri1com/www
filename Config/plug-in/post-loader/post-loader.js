@@ -40,9 +40,10 @@
         const content = root.querySelector(".post-text.post");
         const tag = root.querySelector(".post-tag.post");
         const readmore = root.querySelector(".post-readmore.post");
+        const backto = root.querySelector(".post-backto.post");
         const relatedLinks = root.querySelector(".post-related.post");
 
-        if (!catalog || !images || !date || !title || !content || !tag || !readmore || !relatedLinks) {
+        if (!catalog || !images || !date || !title || !content || !tag || !readmore || !backto || !relatedLinks) {
             throw new Error("Post Loader DOM structure is incomplete.");
         }
 
@@ -61,6 +62,7 @@
             data.related_links
         );
         await renderReadmore(readmore, id);
+        await renderBackTo(backto, id);
     }
 
     async function renderCatalog(container, postId) {
@@ -300,6 +302,80 @@
         }
     }
 
+    async function renderBackTo(container, postId) {
+        const codexWrapper = container.querySelector("span:first-child");
+        const parentWrapper = container.querySelector("span:last-child");
+
+        if (!codexWrapper || !parentWrapper) return;
+
+        codexWrapper.textContent = "";
+        parentWrapper.textContent = "";
+        container.hidden = true;
+
+        // Back to Codex always returns to the Codex main page.
+        codexWrapper.appendChild(
+            createBackToLink(
+                "Codex.html",
+                "‹ Back to Codex",
+                "post-backto-codex post"
+            )
+        );
+
+        try {
+            const response = await fetch("Codex-W/W-Catalog.json");
+
+            if (!response.ok) {
+                throw new Error(
+                    `W-Catalog request failed (${response.status})`
+                );
+            }
+
+            const data = await response.json();
+            const path = findCatalogPath(
+                data?.catalogs || {},
+                postId,
+                ""
+            );
+
+            // The post belongs to a catalog path such as
+            // "Novels/Single : Shorts". The parent destination is that
+            // containing catalog, while the visible label is its final name.
+            if (path) {
+                const parts = path.split("/").filter(Boolean);
+                const parentName = parts[parts.length - 1];
+
+                parentWrapper.appendChild(
+                    createBackToLink(
+                        `Codex.html?catalog=${encodeURIComponent(path)}`,
+                        `Back to ${parentName} ›`,
+                        "post-backto-parent post"
+                    )
+                );
+            }
+
+            container.hidden = false;
+        } catch (error) {
+            console.error(
+                "Post BackTo Loader:",
+                error
+            );
+
+            // Keep the fixed Codex destination available even if the catalog
+            // lookup fails.
+            container.hidden = false;
+        }
+    }
+
+    function createBackToLink(href, text, className) {
+        const link = document.createElement("a");
+
+        link.className = className;
+        link.href = href;
+        link.textContent = text;
+
+        return link;
+    }
+
     function collectReadmorePostIds(catalogs, result = []) {
         // Readmore ordering only uses the leading YYYYMMDD-## part of the Post ID.
         // Example: 20260924-02_S_LadyL -> 20260924 / 02
@@ -450,25 +526,89 @@
         container.dataset.rawContent = normalized;
 
         if (target) {
-            target.textContent = "";
+            target.remove();
 
             const lines = normalized.split("\n");
-            lines.forEach((line, index) => {
-                target.appendChild(
-                    document.createTextNode(line)
-                );
+            let block = createContentBlock();
 
-                if (index < lines.length - 1) {
-                    target.appendChild(
+            lines.forEach((line, index) => {
+                // A standalone --- becomes a real horizontal rule.
+                // This is intentionally line-based so normal hyphens are untouched.
+                if (line.trim() === "---") {
+                    if (block.hasChildNodes()) {
+                        container.appendChild(block);
+                        block = createContentBlock();
+                    }
+
+                    container.appendChild(
+                        document.createElement("hr")
+                    );
+
+                    return;
+                }
+
+                appendInlineMarkup(block, line);
+
+                if (index < lines.length - 1 && lines[index + 1].trim() !== "---") {
+                    block.appendChild(
                         document.createElement("br")
                     );
                 }
             });
+
+            if (block.hasChildNodes() || lines.length === 0) {
+                container.appendChild(block);
+            }
         }
 
         document.dispatchEvent(
             new CustomEvent("post:content-ready")
         );
+    }
+
+    function createContentBlock() {
+        const block = document.createElement("p");
+        block.className = "post-content-block post";
+        return block;
+    }
+
+    function appendInlineMarkup(parent, line) {
+        let rest = String(line || "");
+        const tokenPattern = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/;
+
+        while (rest) {
+            const match = rest.match(tokenPattern);
+
+            if (!match) {
+                parent.appendChild(
+                    document.createTextNode(rest)
+                );
+                return;
+            }
+
+            const index = match.index;
+
+            if (index > 0) {
+                parent.appendChild(
+                    document.createTextNode(
+                        rest.slice(0, index)
+                    )
+                );
+            }
+
+            const token = match[0];
+            const strong = token.startsWith("**");
+            const element = document.createElement(
+                strong ? "strong" : "em"
+            );
+
+            element.textContent = strong
+                ? token.slice(2, -2)
+                : token.slice(1, -1);
+
+            parent.appendChild(element);
+            rest = rest.slice(index + token.length);
+        }
     }
 
     function renderRelatedLinks(container, value) {
@@ -500,7 +640,7 @@
                     "post-related-label";
 
                 label.textContent =
-                    "相關連結 ⇲";
+                    "Related Links:";
 
                 wrapper.appendChild(label);
                 wrapper.appendChild(
