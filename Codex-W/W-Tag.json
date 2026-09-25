@@ -35,7 +35,8 @@
             "Intimacy-Very Pervasive"
         ],
         "Word Count": [
-            "Under 5k",
+            "Under 2.5k",
+            "2.5k-5k",
             "5k-20k",
             "20k-50k",
             "50k-1m",
@@ -63,12 +64,14 @@
         },
         "Humor": {
             "posts": [
+                "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-01_S_LittleBunny"
             ]
         },
         "Modern": {
             "posts": [
+                "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-02_S_LadyL",
                 "20260924-01_S_LittleBunny"
@@ -117,6 +120,7 @@
         },
         "Girlboss": {
             "posts": [
+                "20260926-01_R_The-VIP-Client",
                 "20260924-02_S_LadyL"
             ]
         },
@@ -143,6 +147,7 @@
         },
         "Flirting": {
             "posts": [
+                "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-04_L_Yuri-Succubus"
             ]
@@ -154,12 +159,23 @@
         },
         "Aloof": {
             "posts": [
+                "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry"
             ]
         },
         "Intimacy-Surface": {
             "posts": [
                 "20260925-01_S_Sorry"
+            ]
+        },
+        "Intimacy-Candid": {
+            "posts": [
+                "20260926-01_R_The-VIP-Client"
+            ]
+        },
+        "Under 2.5k": {
+            "posts": [
+                "20260926-01_R_The-VIP-Client"
             ]
         }
     }
