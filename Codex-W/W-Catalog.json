@@ -6,7 +6,7 @@
             "Policy",
             "Feature",
             "User Guide",
-            "IP Characters"
+            "IP Original Characters"
         ],
         "separator_before": [
             "Feature",
@@ -29,20 +29,23 @@
                 "_Reading-Settings"
             ]
         },
-        "IP Characters": {
-            "children": {
-                "DDDStudio": {
-                    "posts": []
-                },
-                "IcyArte": {
-                    "posts": []
-                }
-            }
+        "IP Original Characters": {
+            "posts": [
+                "-N.White",
+                "-D.Cyan",
+                "-D.Golden",
+                "-E.Red",
+                "-L.Night",
+                "-D.Dark",
+                "-Icy",
+                "-Arte"
+            ]
         },
         "Novels": {
             "children": {
                 "Single : Shorts": {
                     "posts": [
+                        "20260925-01_S_Sorry",
                         "20260924-02_S_LadyL",
                         "20260924-01_S_LittleBunny"
                     ]
@@ -54,7 +57,7 @@
                 },
                 "IP : Loading Night": {
                     "posts": [
-                        "20260924-04_Yuri-Succubus"
+                        "20260924-04_L_Yuri-Succubus"
                     ]
                 },
                 "IP : Icy & Arte": {
@@ -63,8 +66,8 @@
             }
         },
         "Policy": {
-            "posts": [                
-                "_Terms",         
+            "posts": [
+                "_Terms",
                 "_Content-Rating-Guide",
                 "_AI-&-Content-Policy",
                 "_Privacy-Policy",

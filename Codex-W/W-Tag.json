@@ -10,6 +10,7 @@
         "OC Trait": [
             "Tsundere",
             "Yandere",
+            "Aloof",
             "Gap Moe",
             "Duplicity",
             "Girlboss",
@@ -62,18 +63,21 @@
         },
         "Humor": {
             "posts": [
+                "20260925-01_S_Sorry",
                 "20260924-01_S_LittleBunny"
             ]
         },
         "Modern": {
             "posts": [
+                "20260925-01_S_Sorry",
                 "20260924-02_S_LadyL",
                 "20260924-01_S_LittleBunny"
             ]
         },
         "Under 5k": {
             "posts": [
-                "20260924-04_Yuri-Succubus",
+                "20260925-01_S_Sorry",
+                "20260924-04_L_Yuri-Succubus",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
                 "20260924-01_S_LittleBunny",
                 "20260924-02_S_LadyL"
@@ -89,14 +93,14 @@
         },
         "Sexual Humor": {
             "posts": [
-                "20260924-04_Yuri-Succubus",
+                "20260924-04_L_Yuri-Succubus",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
                 "20260924-02_S_LadyL"
             ]
         },
         "Spicy": {
             "posts": [
-                "20260924-04_Yuri-Succubus",
+                "20260924-04_L_Yuri-Succubus",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
                 "20260924-02_S_LadyL"
             ]
@@ -128,23 +132,34 @@
         },
         "Intimacy-Very Pervasive": {
             "posts": [
-                "20260924-04_Yuri-Succubus",
+                "20260924-04_L_Yuri-Succubus",
                 "20260924-03_D_AI-Lover-CYAN-V0001"
             ]
         },
         "Fantasy": {
             "posts": [
-                "20260924-04_Yuri-Succubus"
+                "20260924-04_L_Yuri-Succubus"
             ]
         },
         "Flirting": {
             "posts": [
-                "20260924-04_Yuri-Succubus"
+                "20260925-01_S_Sorry",
+                "20260924-04_L_Yuri-Succubus"
             ]
         },
         "Clingy": {
             "posts": [
-                "20260924-04_Yuri-Succubus"
+                "20260924-04_L_Yuri-Succubus"
+            ]
+        },
+        "Aloof": {
+            "posts": [
+                "20260925-01_S_Sorry"
+            ]
+        },
+        "Intimacy-Surface": {
+            "posts": [
+                "20260925-01_S_Sorry"
             ]
         }
     }

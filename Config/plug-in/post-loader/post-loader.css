@@ -75,7 +75,7 @@
 .post-text.codex {}
 
 /* FOR Post.html */
-.post-date.post {letter-spacing:normal; text-align: center;}
+.post-date.post {letter-spacing:25px; text-align: center;}
 .post-title.post {}
 .post-text.post {line-height: 2em;letter-spacing: 0.9px;    text-align: justify;    padding: 20px 0;}
 .post-related-link.post:hover {
