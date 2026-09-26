@@ -4,6 +4,7 @@
             "Sweet",
             "Spicy",
             "Wild",
+            "Dominant",
             "Mischievous",
             "Flirting"
         ],
@@ -54,6 +55,7 @@
         },
         "Mischievous": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260924-01_S_LittleBunny"
             ]
         },
@@ -64,6 +66,7 @@
         },
         "Humor": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-01_S_LittleBunny"
@@ -71,6 +74,7 @@
         },
         "Modern": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-02_S_LadyL",
@@ -79,6 +83,7 @@
         },
         "2.5k-5k": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260925-01_S_Sorry",
                 "20260924-04_L_Yuri-Succubus",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
@@ -120,12 +125,14 @@
         },
         "Girlboss": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260926-01_R_The-VIP-Client",
                 "20260924-02_S_LadyL"
             ]
         },
         "GL Awakening": {
             "posts": [
+                "20260926-02_S_The-Doberman",
                 "20260924-03_D_AI-Lover-CYAN-V0001"
             ]
         },
@@ -176,6 +183,16 @@
         "Under 2.5k": {
             "posts": [
                 "20260926-01_R_The-VIP-Client"
+            ]
+        },
+        "Dominant": {
+            "posts": [
+                "20260926-02_S_The-Doberman"
+            ]
+        },
+        "Intimacy-Suggestive": {
+            "posts": [
+                "20260926-02_S_The-Doberman"
             ]
         }
     }
