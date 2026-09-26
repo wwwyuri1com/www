@@ -12,12 +12,14 @@
             "Tsundere",
             "Yandere",
             "Aloof",
+            "Assertive",
             "Gap Moe",
             "Duplicity",
             "Girlboss",
             "GL Awakening"
         ],
         "Style": [
+            "Romance",
             "Humor",
             "Sexual Humor",
             "Plot",
@@ -48,6 +50,7 @@
     "tags": {
         "Sweet": {
             "posts": [
+                "20260927-01_I_Icys-Patisserie",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
                 "20260924-02_S_LadyL",
                 "20260924-01_S_LittleBunny"
@@ -66,16 +69,17 @@
         },
         "Humor": {
             "posts": [
-                "20260926-02_S_The-Doberman",
                 "20260926-01_R_The-VIP-Client",
+                "20260926-02_S_The-Doberman",
                 "20260925-01_S_Sorry",
                 "20260924-01_S_LittleBunny"
             ]
         },
         "Modern": {
             "posts": [
-                "20260926-02_S_The-Doberman",
+                "20260927-01_I_Icys-Patisserie",
                 "20260926-01_R_The-VIP-Client",
+                "20260926-02_S_The-Doberman",
                 "20260925-01_S_Sorry",
                 "20260924-02_S_LadyL",
                 "20260924-01_S_LittleBunny"
@@ -83,6 +87,7 @@
         },
         "2.5k-5k": {
             "posts": [
+                "20260927-01_I_Icys-Patisserie",
                 "20260926-02_S_The-Doberman",
                 "20260925-01_S_Sorry",
                 "20260924-04_L_Yuri-Succubus",
@@ -97,7 +102,9 @@
             ]
         },
         "5k-20k": {
-            "posts": []
+            "posts": [
+                "20260926-01_R_The-VIP-Client"
+            ]
         },
         "Sexual Humor": {
             "posts": [
@@ -125,8 +132,8 @@
         },
         "Girlboss": {
             "posts": [
-                "20260926-02_S_The-Doberman",
                 "20260926-01_R_The-VIP-Client",
+                "20260926-02_S_The-Doberman",
                 "20260924-02_S_LadyL"
             ]
         },
@@ -154,6 +161,7 @@
         },
         "Flirting": {
             "posts": [
+                "20260927-01_I_Icys-Patisserie",
                 "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
                 "20260924-04_L_Yuri-Succubus"
@@ -177,13 +185,12 @@
         },
         "Intimacy-Candid": {
             "posts": [
+                "20260927-01_I_Icys-Patisserie",
                 "20260926-01_R_The-VIP-Client"
             ]
         },
         "Under 2.5k": {
-            "posts": [
-                "20260926-01_R_The-VIP-Client"
-            ]
+            "posts": []
         },
         "Dominant": {
             "posts": [
@@ -193,6 +200,16 @@
         "Intimacy-Suggestive": {
             "posts": [
                 "20260926-02_S_The-Doberman"
+            ]
+        },
+        "Assertive": {
+            "posts": [
+                "20260927-01_I_Icys-Patisserie"
+            ]
+        },
+        "Romance": {
+            "posts": [
+                "20260927-01_I_Icys-Patisserie"
             ]
         }
     }
