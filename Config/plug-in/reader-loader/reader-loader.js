@@ -486,6 +486,32 @@
             ctx.restore();
         };
 
+        // Backup Card export only: use the original-resolution image from
+        // .Codex-Img-nos when available. Normal website rendering continues
+        // to use Codex-Img (the compressed web version).
+        const loadBackupCardOriginal = async cover => {
+            if (!cover?.postId) return null;
+
+            const encodedId = encodeURIComponent(String(cover.postId));
+            const number = Number(cover.imageNumber) || 1;
+            const candidates = [
+                `./.Codex-Img-nos/${encodedId}%20(${number}).jpg`,
+                `./.Codex-Img-nos/${encodedId}%20(${number}).jpeg`,
+                `./.Codex-Img-nos/${encodedId}%20(${number}).png`,
+                `./.Codex-Img-nos/${encodedId}%20(${number}).webp`
+            ];
+
+            for (const src of candidates) {
+                try {
+                    return await loadImage(src);
+                } catch (error) {
+                    // Try the next original extension.
+                }
+            }
+
+            return null;
+        };
+
         const createBackupCardCanvas = async backup => {
             const canvas = document.createElement('canvas');
             canvas.width = 1805;
@@ -503,7 +529,17 @@
 
             // Custom cover is used only when the user explicitly selected one.
             // When it is unavailable, fall back to the newest catalog post.
-            if (cover?.src) {
+            if (cover?.postId) {
+                coverImage = await loadBackupCardOriginal(cover);
+                if (!coverImage) {
+                    console.warn('YURI1 original Backup Card cover unavailable; using compressed web image.');
+                }
+            }
+
+            // If the original backup image is unavailable, fall back to the
+            // normal Codex-Img image. This keeps existing/older deployments
+            // compatible without changing normal website image behavior.
+            if (!coverImage && cover?.src) {
                 try {
                     coverImage = await loadImage(cover.src);
                 } catch (error) {
@@ -513,7 +549,10 @@
 
             if (!coverImage) {
                 const newest = await getDefaultBackupCover().catch(() => null);
-                if (newest?.src) {
+                if (newest?.postId) {
+                    coverImage = await loadBackupCardOriginal(newest);
+                }
+                if (!coverImage && newest?.src) {
                     try {
                         coverImage = await loadImage(newest.src);
                         cover = newest;

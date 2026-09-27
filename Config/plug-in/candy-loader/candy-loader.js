@@ -58,15 +58,51 @@
                 throw new Error("No catalog post is available.");
             }
 
-            const src = window.YURI1Cover?.src
-                ? window.YURI1Cover.src(newest.postId, 1)
-                : `Codex-Img/${encodeURIComponent(newest.postId)}%20(1).jpg`;
+            // Index hero cover only: use the original image from
+            // .Codex-Img-nos for maximum visual quality.
+            // The normal homepage list below continues to use Codex-Img.
+            const originalSrc = await loadOriginalCover(
+                newest.postId,
+                1
+            );
+
+            const src = originalSrc || (
+                window.YURI1Cover?.src
+                    ? window.YURI1Cover.src(newest.postId, 1)
+                    : `Codex-Img/${encodeURIComponent(newest.postId)}%20(1).jpg`
+            );
 
             boss.style.backgroundImage = `url("${src}")`;
         } catch (error) {
             // Keep cover-def.jpg as the emergency fallback only.
             throw error;
         }
+    }
+
+    async function loadOriginalCover(postId, number = 1) {
+        const encodedId = encodeURIComponent(String(postId));
+        const candidates = [
+            `./.Codex-Img-nos/${encodedId}%20(${number}).jpg`,
+            `./.Codex-Img-nos/${encodedId}%20(${number}).jpeg`,
+            `./.Codex-Img-nos/${encodedId}%20(${number}).png`,
+            `./.Codex-Img-nos/${encodedId}%20(${number}).webp`
+        ];
+
+        for (const src of candidates) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    image.onload = () => resolve();
+                    image.onerror = () => reject(new Error('Image unavailable'));
+                    image.src = src;
+                });
+                return src;
+            } catch (error) {
+                // Try the next original extension.
+            }
+        }
+
+        return null;
     }
 
     function getNumericIdOrder(postId) {

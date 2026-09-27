@@ -30,7 +30,11 @@
             "Technology",
             "Fantasy"
         ],
-        "Main Story CP": [],
+        "Main Story CP": [
+            "🩵🩷",
+            "❤️💛",
+            "❤️💜"
+        ],
         "Intimacy Context Level": [
             "Intimacy-Surface",
             "Intimacy-Suggestive",
@@ -39,8 +43,8 @@
         ],
         "Word Count": [
             "Under 2.5k",
-            "2.5k-5k",
-            "5k-20k",
+            "2.5k-7k",
+            "7k-20k",
             "20k-50k",
             "50k-1m",
             "1m-3m",
@@ -77,6 +81,7 @@
         },
         "Modern": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260927-01_I_Icys-Patisserie",
                 "20260926-01_R_The-VIP-Client",
                 "20260926-02_S_The-Doberman",
@@ -85,7 +90,7 @@
                 "20260924-01_S_LittleBunny"
             ]
         },
-        "2.5k-5k": {
+        "2.5k-7k": {
             "posts": [
                 "20260927-01_I_Icys-Patisserie",
                 "20260926-02_S_The-Doberman",
@@ -101,8 +106,9 @@
                 "20260924-02_S_LadyL"
             ]
         },
-        "5k-20k": {
+        "Under 2.5k": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260926-01_R_The-VIP-Client"
             ]
         },
@@ -161,6 +167,7 @@
         },
         "Flirting": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260927-01_I_Icys-Patisserie",
                 "20260926-01_R_The-VIP-Client",
                 "20260925-01_S_Sorry",
@@ -189,9 +196,6 @@
                 "20260926-01_R_The-VIP-Client"
             ]
         },
-        "Under 2.5k": {
-            "posts": []
-        },
         "Dominant": {
             "posts": [
                 "20260926-02_S_The-Doberman"
@@ -199,17 +203,25 @@
         },
         "Intimacy-Suggestive": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260926-02_S_The-Doberman"
             ]
         },
         "Assertive": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260927-01_I_Icys-Patisserie"
             ]
         },
         "Romance": {
             "posts": [
+                "20260927-01_O_Miss you",
                 "20260927-01_I_Icys-Patisserie"
+            ]
+        },
+        "❤️💛": {
+            "posts": [
+                "20260927-01_O_Miss you"
             ]
         }
     }
