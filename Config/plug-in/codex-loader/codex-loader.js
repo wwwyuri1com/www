@@ -135,6 +135,14 @@
                 return;
             }
 
+            if (
+                catalogQuery === "Hidden" &&
+                tagQuery === null
+            ) {
+                await renderHiddenResult();
+                return;
+            }
+
             const requests = [];
 
 
@@ -319,6 +327,73 @@
         }
 
         resultRoot.appendChild(postList);
+    }
+
+    async function renderHiddenResult() {
+        clearResult();
+
+        appendResultHeader("◈ HIDDEN");
+
+        const data = await getCatalogData();
+        const postIds = collectCatalogPostIds(data?.catalogs || {});
+        const hiddenIds = postIds.filter(postId => isCodexHidden(postId));
+
+        if (hiddenIds.length === 0) {
+            renderMessage("No hidden posts.");
+            return;
+        }
+
+        const posts = await loadPostData(hiddenIds);
+        const postList = document.createElement("div");
+        postList.className = "codex-post-list";
+
+        for (const postId of hiddenIds) {
+            const post = createPostElement(
+                postId,
+                posts.get(postId),
+                0,
+                true
+            );
+
+            if (post) {
+                postList.appendChild(post);
+            }
+        }
+
+        if (postList.children.length === 0) {
+            renderMessage("No hidden posts.");
+            return;
+        }
+
+        resultRoot.appendChild(postList);
+    }
+
+    function isCodexHidden(postId) {
+        return localStorage.getItem(
+            `yuri1.reader.codex-hidden.${postId}`
+        ) === "true";
+    }
+
+    function collectCatalogPostIds(nodes, result = [], seen = new Set()) {
+        if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+            return result;
+        }
+
+        for (const node of Object.values(nodes)) {
+            if (!node || typeof node !== "object") continue;
+
+            if (Array.isArray(node.posts)) {
+                for (const postId of node.posts) {
+                    if (!postId || seen.has(postId)) continue;
+                    seen.add(postId);
+                    result.push(postId);
+                }
+            }
+
+            collectCatalogPostIds(node.children, result, seen);
+        }
+
+        return result;
     }
 
     function getFavoritePostIds() {
@@ -643,6 +718,10 @@
                 const postId
                 of posts
             ) {
+                if (isCodexHidden(postId)) {
+                    continue;
+                }
+
                 const post =
                     createPostElement(
                         postId,
@@ -752,6 +831,10 @@
             const postId
             of tagData.posts
         ) {
+            if (isCodexHidden(postId)) {
+                continue;
+            }
+
             const post =
                 createPostElement(
                     postId,
@@ -1349,6 +1432,60 @@
 
 
         /*
+         * Show Hidden
+         * A fixed Codex utility entry, kept above Home.
+         */
+        const hiddenHeader =
+            document.createElement(
+                "div"
+            );
+
+        hiddenHeader.className =
+            "codex-header codex-hidden-header";
+
+        const hiddenLink =
+            document.createElement(
+                "a"
+            );
+
+        hiddenLink.href =
+            "Codex.html?catalog=Hidden";
+
+        const hiddenIcon =
+            document.createElement(
+                "i"
+            );
+
+        hiddenIcon.setAttribute(
+            "data-lucide",
+            "eye-off"
+        );
+
+        hiddenIcon.className =
+            "codex-hidden-link-icon";
+
+        hiddenLink.appendChild(
+            hiddenIcon
+        );
+
+        hiddenLink.appendChild(
+            document.createTextNode(
+                " Show Hidden"
+            )
+        );
+
+        hiddenHeader.appendChild(
+            hiddenLink
+        );
+
+        resultRoot.appendChild(
+            hiddenHeader
+        );
+
+        renderStatusIcons();
+
+
+        /*
          * Home
          */
         const homeHeader =
@@ -1682,6 +1819,21 @@
 
 
         /*
+         * Show Hidden stays immediately above Home.
+         * Keep this selector entry intentionally text-only so it
+         * remains lightweight even when Lucide is unavailable.
+         */
+        select.appendChild(
+            createOption(
+                "Hidden",
+                "⛞ Show Hidden",
+                "hidden",
+                "Hidden"
+            )
+        );
+
+
+        /*
          * Home stays at the bottom so it is not confused
          * with the content/navigation entries above.
          */
@@ -1715,6 +1867,16 @@
                 ) {
                     window.location.href =
                         "Codex.html?catalog=Favorite";
+
+                    return;
+                }
+
+                if (
+                    option.dataset.type ===
+                    "hidden"
+                ) {
+                    window.location.href =
+                        "Codex.html?catalog=Hidden";
 
                     return;
                 }
@@ -1881,7 +2043,7 @@
 
         if (
             Array.isArray(node.posts) &&
-            node.posts.length > 0
+            node.posts.some(postId => !isCodexHidden(postId))
         ) {
             return true;
         }

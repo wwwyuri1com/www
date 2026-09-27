@@ -46,6 +46,14 @@
     font-size:0.85rem;
 }
 
+.codex-hidden-link-icon {
+    width: 11px;
+    height: 11px;
+    margin-right: 3px;
+    stroke-width: 1.5;
+    vertical-align: -0.12em;
+}
+
 .codex-series-icon {
     width: 10px;
     height: 10px;
@@ -105,6 +113,11 @@
     font-size:0.8rem;
     border: 1px solid #ffffff;
     color:#696969;
+}
+
+/* Catalog section titles */
+.codex-catalog-title span {
+      font-size: 0.7rem;
 }
 
 .codex-post{border-bottom: 1px #cccccc dashed;    padding: 7px 0;}

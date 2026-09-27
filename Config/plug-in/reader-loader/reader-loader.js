@@ -1607,6 +1607,7 @@
 
     const progressValue = loader.querySelector(".reader-progress-value");
     const favoriteButton = loader.querySelector(".favorite");
+    const codexVisibilityButton = loader.querySelector(".codex-visibility");
     const saveButton = loader.querySelector(".save-progress");
     const clearButton = loader.querySelector(".clear-progress");
     const doneButton = loader.querySelector(".read-done");
@@ -1693,6 +1694,10 @@
 
     const favoriteKey = postId
         ? `yuri1.reader.favorite.${postId}`
+        : null;
+
+    const codexHiddenKey = postId
+        ? `yuri1.reader.codex-hidden.${postId}`
         : null;
 
     let toastTimer = null;
@@ -1915,6 +1920,55 @@
         }
 
         updateFavoriteButton();
+    };
+
+    const isCodexHidden = () => {
+        if (!codexHiddenKey) return false;
+
+        return localStorage.getItem(codexHiddenKey) === "true";
+    };
+
+    const updateCodexVisibilityButton = () => {
+        if (!codexVisibilityButton) return;
+
+        const hidden = isCodexHidden();
+
+        codexVisibilityButton.setAttribute(
+            "aria-label",
+            hidden ? "Show in Codex" : "Hide from Codex"
+        );
+
+        codexVisibilityButton.setAttribute(
+            "title",
+            hidden ? "Show in Codex" : "Hide from Codex"
+        );
+
+        setButtonIcon(
+            codexVisibilityButton,
+            hidden ? "eye-off" : "eye"
+        );
+
+        codexVisibilityButton.classList.toggle(
+            "is-active",
+            hidden
+        );
+    };
+
+    const toggleCodexVisibility = () => {
+        if (!codexHiddenKey) return;
+
+        if (isCodexHidden()) {
+            localStorage.removeItem(codexHiddenKey);
+            showToast("Shown in Codex");
+        } else {
+            localStorage.setItem(
+                codexHiddenKey,
+                "true"
+            );
+            showToast("Hidden from Codex");
+        }
+
+        updateCodexVisibilityButton();
     };
 
     const isReadDone = () => {
@@ -2266,6 +2320,13 @@
         );
     }
 
+    if (codexVisibilityButton) {
+        codexVisibilityButton.addEventListener(
+            "click",
+            toggleCodexVisibility
+        );
+    }
+
     if (saveButton) {
         saveButton.addEventListener(
             "click",
@@ -2330,6 +2391,7 @@
     void applyReaderFontSettings();
     updateImmersiveButton();
     updateFavoriteButton();
+    updateCodexVisibilityButton();
     updateDoneButton();
     updateProgress();
 
