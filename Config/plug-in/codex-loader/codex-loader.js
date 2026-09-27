@@ -882,6 +882,9 @@
 
             titleLink.textContent =
                 displayTitle;
+
+            titleLink.dataset.readDoneText =
+                displayTitle;
         }
 
         const doneKey =

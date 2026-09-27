@@ -194,6 +194,33 @@
     color: #69696970;
 }
 
+/* Read-done: emulate a lowered wavy line-through on a transparent
+   text duplicate so the line can sit above the glyphs. */
+.codex-post-title.is-read-done > a {
+    position: relative;
+    text-decoration: none;
+}
+
+.codex-post-title.is-read-done > a::after {
+    content: attr(data-read-done-text);
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    pointer-events: none;
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+    line-height: inherit;
+    font: inherit;
+    transform: translateY(0.14em);
+    z-index: 2;
+    text-decoration-line: line-through;
+    text-decoration-style: wavy;
+    text-decoration-color: #fa6699;
+    text-decoration-thickness: 1px;
+    text-decoration-skip-ink: none;
+}
+
 /* Codex Post Status Indicators */
 .codex-post-status-slot {
     appearance: none;
