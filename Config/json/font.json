@@ -68,6 +68,12 @@
             "fallback": "cursive"
         },
         {
+            "value": "roboto",
+            "name": "Roboto",
+            "googleFamily": "Roboto",
+            "fallback": "sans-serif"
+        },
+        {
             "value": "silkscreen",
             "name": "Silkscreen",
             "googleFamily": "Silkscreen",
@@ -90,12 +96,6 @@
             "name": "Zen Kurenaido",
             "googleFamily": "Zen Kurenaido",
             "fallback": "sans-serif"
-        },
-        {
-            "value": "zilla-slab-highlight",
-            "name": "Zilla Slab Highlight",
-            "googleFamily": "Zilla Slab Highlight",
-            "fallback": "serif"
         }
     ],
     "chinese": [
