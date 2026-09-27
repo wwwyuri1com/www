@@ -37,11 +37,43 @@
     object-position: center top;
 }
 
+.codex-post-list {padding-left:10px;}
 .codex-post-title {
     flex: 1;
     text-align: left;
     padding-left: 5px;
     color: #242424;
+    font-size:0.85rem;
+}
+
+.codex-series-icon {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    margin-right: 2px;
+    stroke-width: 1.5;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: -0.03em;
+}
+
+.codex-catalog-icon {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 0 2px 0 4px;
+    stroke-width: 1.5;
+    display: inline-block;
+    vertical-align: -0.17em;
+}
+
+.codex-catalog-icon[hidden] {
+    display: inline-block;
+    visibility: hidden;
+}
+
+.codex-catalog-prefix {
+    white-space: pre;
 }
 
 .codex-post-meta {
@@ -70,8 +102,9 @@
 .codex-header {
     position: relative;
     overflow: hidden;
-
+    font-size:0.8rem;
     border: 1px solid #ffffff;
+    color:#696969;
 }
 
 .codex-post{border-bottom: 1px #cccccc dashed;    padding: 7px 0;}

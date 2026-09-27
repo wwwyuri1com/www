@@ -1,4 +1,26 @@
 {
+    "catalog_marks": {
+        "IP : Icy & Arte": {
+            "icon": "ice-cream-cone",
+            "color": "#a9d8e5"
+        },
+        "IP : DDD Presents": {
+            "icon": "sparkle",
+            "color": "#ffe09c"
+        },
+        "IP : Loading Night": {
+            "icon": "wine",
+            "color": "#b37eb3"
+        },
+        "Single : Shorts": {
+            "icon": "feather",
+            "color": "#81c986"
+        },
+        "Single : OC's Off Script Time": {
+            "icon": "sofa",
+            "color": "#cdcdcd"
+        }
+    },
     "_comment": "=== Here's Will be list _.json in SELECT ===",
     "selector": {
         "print_posts": [],

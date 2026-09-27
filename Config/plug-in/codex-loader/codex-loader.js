@@ -30,6 +30,8 @@
 
     let catalogDataPromise = null;
     let tagDataPromise = null;
+    let catalogPostMarks = new Map();
+    let catalogNodeMarks = new Map();
 
     function loadFreshJSON(path) {
         return fetch(path, { cache: "no-cache" }).then(async response => {
@@ -84,7 +86,15 @@
 
             if (resultRoot) {
                 requests.push(
-                    loadCodexResult()
+                    getCatalogData()
+                        .then(data => {
+                            catalogPostMarks =
+                                buildCatalogPostMarks(data);
+                            catalogNodeMarks =
+                                buildCatalogNodeMarks(data);
+
+                            return loadCodexResult();
+                        })
                         .then(() => {
                             renderStatusIcons();
                         })
@@ -537,6 +547,21 @@
                 '[data-codex="catalog-link"]'
             );
 
+        const catalogPrefix =
+            catalog.querySelector(
+                '[data-codex="catalog-prefix"]'
+            );
+
+        const catalogIcon =
+            catalog.querySelector(
+                '[data-codex="catalog-icon"]'
+            );
+
+        const catalogName =
+            catalog.querySelector(
+                '[data-codex="catalog-name"]'
+            );
+
 
         if (
             showTitle &&
@@ -548,8 +573,45 @@
                     path
                 )}`;
 
-            catalogLink.textContent =
-                `${indent(depth)}✧ ${name}`;
+            if (catalogPrefix) {
+                catalogPrefix.textContent =
+                    `${indent(depth)}✧`;
+            }
+
+            if (catalogName) {
+                catalogName.textContent =
+                    ` ${name}`;
+            } else {
+                // Backward-safe fallback for older cached templates.
+                catalogLink.appendChild(
+                    document.createTextNode(
+                        ` ${name}`
+                    )
+                );
+            }
+
+            const mark =
+                catalogNodeMarks.get(path) ||
+                catalogNodeMarks.get(name);
+
+            if (catalogIcon) {
+                catalogIcon.removeAttribute('data-lucide');
+                catalogIcon.removeAttribute('style');
+                catalogIcon.hidden = true;
+
+                if (mark?.icon) {
+                    catalogIcon.setAttribute(
+                        'data-lucide',
+                        mark.icon
+                    );
+                    catalogIcon.hidden = false;
+
+                    if (mark.color) {
+                        catalogIcon.style.color =
+                            mark.color;
+                    }
+                }
+            }
 
         } else if (catalogTitle) {
             catalogTitle.remove();
@@ -586,7 +648,8 @@
                         postId,
                         postData.get(postId),
                         depth +
-                            (showTitle ? 1 : 0)
+                            (showTitle ? 1 : 0),
+                        false
                     );
 
 
@@ -776,10 +839,132 @@
     }
 
 
+    function buildCatalogPostMarks(data) {
+        const map = new Map();
+        const marks =
+            data?.catalog_marks &&
+            typeof data.catalog_marks === "object"
+                ? data.catalog_marks
+                : {};
+
+        const resolveMark = (path, name, inherited) => {
+            const raw =
+                Object.prototype.hasOwnProperty.call(marks, path)
+                    ? marks[path]
+                    : Object.prototype.hasOwnProperty.call(marks, name)
+                        ? marks[name]
+                        : inherited;
+
+            if (!raw) return null;
+
+            if (typeof raw === "string") {
+                return { icon: raw, color: "" };
+            }
+
+            return {
+                icon: String(raw.icon || ""),
+                color: String(raw.color || "")
+            };
+        };
+
+        const walk = (nodes, parentPath = "", inherited = null) => {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+                return;
+            }
+
+            for (const [name, node] of Object.entries(nodes)) {
+                if (!node || typeof node !== "object") continue;
+
+                const path =
+                    parentPath
+                        ? `${parentPath}/${name}`
+                        : name;
+
+                const mark =
+                    resolveMark(path, name, inherited);
+
+                if (mark && Array.isArray(node.posts)) {
+                    for (const postId of node.posts) {
+                        if (!map.has(postId)) {
+                            map.set(postId, mark);
+                        }
+                    }
+                }
+
+                walk(node.children, path, mark);
+            }
+        };
+
+        walk(data?.catalogs);
+        return map;
+    }
+
+
+    function buildCatalogNodeMarks(data) {
+        const map = new Map();
+        const marks =
+            data?.catalog_marks &&
+            typeof data.catalog_marks === "object"
+                ? data.catalog_marks
+                : {};
+
+        const resolveMark = (path, name, inherited) => {
+            const raw =
+                Object.prototype.hasOwnProperty.call(marks, path)
+                    ? marks[path]
+                    : Object.prototype.hasOwnProperty.call(marks, name)
+                        ? marks[name]
+                        : inherited;
+
+            if (!raw) return null;
+
+            if (typeof raw === "string") {
+                return { icon: raw, color: "" };
+            }
+
+            return {
+                icon: String(raw.icon || ""),
+                color: String(raw.color || "")
+            };
+        };
+
+        const walk = (nodes, parentPath = "", inherited = null) => {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+                return;
+            }
+
+            for (const [name, node] of Object.entries(nodes)) {
+                if (!node || typeof node !== "object") continue;
+
+                const path =
+                    parentPath
+                        ? `${parentPath}/${name}`
+                        : name;
+
+                const mark =
+                    resolveMark(path, name, inherited);
+
+                if (mark) {
+                    map.set(path, mark);
+                    if (!map.has(name)) {
+                        map.set(name, mark);
+                    }
+                }
+
+                walk(node.children, path, mark);
+            }
+        };
+
+        walk(data?.catalogs);
+        return map;
+    }
+
+
     function createPostElement(
         postId,
         data,
-        depth
+        depth,
+        showSeriesIcon = true
     ) {
         const post =
             cloneTemplate(
@@ -873,6 +1058,39 @@
             post.querySelector(
                 '[data-codex="post-title"]'
             );
+
+        if (titleContainer && showSeriesIcon) {
+            const seriesIcon =
+                document.createElement("i");
+
+            seriesIcon.className =
+                "codex-series-icon";
+
+            seriesIcon.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            const mark =
+                catalogPostMarks.get(postId);
+
+            if (mark?.icon) {
+                seriesIcon.setAttribute(
+                    "data-lucide",
+                    mark.icon
+                );
+            }
+
+            if (mark?.color) {
+                seriesIcon.style.color =
+                    mark.color;
+            }
+
+            titleContainer.insertBefore(
+                seriesIcon,
+                titleLink || titleContainer.firstChild
+            );
+        }
 
         if (titleLink) {
             titleLink.href =
