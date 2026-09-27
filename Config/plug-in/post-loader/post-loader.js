@@ -459,7 +459,7 @@
 
         const loadNext = () => {
             const src =
-                `Codex-Img/${postId} (${imageNumber}).jpg`;
+                `Codex-Img-hd/${postId} (${imageNumber}).jpg`;
 
             const img = new Image();
 

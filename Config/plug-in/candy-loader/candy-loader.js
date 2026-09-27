@@ -66,7 +66,7 @@
             }
 
             // Index hero cover only: use the original image from
-            // .Codex-Img-nos for maximum visual quality.
+            // Codex-Img-hd for maximum visual quality.
             // The normal homepage list below continues to use Codex-Img.
             const originalSrc = await loadOriginalCover(
                 newest.postId,
@@ -89,10 +89,10 @@
     async function loadOriginalCover(postId, number = 1) {
         const encodedId = encodeURIComponent(String(postId));
         const candidates = [
-            `./.Codex-Img-nos/${encodedId}%20(${number}).jpg`,
-            `./.Codex-Img-nos/${encodedId}%20(${number}).jpeg`,
-            `./.Codex-Img-nos/${encodedId}%20(${number}).png`,
-            `./.Codex-Img-nos/${encodedId}%20(${number}).webp`
+            `./Codex-Img-hd/${encodedId}%20(${number}).jpg`,
+            `./Codex-Img-hd/${encodedId}%20(${number}).jpeg`,
+            `./Codex-Img-hd/${encodedId}%20(${number}).png`,
+            `./Codex-Img-hd/${encodedId}%20(${number}).webp`
         ];
 
         for (const src of candidates) {

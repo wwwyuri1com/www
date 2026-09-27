@@ -487,7 +487,7 @@
         };
 
         // Backup Card export only: use the original-resolution image from
-        // .Codex-Img-nos when available. Normal website rendering continues
+        // Codex-Img-hd when available. Normal website rendering continues
         // to use Codex-Img (the compressed web version).
         const loadBackupCardOriginal = async cover => {
             if (!cover?.postId) return null;
@@ -495,10 +495,10 @@
             const encodedId = encodeURIComponent(String(cover.postId));
             const number = Number(cover.imageNumber) || 1;
             const candidates = [
-                `./.Codex-Img-nos/${encodedId}%20(${number}).jpg`,
-                `./.Codex-Img-nos/${encodedId}%20(${number}).jpeg`,
-                `./.Codex-Img-nos/${encodedId}%20(${number}).png`,
-                `./.Codex-Img-nos/${encodedId}%20(${number}).webp`
+                `./Codex-Img-hd/${encodedId}%20(${number}).jpg`,
+                `./Codex-Img-hd/${encodedId}%20(${number}).jpeg`,
+                `./Codex-Img-hd/${encodedId}%20(${number}).png`,
+                `./Codex-Img-hd/${encodedId}%20(${number}).webp`
             ];
 
             for (const src of candidates) {
