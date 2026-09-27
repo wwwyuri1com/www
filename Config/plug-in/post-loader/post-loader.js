@@ -11,14 +11,33 @@
     }
 
     const textPath = `Codex-Text/${encodeURIComponent(id)}.json`;
+    let catalogDataPromise = null;
+    let tagDataPromise = null;
 
-    fetch(textPath)
-        .then(response => {
+    function loadFreshJSON(path) {
+        return fetch(path, { cache: "no-cache" }).then(async response => {
             if (!response.ok) {
-                throw new Error(`JSON not found: ${textPath}`);
+                throw new Error(`JSON request failed (${response.status}): ${path}`);
             }
             return response.json();
-        })
+        });
+    }
+
+    function getCatalogData() {
+        if (!catalogDataPromise) {
+            catalogDataPromise = loadFreshJSON("Codex-W/W-Catalog.json");
+        }
+        return catalogDataPromise;
+    }
+
+    function getTagData() {
+        if (!tagDataPromise) {
+            tagDataPromise = loadFreshJSON("Codex-W/W-Tag.json");
+        }
+        return tagDataPromise;
+    }
+
+    loadFreshJSON(textPath)
         .then(data => {
             if (data.id !== id) {
                 throw new Error(
@@ -127,15 +146,7 @@
         try {
             // Catalog 的正式來源是 W-Catalog。
             // Post JSON 不需要重複保存 catalog。
-            const response = await fetch("Codex-W/W-Catalog.json");
-
-            if (!response.ok) {
-                throw new Error(
-                    `W-Catalog request failed (${response.status})`
-                );
-            }
-
-            const data = await response.json();
+            const data = await getCatalogData();
 
             const path = findCatalogPath(
                 data?.catalogs || {},
@@ -243,15 +254,7 @@
         try {
             // W-Catalog 是上一篇／下一篇的唯一來源。
             // 只統計開頭符合 YYYYMMDD-## 的 Post ID，後面的 JSON 名稱不參與排序。
-            const response = await fetch("Codex-W/W-Catalog.json");
-
-            if (!response.ok) {
-                throw new Error(
-                    `W-Catalog request failed (${response.status})`
-                );
-            }
-
-            const data = await response.json();
+            const data = await getCatalogData();
             const postIds = collectReadmorePostIds(data?.catalogs || {});
 
             postIds.sort((a, b) => {
@@ -322,15 +325,7 @@
         );
 
         try {
-            const response = await fetch("Codex-W/W-Catalog.json");
-
-            if (!response.ok) {
-                throw new Error(
-                    `W-Catalog request failed (${response.status})`
-                );
-            }
-
-            const data = await response.json();
+            const data = await getCatalogData();
             const path = findCatalogPath(
                 data?.catalogs || {},
                 postId,
@@ -681,17 +676,7 @@
         wrapper.textContent = "";
 
         try {
-            const response =
-                await fetch("Codex-W/W-Tag.json");
-
-            if (!response.ok) {
-                throw new Error(
-                    `W-Tag request failed (${response.status})`
-                );
-            }
-
-            const data =
-                await response.json();
+            const data = await getTagData();
 
             const tags = [];
 

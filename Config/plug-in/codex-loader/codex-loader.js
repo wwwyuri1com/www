@@ -28,6 +28,32 @@
         return;
     }
 
+    let catalogDataPromise = null;
+    let tagDataPromise = null;
+
+    function loadFreshJSON(path) {
+        return fetch(path, { cache: "no-cache" }).then(async response => {
+            if (!response.ok) {
+                throw new Error(`JSON request failed (${response.status}): ${path}`);
+            }
+            return response.json();
+        });
+    }
+
+    function getCatalogData() {
+        if (!catalogDataPromise) {
+            catalogDataPromise = loadFreshJSON("Codex-W/W-Catalog.json");
+        }
+        return catalogDataPromise;
+    }
+
+    function getTagData() {
+        if (!tagDataPromise) {
+            tagDataPromise = loadFreshJSON("Codex-W/W-Tag.json");
+        }
+        return tagDataPromise;
+    }
+
     loadSelectors();
 
 
@@ -38,16 +64,7 @@
 
             if (catalogRoot) {
                 requests.push(
-                    fetch("Codex-W/W-Catalog.json")
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(
-                                    `W-Catalog request failed (${response.status})`
-                                );
-                            }
-
-                            return response.json();
-                        })
+                    getCatalogData()
                         .then(data =>
                             buildCatalogSelector(data)
                         )
@@ -57,16 +74,7 @@
 
             if (tagRoot) {
                 requests.push(
-                    fetch("Codex-W/W-Tag.json")
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(
-                                    `W-Tag request failed (${response.status})`
-                                );
-                            }
-
-                            return response.json();
-                        })
+                    getTagData()
                         .then(data =>
                             buildTagSelector(data)
                         )
@@ -122,40 +130,22 @@
 
             if (catalogQuery !== null) {
                 requests.push(
-                    fetch("Codex-W/W-Catalog.json")
-                        .then(async response => {
-                            if (!response.ok) {
-                                throw new Error(
-                                    `W-Catalog request failed (${response.status})`
-                                );
-                            }
-
-                            return {
-                                type: "catalog",
-                                data:
-                                    await response.json()
-                            };
-                        })
+                    getCatalogData()
+                        .then(data => ({
+                            type: "catalog",
+                            data
+                        }))
                 );
             }
 
 
             if (tagQuery !== null) {
                 requests.push(
-                    fetch("Codex-W/W-Tag.json")
-                        .then(async response => {
-                            if (!response.ok) {
-                                throw new Error(
-                                    `W-Tag request failed (${response.status})`
-                                );
-                            }
-
-                            return {
-                                type: "tag",
-                                data:
-                                    await response.json()
-                            };
-                        })
+                    getTagData()
+                        .then(data => ({
+                            type: "tag",
+                            data
+                        }))
                 );
             }
 
@@ -165,20 +155,11 @@
                 tagQuery === null
             ) {
                 requests.push(
-                    fetch("Codex-W/W-Catalog.json")
-                        .then(async response => {
-                            if (!response.ok) {
-                                throw new Error(
-                                    `W-Catalog request failed (${response.status})`
-                                );
-                            }
-
-                            return {
-                                type: "catalog-all",
-                                data:
-                                    await response.json()
-                            };
-                        })
+                    getCatalogData()
+                        .then(data => ({
+                            type: "catalog-all",
+                            data
+                        }))
                 );
             }
 

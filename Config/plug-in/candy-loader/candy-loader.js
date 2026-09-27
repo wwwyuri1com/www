@@ -6,6 +6,23 @@
     if (!river) return;
 
     const catalogPath = "Codex-W/W-Catalog.json";
+    let catalogPromise = null;
+
+    function loadCatalog() {
+        if (!catalogPromise) {
+            catalogPromise = fetch(catalogPath, {
+                cache: "no-cache"
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(
+                        `W-Catalog request failed (${response.status})`
+                    );
+                }
+                return response.json();
+            });
+        }
+        return catalogPromise;
+    }
 
     loadNewestCover()
         .catch(error => {
@@ -17,17 +34,7 @@
         if (!boss) return;
 
         try {
-            const response = await fetch(catalogPath, {
-                cache: "no-store"
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `W-Catalog request failed (${response.status})`
-                );
-            }
-
-            const data = await response.json();
+            const data = await loadCatalog();
             const postIds = new Set();
 
             collectPosts(
@@ -120,15 +127,7 @@
         });
 
     async function loadPosts() {
-        const response = await fetch(catalogPath);
-
-        if (!response.ok) {
-            throw new Error(
-                `W-Catalog request failed (${response.status})`
-            );
-        }
-
-        const data = await response.json();
+        const data = await loadCatalog();
 
         const postIds = new Set();
 

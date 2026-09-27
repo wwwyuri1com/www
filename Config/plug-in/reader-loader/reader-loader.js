@@ -125,7 +125,7 @@
             defaultCoverPromise = (async () => {
                 try {
                     const response = await fetch('Codex-W/W-Catalog.json', {
-                        cache: 'no-store'
+                        cache: 'no-cache'
                     });
                     if (!response.ok) {
                         throw new Error(`W-Catalog request failed (${response.status})`);
