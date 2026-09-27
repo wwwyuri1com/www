@@ -5,14 +5,14 @@
             "Spicy",
             "Wild",
             "Dominant",
-            "Mischievous",
+            "Metaphorical",
             "Flirting"
         ],
         "OC Trait": [
             "Tsundere",
             "Yandere",
             "Aloof",
-            "Assertive",
+            "Forward",
             "Gap Moe",
             "Duplicity",
             "Girlboss",
@@ -60,7 +60,7 @@
                 "20260924-01_S_LittleBunny"
             ]
         },
-        "Mischievous": {
+        "Metaphorical": {
             "posts": [
                 "20260926-02_S_Doberman",
                 "20260924-01_S_LittleBunny"
@@ -213,7 +213,7 @@
                 "20260926-02_S_Doberman"
             ]
         },
-        "Assertive": {
+        "Forward": {
             "posts": [
                 "20260928-01_L_Contract-Me",
                 "20260927-01_O_Miss you",
@@ -226,6 +226,11 @@
                 "20260927-01_I_Icys-Patisserie"
             ]
         },
+        "🩵🩷": {
+            "posts": [
+                "20260927-01_I_Icys-Patisserie"
+            ]
+        },
         "❤️💛": {
             "posts": [
                 "20260927-01_O_Miss you"
@@ -233,7 +238,13 @@
         },
         "❤️💜": {
             "posts": [
-                "20260928-01_L_Contract-Me"
+                "20260928-01_L_Contract-Me",
+                "20260924-04_L_Yuri-Succubus"
+            ]
+        },
+        "❤️💙": {
+            "posts": [
+                "20260924-03_D_AI-Lover-CYAN-V0001"
             ]
         }
     }
