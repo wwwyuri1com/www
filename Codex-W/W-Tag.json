@@ -8,57 +8,58 @@
   },
   "groups": {
     "Love Emo": [
-      "Sweet",
-      "Spicy",
-      "Wild",
-      "Dominant",
-      "Metaphorical",
-      "Flirting",
-      "Love-Triangle"
+      {        "id": "a01", "name": "Sweet"      },
+      {        "id": "a02",        "name": "Spicy"      },
+      {        "id": "a03",        "name": "Wild"      },
+      {        "id": "a04",        "name": "Dominant"      },
+      {        "id": "a05",        "name": "Metaphorical"      },
+      {        "id": "a06",        "name": "Flirting"      },
+      {        "id": "a07",        "name": "Love-Triangle"      }
     ],
     "OC Trait": [
-      "Tsundere",
-      "Yandere",
-      "Aloof",
-      "Forward",
-      "Gap Moe",
-      "Duplicity",
-      "Girlboss",
-      "GL Awakening"
+      {        "id": "b01",        "name": "Tsundere"      },
+      {        "id": "b02",        "name": "Yandere"      },
+      {        "id": "b03",        "name": "Aloof"      },
+      {        "id": "b04",        "name": "Forward"      },
+      {        "id": "b05",        "name": "Gap Moe"      },
+      {        "id": "b06",        "name": "Duplicity"      },
+      {        "id": "b07",        "name": "Girlboss"      },
+      {        "id": "b08",        "name": "GL Awakening"      }
     ],
     "Style": [
-      "Romance",
-      "Humor",
-      "Sexual Humor",
-      "Plot",
-      "Suspense"
+      {        "id": "c01",        "name": "Romance"      },
+      {        "id": "c02",        "name": "Humor"      },
+      {        "id": "c03",        "name": "Sexual Humor"      },
+      {        "id": "c04",        "name": "Plot"      },
+      {        "id": "c05",        "name": "Suspense"      }
     ],
     "Background": [
-      "Modern",
-      "Technology",
-      "Fantasy",
-      "Campus"
+      {        "id": "d01",        "name": "Modern"      },
+      {        "id": "d02",        "name": "Technology"      },
+      {        "id": "d03",        "name": "Fantasy"      },
+      {        "id": "d04",        "name": "Campus"      }
     ],
     "Main Story CP": [
-      "🩵🩷",
-      "🩵🩶",
-      "❤️💛",
-      "❤️💜"
+      {        "id": "e01",        "name": "🩵🩷"      },
+      {        "id": "e02",        "name": "🩵🩶"      },
+      {        "id": "e03",        "name": "❤️💜"      },
+      {        "id": "e04",        "name": "❤️💛"      },
+      {        "id": "e05",        "name": "❤️💙"      }
     ],
     "Intimacy Context Level": [
-      "Intimacy-Surface",
-      "Intimacy-Suggestive",
-      "Intimacy-Candid",
-      "Intimacy-Very Pervasive"
+      {        "id": "f01",        "name": "Intimacy-Surface"      },
+      {        "id": "f02",        "name": "Intimacy-Suggestive"      },
+      {        "id": "f03",        "name": "Intimacy-Candid"      },
+      {        "id": "f04",        "name": "Intimacy-Very Pervasive"      }
     ],
     "Word Count": [
-      "Under 2.5k",
-      "2.5k-7k",
-      "7k-20k",
-      "20k-50k",
-      "50k-1m",
-      "1m-3m",
-      "Over 3m"
+      {        "id": "g01",        "name": "Under 2.5k"      },
+      {        "id": "g02",        "name": "2.5k-7k"      },
+      {        "id": "g03",        "name": "7k-20k"      },
+      {        "id": "g04",        "name": "20k-50k"      },
+      {        "id": "g05",        "name": "50k-1m"      },
+      {        "id": "g06",        "name": "1m-3m"      },
+      {        "id": "g07",        "name": "Over 3m"      }
     ]
   },
   "tags": {
@@ -218,11 +219,6 @@
         "20260924-04_L_Yuri-Succubus"
       ]
     },
-    "Clingy": {
-      "posts": [
-        "20260924-04_L_Yuri-Succubus"
-      ]
-    },
     "Aloof": {
       "posts": [
         "20260928-04_C_15x-Massage",
@@ -264,7 +260,8 @@
         "20260928-03_D_Campus-Heartthrob",
         "20260928-01_L_Contract-Me",
         "20260927-01_O_Miss you",
-        "20260927-01_I_Icys-Patisserie"
+        "20260927-01_I_Icys-Patisserie",
+        "20260924-04_L_Yuri-Succubus"
       ]
     },
     "Romance": {

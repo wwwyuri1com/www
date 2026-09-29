@@ -198,10 +198,17 @@
             }
 
             if (result.type === "tag") {
-                activeTagSelection = [...tagQueries];
+                activeTagSelection =
+                    tagQueries.map(tag =>
+                        resolveTagId(
+                            result.data,
+                            tag
+                        )
+                    );
+
                 await renderTagResult(
                     result.data,
-                    tagQueries
+                    activeTagSelection
                 );
             } else {
                 activeTagSelection = [];
@@ -786,9 +793,18 @@
     ) {
         clearResult();
 
+        tagFilterData = data || tagFilterData || {};
+
         const selectedTags =
             Array.isArray(tags)
-                ? tags.filter(Boolean)
+                ? tags
+                    .filter(Boolean)
+                    .map(tag =>
+                        resolveTagId(
+                            data,
+                            tag
+                        )
+                    )
                 : [];
 
         appendResultHeader(
@@ -857,10 +873,104 @@
     }
 
 
+    function normalizeTagEntry(entry) {
+        if (typeof entry === "string") {
+            return {
+                id: "",
+                name: entry
+            };
+        }
+
+        if (!entry || typeof entry !== "object") {
+            return null;
+        }
+
+        return {
+            id: String(entry.id || ""),
+            name: String(entry.name || "")
+        };
+    }
+
+
+    function getTagEntries(data) {
+        const entries = [];
+
+        for (const tags of Object.values(data?.groups || {})) {
+            if (!Array.isArray(tags)) {
+                continue;
+            }
+
+            for (const rawTag of tags) {
+                const tag =
+                    normalizeTagEntry(rawTag);
+
+                if (
+                    tag &&
+                    tag.name
+                ) {
+                    entries.push(tag);
+                }
+            }
+        }
+
+        return entries;
+    }
+
+
+    function resolveTagName(data, ref) {
+        const value = String(ref || "");
+
+        const entry =
+            getTagEntries(data).find(tag =>
+                tag.id === value ||
+                tag.name === value
+            );
+
+        if (entry) {
+            return entry.name;
+        }
+
+        /*
+         * Backward-compatible fallback for a historical
+         * tag name that is still present in the posts map
+         * but is no longer listed in the main groups.
+         */
+        if (
+            Object.prototype.hasOwnProperty.call(
+                data?.tags || {},
+                value
+            )
+        ) {
+            return value;
+        }
+
+        return value;
+    }
+
+
+    function resolveTagId(data, ref) {
+        const value = String(ref || "");
+
+        const entry =
+            getTagEntries(data).find(tag =>
+                tag.id === value ||
+                tag.name === value
+            );
+
+        return entry?.id || value;
+    }
+
+
     function formatTagLabel(tag) {
-        return /^\p{Extended_Pictographic}/u.test(tag)
-            ? tag
-            : `#${tag}`;
+        const name =
+            resolveTagName(
+                tagFilterData || {},
+                tag
+            );
+
+        return /^\p{Extended_Pictographic}/u.test(name)
+            ? name
+            : `#${name}`;
     }
 
 
@@ -897,10 +1007,16 @@
         const tagSets = [];
         let baseOrder = null;
 
-        for (const tag of selectedTags) {
+        for (const tagRef of selectedTags) {
+            const tagName =
+                resolveTagName(
+                    data,
+                    tagRef
+                );
+
             const posts =
-                Array.isArray(data?.tags?.[tag]?.posts)
-                    ? data.tags[tag].posts
+                Array.isArray(data?.tags?.[tagName]?.posts)
+                    ? data.tags[tagName].posts
                     : [];
 
             const set = new Set();
@@ -2232,21 +2348,26 @@
         let visibleGroupCount = 0;
 
         for (
-            const [groupName, tags]
+            const [groupName, rawTags]
             of Object.entries(
                 data?.groups || {}
             )
         ) {
-            if (!Array.isArray(tags)) {
+            if (!Array.isArray(rawTags)) {
                 continue;
             }
 
+            const tagEntries =
+                rawTags
+                    .map(normalizeTagEntry)
+                    .filter(Boolean);
+
             const visibleTags =
-                tags.filter(tag =>
+                tagEntries.filter(tag =>
                     Array.isArray(
-                        data?.tags?.[tag]?.posts
+                        data?.tags?.[tag.name]?.posts
                     ) &&
-                    data.tags[tag].posts.length > 0
+                    data.tags[tag.name].posts.length > 0
                 );
 
             if (visibleTags.length === 0) {
@@ -2265,10 +2386,10 @@
                 tag => {
                     group.appendChild(
                         createOption(
-                            tag,
-                            `#${tag}`,
+                            tag.id || tag.name,
+                            `#${tag.name}`,
                             "tag",
-                            tag
+                            tag.name
                         )
                     );
                 }
@@ -2286,10 +2407,17 @@
                 window.location.search
             ).getAll("tag").filter(Boolean);
 
-        activeTagSelection = [...currentTags];
+        activeTagSelection =
+            currentTags.map(tag =>
+                resolveTagId(
+                    data,
+                    tag
+                )
+            );
+
         updateTagSelectSummary(
             select,
-            currentTags
+            activeTagSelection
         );
 
         /* Native SELECT remains underneath as the fallback layer. */
@@ -2550,7 +2678,14 @@
         const current =
             new URLSearchParams(
                 window.location.search
-            ).getAll("tag").filter(Boolean);
+            ).getAll("tag")
+            .filter(Boolean)
+            .map(tag =>
+                resolveTagId(
+                    tagFilterData || {},
+                    tag
+                )
+            );
 
         tagFilterPopup.modal._draftTags =
             new Set(current);
@@ -2613,13 +2748,19 @@
         const singleSelectGroups =
             getSingleSelectGroups(data);
 
-        for (const [groupName, tags] of Object.entries(data.groups || {})) {
-            if (!Array.isArray(tags)) continue;
+        for (const [groupName, rawTags] of Object.entries(data.groups || {})) {
+            if (!Array.isArray(rawTags)) continue;
 
-            const visibleTags = tags.filter(tag =>
-                Array.isArray(data?.tags?.[tag]?.posts) &&
-                data.tags[tag].posts.length > 0
-            );
+            const tagEntries =
+                rawTags
+                    .map(normalizeTagEntry)
+                    .filter(Boolean);
+
+            const visibleTags =
+                tagEntries.filter(tag =>
+                    Array.isArray(data?.tags?.[tag.name]?.posts) &&
+                    data.tags[tag.name].posts.length > 0
+                );
 
             if (!visibleTags.length) continue;
 
@@ -2648,8 +2789,12 @@
             for (const tag of visibleTags) {
                 const button =
                     document.createElement("button");
+
+                const tagId =
+                    tag.id || tag.name;
+
                 const active =
-                    draft.has(tag);
+                    draft.has(tagId);
 
                 button.type = "button";
                 button.className =
@@ -2657,7 +2802,7 @@
                     (isSingleSelect ? " is-single" : "") +
                     (active ? " is-selected" : "");
                 button.textContent =
-                    formatTagLabel(tag);
+                    formatTagLabel(tagId);
                 button.setAttribute(
                     "aria-pressed",
                     String(active)
@@ -2667,19 +2812,23 @@
                     "click",
                     () => {
                         if (isSingleSelect) {
-                            if (draft.has(tag)) {
+                            if (draft.has(tagId)) {
                                 return;
                             }
 
-                            for (const otherTag of tags) {
-                                draft.delete(otherTag);
+                            for (const otherTag of visibleTags) {
+                                const otherId =
+                                    otherTag.id || otherTag.name;
+                                draft.delete(otherId);
                             }
-                            draft.add(tag);
-                        } else if (draft.has(tag)) {
-                            draft.delete(tag);
+
+                            draft.add(tagId);
+                        } else if (draft.has(tagId)) {
+                            draft.delete(tagId);
                         } else {
-                            draft.add(tag);
+                            draft.add(tagId);
                         }
+
                         renderTagFilterPopup();
                     }
                 );
@@ -2693,6 +2842,7 @@
 
         updateTagFilterMatchCount();
     }
+
 
     async function updateTagFilterMatchCount() {
         if (!tagFilterPopup) {
