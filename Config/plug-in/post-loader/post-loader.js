@@ -378,6 +378,14 @@
             resolvedPublicId =
                 result.publicId;
 
+            // Provide the resolved public/storage pair to Reader so a
+            // manually selected Backup Card cover can still address the
+            // real legacy filename used in Codex-Img / Codex-Img-hd.
+            window.YURI1PostStorageId =
+                resolvedStorageId;
+            window.YURI1PostPublicId =
+                resolvedPublicId;
+
             /*
              * Canonicalize old / storage-facing URLs without
              * reloading the page. This keeps the existing JSON file

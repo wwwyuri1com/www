@@ -347,8 +347,74 @@
 
 /* ========================================
    Codex Tag Filter Popup
-   Reuses Reader's data-dialog surface.
+   Standalone modal surface so Index pages do not need reader-loader.css.
    ======================================== */
+
+.codex-tag-filter-modal[hidden] {
+    display: none;
+}
+
+.codex-tag-filter-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.codex-tag-filter-modal .reader-data-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(36, 36, 36, 0.28);
+    backdrop-filter: blur(2px);
+}
+
+.codex-tag-filter-dialog {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #fa669930;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.codex-tag-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.codex-tag-filter-confirm {
+    appearance: none;
+    min-width: 58px;
+    padding: 6px 12px;
+    border: 1px solid #fa6699;
+    border-radius: 5px;
+    background: #fa6699;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.codex-tag-filter-confirm:hover {
+    opacity: 0.78;
+}
+
+.codex-tag-filter-confirm:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+body.reader-dark .codex-tag-filter-dialog {
+    background: #111111;
+    color: #999999;
+    border-color: #99999930;
+}
 
 .codex-tag-filter-trigger {
     position: absolute;

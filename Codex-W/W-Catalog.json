@@ -40,7 +40,7 @@
     },
     "_comment_catalog": "=== Tell Which Post belong to What Catalog ===",
     "catalogs": {
-        "Website News": {
+        "N-Char": {
             "id": "N",
             "children": {
                 "News": {
@@ -57,7 +57,7 @@
                 }
             }
         },
-        "Feature": {
+        "F-Char": {
             "id": "F",
             "children": {
                 "Feature": {
@@ -80,7 +80,7 @@
                 }
             }
         },
-        "User Guide": {
+        "U-Char": {
             "id": "U",
             "children": {
                 "User Guide": {
@@ -103,7 +103,7 @@
                 }
             }
         },
-        "IP Items": {
+        "I-Char": {
             "id": "I",
             "children": {
                 "IP Original Characters": {
@@ -154,7 +154,7 @@
                 }
             }
         },
-        "Novels": {
+        "P-Char": {
             "id": "P",
             "children": {
                 "Novels": {
@@ -210,7 +210,7 @@
                 }
             }
         },
-        "Policy": {
+        "Y-Char": {
             "id": "Y",
             "children": {
                 "Policy": {

@@ -207,7 +207,10 @@
 
         const getCurrentBackupCover = async () => {
             const stored = getStoredBackupCover();
-            if (stored) return { ...stored, isDefault: false };
+            if (stored) {
+                const resolved = await resolveBackupCoverRecord(stored);
+                if (resolved) return { ...resolved, isDefault: false };
+            }
             return getDefaultBackupCover();
         };
 
@@ -504,9 +507,10 @@
         // Codex-Img-hd when available. Normal website rendering continues
         // to use Codex-Img (the compressed web version).
         const loadBackupCardOriginal = async cover => {
-            if (!cover?.postId) return null;
+            if (!cover?.postId && !cover?.storageId) return null;
 
-            const encodedId = encodeURIComponent(String(cover.postId));
+            const storageId = String(cover.storageId || cover.postId);
+            const encodedId = encodeURIComponent(storageId);
             const number = Number(cover.imageNumber) || 1;
             const candidates = [
                 `./Codex-Img-hd/${encodedId}%20(${number}).jpg`,
@@ -1121,6 +1125,100 @@
 
     const BACKUP_COVER_KEY = "yuri1.reader.backup-cover";
 
+    let backupCoverCatalogPromise = null;
+
+    const getBackupCoverStorageFallback = publicId => {
+        const value = String(publicId || "");
+
+        if (
+            window.YURI1PostPublicId &&
+            window.YURI1PostStorageId &&
+            String(window.YURI1PostPublicId) === value
+        ) {
+            return String(window.YURI1PostStorageId);
+        }
+
+        let match = value.match(/^N(\d{6})-(\d{2})$/);
+        if (match) {
+            return `~${match[1]}-${match[2]}`;
+        }
+
+        match = value.match(/^P(\d{8})-(\d{2})$/);
+        if (match) {
+            return `${match[1]}-${match[2]}`;
+        }
+
+        return value;
+    };
+
+    const loadBackupCoverCatalogMap = async () => {
+        if (backupCoverCatalogPromise) return backupCoverCatalogPromise;
+
+        backupCoverCatalogPromise = (async () => {
+            const map = new Map();
+            try {
+                const response = await fetch('Codex-W/W-Catalog.json', {
+                    cache: 'no-cache'
+                });
+                if (!response.ok) return map;
+
+                const data = await response.json();
+
+                const walk = nodes => {
+                    if (!nodes || typeof nodes !== 'object' || Array.isArray(nodes)) {
+                        return;
+                    }
+
+                    for (const node of Object.values(nodes)) {
+                        if (!node || typeof node !== 'object') continue;
+
+                        if (Array.isArray(node.posts)) {
+                            for (const postRef of node.posts) {
+                                const storageId = getCatalogPostStorageId(postRef);
+                                const publicId = getCatalogPostPublicId(postRef);
+                                if (!storageId || !publicId) continue;
+                                map.set(publicId, storageId);
+                            }
+                        }
+
+                        walk(node.children);
+                    }
+                };
+
+                walk(data?.catalogs);
+            } catch (error) {
+                console.warn('YURI1 Backup Card cover catalog resolver:', error);
+            }
+            return map;
+        })();
+
+        return backupCoverCatalogPromise;
+    };
+
+    const resolveBackupCoverRecord = async record => {
+        if (!record?.postId) return null;
+
+        const postId = String(record.postId);
+        const imageNumber = Number(record.imageNumber);
+        if (!Number.isInteger(imageNumber) || imageNumber < 1) return null;
+
+        let storageId = String(record.storageId || '');
+
+        if (!storageId) {
+            const map = await loadBackupCoverCatalogMap();
+            storageId = map.get(postId) || getBackupCoverStorageFallback(postId);
+        }
+
+        if (!storageId) return null;
+
+        return {
+            postId,
+            storageId,
+            imageNumber,
+            src: `Codex-Img/${encodeURIComponent(storageId)}%20(${imageNumber}).jpg`
+        };
+    };
+
     const getBackupCover = () => {
         const raw = localStorage.getItem(BACKUP_COVER_KEY);
         if (!raw) return null;
@@ -1130,12 +1228,24 @@
             if (!data?.postId) return null;
             const imageNumber = Number(data.imageNumber);
             if (!Number.isInteger(imageNumber) || imageNumber < 1) return null;
+
+            const storageId = String(
+                data.storageId ||
+                (
+                    window.YURI1PostPublicId &&
+                    window.YURI1PostStorageId &&
+                    String(window.YURI1PostPublicId) === String(data.postId)
+                        ? window.YURI1PostStorageId
+                        : ''
+                ) ||
+                getBackupCoverStorageFallback(data.postId)
+            );
+
             return {
                 postId: String(data.postId),
+                storageId,
                 imageNumber,
-                src: window.YURI1Cover?.src
-                    ? window.YURI1Cover.src(String(data.postId), imageNumber)
-                    : `Codex-Img/${encodeURIComponent(data.postId)}%20(${imageNumber}).jpg`
+                src: `Codex-Img/${encodeURIComponent(storageId)}%20(${imageNumber}).jpg`
             };
         } catch (error) {
             return null;
@@ -1143,8 +1253,17 @@
     };
 
     const setBackupCover = (postId, imageNumber) => {
+        const publicId = String(postId);
+        const storageId =
+            window.YURI1PostPublicId &&
+            window.YURI1PostStorageId &&
+            String(window.YURI1PostPublicId) === publicId
+                ? String(window.YURI1PostStorageId)
+                : '';
+
         const value = {
-            postId: String(postId),
+            postId: publicId,
+            ...(storageId ? { storageId } : {}),
             imageNumber: Number(imageNumber) || 1,
             savedAt: Date.now()
         };
