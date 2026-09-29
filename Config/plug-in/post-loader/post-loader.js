@@ -2,17 +2,23 @@
     const root = document.getElementById("post-loader");
     if (!root) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-    if (!id) {
+    const requestedId =
+        params.get("id");
+
+    if (!requestedId) {
         root.textContent = "Post ID not found.";
         return;
     }
 
-    const textPath = `Codex-Text/${encodeURIComponent(id)}.json`;
     let catalogDataPromise = null;
     let tagDataPromise = null;
+    let resolvedStorageId = requestedId;
+    let resolvedPublicId = requestedId;
 
     function loadFreshJSON(path) {
         return fetch(path, { cache: "no-cache" }).then(async response => {
@@ -25,33 +31,368 @@
 
     function getCatalogData() {
         if (!catalogDataPromise) {
-            catalogDataPromise = loadFreshJSON("Codex-W/W-Catalog.json");
+            catalogDataPromise =
+                loadFreshJSON(
+                    "Codex-W/W-Catalog.json"
+                );
         }
+
         return catalogDataPromise;
+    }
+
+    let catalogPostStorageToPublic = new Map();
+    let catalogPostPublicToStorage = new Map();
+    let catalogIndexReady = false;
+
+    function indexCatalogPostIds(catalogs) {
+        catalogPostStorageToPublic = new Map();
+        catalogPostPublicToStorage = new Map();
+
+        function walk(nodes) {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+                return;
+            }
+
+            for (const node of Object.values(nodes)) {
+                if (!node || typeof node !== "object") {
+                    continue;
+                }
+
+                if (node.post_ids && typeof node.post_ids === "object" && !Array.isArray(node.post_ids)) {
+                    for (const [storageId, publicId] of Object.entries(node.post_ids)) {
+                        const storage = String(storageId);
+                        const publicValue = String(publicId || "");
+                        if (!storage || !publicValue) continue;
+                        catalogPostStorageToPublic.set(storage, publicValue);
+                        catalogPostPublicToStorage.set(publicValue, storage);
+                    }
+                }
+
+                walk(node.children);
+            }
+        }
+
+        walk(catalogs);
+        catalogIndexReady = true;
     }
 
     function getTagData() {
         if (!tagDataPromise) {
-            tagDataPromise = loadFreshJSON("Codex-W/W-Tag.json");
+            tagDataPromise =
+                loadFreshJSON(
+                    "Codex-W/W-Tag.json"
+                );
         }
+
         return tagDataPromise;
     }
 
-    loadFreshJSON(textPath)
-        .then(data => {
-            if (data.id !== id) {
+    function getPublicPostId(
+        postId
+    ) {
+        const value =
+            String(postId || "");
+
+        const fixedPublicId =
+            catalogPostStorageToPublic.get(value);
+
+        if (fixedPublicId) {
+            return fixedPublicId;
+        }
+
+        let match =
+            value.match(
+                /^~(\d{6})-(\d{2})$/
+            );
+
+        if (match) {
+            return `N${match[1]}-${match[2]}`;
+        }
+
+        match =
+            value.match(
+                /^(\d{8})-(\d{2})(?:_|$)/
+            );
+
+        if (match) {
+            return `P${match[1]}-${match[2]}`;
+        }
+
+        return value;
+    }
+
+    function getPostIdCandidates(
+        publicId
+    ) {
+        const value =
+            String(publicId || "");
+
+        const candidates = [];
+
+        const fixedStorageId =
+            catalogPostPublicToStorage.get(value);
+
+        if (fixedStorageId) {
+            candidates.push(fixedStorageId);
+        }
+
+        /*
+         * News:
+         *   N260929-01 -> ~260929-01
+         */
+        let match =
+            value.match(
+                /^N(\d{6})-(\d{2})$/
+            );
+
+        if (match) {
+            candidates.push(
+                `~${match[1]}-${match[2]}`
+            );
+        }
+
+        /*
+         * Novel / Post:
+         *   P20260929-02 -> 20260929-02
+         */
+        match =
+            value.match(
+                /^P(\d{8})-(\d{2})$/
+            );
+
+        if (match) {
+            candidates.push(
+                `${match[1]}-${match[2]}`
+            );
+        }
+
+        if (!candidates.includes(value)) {
+            candidates.push(value);
+        }
+
+        return [...new Set(candidates)];
+    }
+
+    async function tryLoadPostJSON(
+        postId
+    ) {
+        try {
+            const response =
+                await fetch(
+                    `Codex-Text/${encodeURIComponent(
+                        postId
+                    )}.json`,
+                    {
+                        cache: "no-cache"
+                    }
+                );
+
+            if (!response.ok) {
+                return null;
+            }
+
+            const data =
+                await response.json();
+
+            if (
+                !data ||
+                data.id !== postId
+            ) {
+                return null;
+            }
+
+            return data;
+        } catch {
+            return null;
+        }
+    }
+
+    function findLegacyPostId(
+        catalogs,
+        publicId
+    ) {
+        const match =
+            String(publicId || "")
+                .match(
+                    /^P(\d{8})-(\d{2})$/
+                );
+
+        if (!match) {
+            return "";
+        }
+
+        const base =
+            `${match[1]}-${match[2]}`;
+
+        function walk(
+            nodes
+        ) {
+            if (
+                !nodes ||
+                typeof nodes !== "object" ||
+                Array.isArray(nodes)
+            ) {
+                return "";
+            }
+
+            for (const node of Object.values(nodes)) {
+                if (!node || typeof node !== "object") {
+                    continue;
+                }
+
+                if (Array.isArray(node.posts)) {
+                    for (const postRef of node.posts) {
+                        const value =
+                            typeof postRef === "object" && postRef !== null
+                                ? String(postRef.file || postRef.storage || postRef.filename || "")
+                                : String(postRef);
+
+                        if (
+                            value === base ||
+                            value.startsWith(
+                                `${base}_`
+                            )
+                        ) {
+                            return value;
+                        }
+                    }
+                }
+
+                const child =
+                    walk(node.children);
+
+                if (child) {
+                    return child;
+                }
+            }
+
+            return "";
+        }
+
+        return walk(catalogs);
+    }
+
+    async function resolvePost(
+        publicOrStorageId
+    ) {
+        const requested =
+            String(
+                publicOrStorageId || ""
+            );
+
+        if (!catalogIndexReady) {
+            indexCatalogPostIds(
+                (await getCatalogData())?.catalogs || {}
+            );
+        }
+
+        for (
+            const candidate
+            of getPostIdCandidates(requested)
+        ) {
+            const data =
+                await tryLoadPostJSON(
+                    candidate
+                );
+
+            if (data) {
+                return {
+                    storageId: candidate,
+                    publicId: getPublicPostId(
+                        candidate
+                    ),
+                    data
+                };
+            }
+        }
+
+        /*
+         * Existing Novel JSON files may still use the legacy
+         * human-readable suffix. Resolve those only as a compatibility
+         * fallback through W-Catalog; new files do not need this.
+         */
+        const legacyId =
+            findLegacyPostId(
+                (await getCatalogData())?.catalogs || {},
+                requested
+            );
+
+        if (legacyId) {
+            const data =
+                await tryLoadPostJSON(
+                    legacyId
+                );
+
+            if (data) {
+                return {
+                    storageId: legacyId,
+                    publicId: getPublicPostId(
+                        legacyId
+                    ),
+                    data
+                };
+            }
+        }
+
+        return null;
+    }
+
+    resolvePost(requestedId)
+        .then(result => {
+            if (!result) {
                 throw new Error(
-                    `ID mismatch: ${data.id || "(missing)"} !== ${id}`
+                    `Post not found: ${requestedId}`
                 );
             }
 
-            renderPost(data);
+            resolvedStorageId =
+                result.storageId;
+
+            resolvedPublicId =
+                result.publicId;
+
+            /*
+             * Canonicalize old / storage-facing URLs without
+             * reloading the page. This keeps the existing JSON file
+             * untouched while giving SEO/GA a stable public URL.
+             */
+            if (
+                resolvedPublicId !==
+                requestedId
+            ) {
+                const url =
+                    new URL(
+                        window.location.href
+                    );
+
+                url.searchParams.set(
+                    "id",
+                    resolvedPublicId
+                );
+
+                window.history.replaceState(
+                    null,
+                    "",
+                    url
+                );
+            }
+
+            renderPost(
+                result.data,
+                resolvedStorageId,
+                resolvedPublicId
+            );
         })
         .catch(error => {
-            root.textContent = error.message;
+            root.textContent =
+                error.message;
         });
 
-    async function renderPost(data) {
+    async function renderPost(
+        data,
+        storageId,
+        publicId
+    ) {
         const catalog = document.querySelector(".post-catalog.post");
         const images = root.querySelector(".post-images.post");
         const date = root.querySelector(".post-date.post");
@@ -70,112 +411,237 @@
             ? `${data.title} | Derive Dimension Demon`
             : "Derive Dimension Demon Official Website";
 
-        await renderCatalog(catalog, id);
-        renderImages(images, id);
-        renderText(date, data.date || "");
-        renderTitle(title, data.title || "");
-        renderContent(content, data.content || "");
-        await renderTags(tag, id);
+        await renderCatalog(
+            catalog,
+            storageId
+        );
+        renderImages(
+            images,
+            storageId
+        );
+        renderText(
+            date,
+            data.date || ""
+        );
+        renderTitle(
+            title,
+            data.title || ""
+        );
+        renderContent(
+            content,
+            data.content || ""
+        );
+        await renderTags(
+            tag,
+            storageId
+        );
         renderRelatedLinks(
             relatedLinks,
             data.related_links
         );
-        await renderReadmore(readmore, id);
-        await renderBackTo(backto, id);
+        await renderReadmore(
+            readmore,
+            storageId
+        );
+        await renderBackTo(
+            backto,
+            storageId
+        );
     }
 
-    async function renderCatalog(container, postId) {
-        const wrapper = container.querySelector("span");
-        if (!wrapper) return;
+    async function renderCatalog(
+        container,
+        postId
+    ) {
+        const wrapper =
+            container.querySelector(
+                "span"
+            );
+
+        if (!wrapper) {
+            return;
+        }
 
         wrapper.textContent = "";
 
-        // 固定第一層：Home
-        const homeLink = document.createElement("a");
-        homeLink.className = "post-catalog-link post";
-        homeLink.textContent = "⛶ Home";
-        homeLink.href = "index.html";
-        wrapper.appendChild(homeLink);
+        const homeLink =
+            document.createElement(
+                "a"
+            );
 
-        wrapper.appendChild(document.createTextNode(" "));
+        homeLink.className =
+            "post-catalog-link post";
 
-        // 固定第二層：Codex
-        const codexLink = document.createElement("a");
-        codexLink.className = "post-catalog-link post";
-        codexLink.textContent = "𖤐 Codex";
-        codexLink.href = "Codex.html";
-        wrapper.appendChild(codexLink);
+        homeLink.textContent =
+            "⛶ Home";
 
-        const getLink = document.createElement("a");
-        getLink.className = "post-get-link post";
-        getLink.href = "#";
-        getLink.textContent = "⿻ Get post link";
+        homeLink.href =
+            "index.html";
 
-        getLink.addEventListener("click", async event => {
-            event.preventDefault();
+        wrapper.appendChild(
+            homeLink
+        );
 
-            const success = await copyPostLink();
-            showPostLinkNotice(success ? "◈ Link Copied ◈" : "◈ Copy Failed ◈");
-        });
+        wrapper.appendChild(
+            document.createTextNode(
+                " "
+            )
+        );
 
-        // Keep Get post link inside its own span,
-        // so all Post links remain grouped inside span elements.
-        const getLinkWrapper = document.createElement("span");
-        getLinkWrapper.appendChild(getLink);
-        container.appendChild(getLinkWrapper);
+        const codexLink =
+            document.createElement(
+                "a"
+            );
 
-        // 置頂返回：Top（最右側），獨立放進 span。
-        let topWrapper = container.querySelector(".post-top-wrapper.post");
-        if (!topWrapper) {
-            topWrapper = document.createElement("span");
-            topWrapper.className = "post-top-wrapper post";
+        codexLink.className =
+            "post-catalog-link post";
 
-            const topLink = document.createElement("a");
-            topLink.className = "post-top-link post";
-            topLink.href = "#";
-            topLink.textContent = "◌ TOP";
-            topLink.addEventListener("click", event => {
+        codexLink.textContent =
+            "𖤐 Codex";
+
+        codexLink.href =
+            "Codex.html";
+
+        wrapper.appendChild(
+            codexLink
+        );
+
+        const getLink =
+            document.createElement(
+                "a"
+            );
+
+        getLink.className =
+            "post-get-link post";
+
+        getLink.href =
+            "#";
+
+        getLink.textContent =
+            "⿻ Get post link";
+
+        getLink.addEventListener(
+            "click",
+            async event => {
                 event.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            });
 
-            topWrapper.appendChild(topLink);
-            container.appendChild(topWrapper);
+                const success =
+                    await copyPostLink();
+
+                showPostLinkNotice(
+                    success
+                        ? "◈ Link Copied ◈"
+                        : "◈ Copy Failed ◈"
+                );
+            }
+        );
+
+        const getLinkWrapper =
+            document.createElement(
+                "span"
+            );
+
+        getLinkWrapper.appendChild(
+            getLink
+        );
+
+        container.appendChild(
+            getLinkWrapper
+        );
+
+        let topWrapper =
+            container.querySelector(
+                ".post-top-wrapper.post"
+            );
+
+        if (!topWrapper) {
+            topWrapper =
+                document.createElement(
+                    "span"
+                );
+
+            topWrapper.className =
+                "post-top-wrapper post";
+
+            const topLink =
+                document.createElement(
+                    "a"
+                );
+
+            topLink.className =
+                "post-top-link post";
+
+            topLink.href =
+                "#";
+
+            topLink.textContent =
+                "◌ TOP";
+
+            topLink.addEventListener(
+                "click",
+                event => {
+                    event.preventDefault();
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+                }
+            );
+
+            topWrapper.appendChild(
+                topLink
+            );
+
+            container.appendChild(
+                topWrapper
+            );
         }
 
         try {
-            // Catalog 的正式來源是 W-Catalog。
-            // Post JSON 不需要重複保存 catalog。
-            const data = await getCatalogData();
+            const data =
+                await getCatalogData();
 
-            const path = findCatalogPath(
-                data?.catalogs || {},
-                postId,
-                ""
-            );
+            const context =
+                findCatalogContext(
+                    data?.catalogs || {},
+                    postId
+                );
 
-            if (!path) return;
+            if (!context) {
+                return;
+            }
 
-            path.split("/")
-                .filter(Boolean)
-                .forEach((part, index, parts) => {
+            context.trail.forEach(
+                (part, index) => {
                     wrapper.appendChild(
-                        document.createTextNode(" ")
+                        document.createTextNode(
+                            " "
+                        )
                     );
 
-                    const link = document.createElement("a");
-                    link.className = "post-catalog-link post";
-                    link.textContent = `✧ ${part}`;
+                    const link =
+                        document.createElement(
+                            "a"
+                        );
 
-                    const cumulativePath =
-                        parts.slice(0, index + 1).join("/");
+                    link.className =
+                        "post-catalog-link post";
+
+                    link.textContent =
+                        `✧ ${part.name}`;
 
                     link.href =
-                        `Codex.html?catalog=${encodeURIComponent(cumulativePath)}`;
+                        `Codex.html?catalog=${encodeURIComponent(
+                            part.id ||
+                            part.path
+                        )}`;
 
-                    wrapper.appendChild(link);
-                });
-
+                    wrapper.appendChild(
+                        link
+                    );
+                }
+            );
         } catch (error) {
             console.error(
                 "Post Catalog Loader:",
@@ -184,8 +650,20 @@
         }
     }
 
+
     async function copyPostLink() {
-        const url = window.location.href;
+        const urlObject =
+            new URL(
+                window.location.href
+            );
+
+        urlObject.searchParams.set(
+            "id",
+            resolvedPublicId
+        );
+
+        const url =
+            urlObject.toString();
 
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -241,38 +719,103 @@
         }, 900);
     }
 
-    async function renderReadmore(container, postId) {
-        const previousWrapper = container.querySelector("span:first-child");
-        const nextWrapper = container.querySelector("span:last-child");
+    async function renderReadmore(
+        container,
+        postId
+    ) {
+        const previousWrapper =
+            container.querySelector(
+                "span:first-child"
+            );
 
-        if (!previousWrapper || !nextWrapper) return;
+        const nextWrapper =
+            container.querySelector(
+                "span:last-child"
+            );
+
+        if (
+            !previousWrapper ||
+            !nextWrapper
+        ) {
+            return;
+        }
 
         previousWrapper.textContent = "";
         nextWrapper.textContent = "";
         container.hidden = true;
 
         try {
-            // W-Catalog 是上一篇／下一篇的唯一來源。
-            // 只統計開頭符合 YYYYMMDD-## 的 Post ID，後面的 JSON 名稱不參與排序。
-            const data = await getCatalogData();
-            const postIds = collectReadmorePostIds(data?.catalogs || {});
+            const data =
+                await getCatalogData();
 
-            postIds.sort((a, b) => {
-                const keyA = getReadmoreSortKey(a);
-                const keyB = getReadmoreSortKey(b);
-
-                return (
-                    keyA.date.localeCompare(keyB.date) ||
-                    keyA.number - keyB.number ||
-                    a.localeCompare(b)
+            const context =
+                findCatalogContext(
+                    data?.catalogs || {},
+                    postId
                 );
-            });
 
-            const currentIndex = postIds.indexOf(postId);
-            if (currentIndex === -1) return;
+            if (!context) {
+                return;
+            }
 
-            const previousId = postIds[currentIndex - 1];
-            const nextId = postIds[currentIndex + 1];
+            /*
+             * Previous / Next is scoped to the current Catalog node.
+             * This means future splits such as:
+             *   News / Dev Log / Announcement
+             * or
+             *   Novel / Comic / a specific series
+             * can remain independent without encoding that rule
+             * into the Post filename.
+             */
+            const postIds =
+                Array.isArray(
+                    context.node?.posts
+                )
+                    ? [...new Set(
+                        context.node.posts
+                            .map(String)
+                    )]
+                    : [];
+
+            postIds.sort(
+                (a, b) => {
+                    const keyA =
+                        getReadmoreSortKey(a);
+
+                    const keyB =
+                        getReadmoreSortKey(b);
+
+                    return (
+                        keyA.date.localeCompare(
+                            keyB.date
+                        ) ||
+                        keyA.number -
+                            keyB.number ||
+                        a.localeCompare(b)
+                    );
+                }
+            );
+
+            const currentIndex =
+                postIds.indexOf(
+                    String(postId)
+                );
+
+            if (
+                currentIndex === -1
+            ) {
+                return;
+            }
+
+            const previousId =
+                postIds[
+                    currentIndex - 1
+                ];
+
+            const nextId =
+                postIds[
+                    currentIndex + 1
+                ];
 
             if (previousId) {
                 previousWrapper.appendChild(
@@ -294,7 +837,10 @@
                 );
             }
 
-            if (previousId || nextId) {
+            if (
+                previousId ||
+                nextId
+            ) {
                 container.hidden = false;
             }
         } catch (error) {
@@ -305,17 +851,32 @@
         }
     }
 
-    async function renderBackTo(container, postId) {
-        const codexWrapper = container.querySelector("span:first-child");
-        const parentWrapper = container.querySelector("span:last-child");
 
-        if (!codexWrapper || !parentWrapper) return;
+    async function renderBackTo(
+        container,
+        postId
+    ) {
+        const codexWrapper =
+            container.querySelector(
+                "span:first-child"
+            );
+
+        const parentWrapper =
+            container.querySelector(
+                "span:last-child"
+            );
+
+        if (
+            !codexWrapper ||
+            !parentWrapper
+        ) {
+            return;
+        }
 
         codexWrapper.textContent = "";
         parentWrapper.textContent = "";
         container.hidden = true;
 
-        // Back to Codex always returns to the Codex main page.
         codexWrapper.appendChild(
             createBackToLink(
                 "Codex.html",
@@ -325,24 +886,22 @@
         );
 
         try {
-            const data = await getCatalogData();
-            const path = findCatalogPath(
-                data?.catalogs || {},
-                postId,
-                ""
-            );
+            const data =
+                await getCatalogData();
 
-            // The post belongs to a catalog path such as
-            // "Novels/Single : Shorts". The parent destination is that
-            // containing catalog, while the visible label is its final name.
-            if (path) {
-                const parts = path.split("/").filter(Boolean);
-                const parentName = parts[parts.length - 1];
+            const context =
+                findCatalogContext(
+                    data?.catalogs || {},
+                    postId
+                );
 
+            if (context) {
                 parentWrapper.appendChild(
                     createBackToLink(
-                        `Codex.html?catalog=${encodeURIComponent(path)}`,
-                        `Back to ${parentName} ›`,
+                        `Codex.html?catalog=${encodeURIComponent(
+                            context.leafId
+                        )}`,
+                        `Back to ${context.leafName} ›`,
                         "post-backto-parent post"
                     )
                 );
@@ -355,102 +914,181 @@
                 error
             );
 
-            // Keep the fixed Codex destination available even if the catalog
-            // lookup fails.
             container.hidden = false;
         }
     }
 
-    function createBackToLink(href, text, className) {
-        const link = document.createElement("a");
 
-        link.className = className;
-        link.href = href;
-        link.textContent = text;
+    function createBackToLink(
+        href,
+        text,
+        className
+    ) {
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.className =
+            className;
+
+        link.href =
+            href;
+
+        link.textContent =
+            text;
 
         return link;
     }
 
-    function collectReadmorePostIds(catalogs, result = []) {
-        // Readmore ordering only uses the leading YYYYMMDD-## part of the Post ID.
-        // Example: 20260924-02_S_LadyL -> 20260924 / 02
-        const pattern = /^(\d{8})-(\d{2})(?:_|$)/;
 
-        for (const node of Object.values(catalogs || {})) {
-            if (Array.isArray(node?.posts)) {
-                node.posts.forEach(postId => {
-                    const value = String(postId);
-                    if (pattern.test(value) && !result.includes(value)) {
-                        result.push(value);
-                    }
-                });
-            }
-
-            collectReadmorePostIds(
-                node?.children || {},
-                result
-            );
-        }
-
-        return result;
-    }
-
-    function getReadmoreSortKey(postId) {
-        const match = String(postId).match(/^(\d{8})-(\d{2})(?:_|$)/);
+    function getReadmoreSortKey(
+        postId
+    ) {
+        const match =
+            String(postId)
+                .match(
+                    /^~?(\d{6}|\d{8})-(\d{2})(?:_|$)/
+                );
 
         if (!match) {
-            return { date: "", number: Number.MAX_SAFE_INTEGER };
+            return {
+                date: "",
+                number:
+                    Number.MAX_SAFE_INTEGER
+            };
         }
 
         return {
-            date: match[1],
-            number: Number(match[2])
+            date:
+                match[1],
+            number:
+                Number(match[2])
         };
     }
 
-    function createReadmoreLink(postId, text, className) {
-        const link = document.createElement("a");
 
-        link.className = className;
-        link.href = `Post.html?id=${encodeURIComponent(postId)}`;
-        link.textContent = text;
+    function createReadmoreLink(
+        postId,
+        text,
+        className
+    ) {
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.className =
+            className;
+
+        link.href =
+            `Post.html?id=${encodeURIComponent(
+                getPublicPostId(postId)
+            )}`;
+
+        link.textContent =
+            text;
 
         return link;
     }
 
-    function findCatalogPath(
+
+    function findCatalogContext(
         catalogs,
-        postId,
-        parentPath
+        postId
     ) {
-        for (const [name, node] of Object.entries(catalogs || {})) {
-
-            const path = parentPath
-                ? `${parentPath}/${name}`
-                : name;
-
+        function walk(
+            nodes,
+            trail = []
+        ) {
             if (
-                Array.isArray(node?.posts) &&
-                node.posts.some(
-                    id => String(id) === String(postId)
-                )
+                !nodes ||
+                typeof nodes !== "object" ||
+                Array.isArray(nodes)
             ) {
-                return path;
+                return null;
             }
 
-            const childPath = findCatalogPath(
-                node?.children || {},
-                postId,
-                path
-            );
+            for (
+                const [name, node]
+                of Object.entries(nodes)
+            ) {
+                if (
+                    !node ||
+                    typeof node !== "object"
+                ) {
+                    continue;
+                }
 
-            if (childPath) {
-                return childPath;
+                const current =
+                    {
+                        name,
+                        id: String(
+                            node.id ||
+                            ""
+                        ),
+                        path:
+                            trail.length
+                                ? `${
+                                    trail[
+                                        trail.length - 1
+                                    ].path
+                                }/${name}`
+                                : name,
+                        node
+                    };
+
+                const nextTrail =
+                    [
+                        ...trail,
+                        current
+                    ];
+
+                if (
+                    Array.isArray(
+                        node.posts
+                    ) &&
+                    node.posts.some(
+                        id =>
+                            String(id) ===
+                            String(postId)
+                    )
+                ) {
+                    const root =
+                        nextTrail[0];
+
+                    return {
+                        trail:
+                            nextTrail,
+                        node,
+                        leafName:
+                            name,
+                        leafId:
+                            current.id ||
+                            current.path,
+                        rootId:
+                            root.id ||
+                            root.path
+                    };
+                }
+
+                const child =
+                    walk(
+                        node.children,
+                        nextTrail
+                    );
+
+                if (child) {
+                    return child;
+                }
             }
+
+            return null;
         }
 
-        return "";
+        return walk(catalogs);
     }
+
 
     function renderImages(container, postId) {
         container.textContent = "";
@@ -678,31 +1316,59 @@
         try {
             const data = await getTagData();
 
-            const tags = [];
+            const tagEntries = [];
 
             for (
                 const [tagName, node]
                 of Object.entries(data?.tags || {})
             ) {
                 if (
-                    Array.isArray(node?.posts) &&
-                    node.posts.includes(postId)
+                    !Array.isArray(node?.posts) ||
+                    !node.posts.includes(postId)
                 ) {
-                    tags.push(tagName);
+                    continue;
                 }
+
+                let tagId = tagName;
+
+                for (const rawGroup of Object.values(data?.groups || {})) {
+                    if (!Array.isArray(rawGroup)) {
+                        continue;
+                    }
+
+                    const entry =
+                        rawGroup.find(
+                            item =>
+                                typeof item === "object" &&
+                                item !== null &&
+                                String(item.name || "") === tagName
+                        );
+
+                    if (entry?.id) {
+                        tagId =
+                            String(entry.id);
+                        break;
+                    }
+                }
+
+                tagEntries.push({
+                    name: tagName,
+                    id: tagId
+                });
             }
 
-            tags.forEach((tagText, index) => {
+            tagEntries.forEach((tag, index) => {
                 const link =
                     document.createElement("a");
 
                 link.className =
                     "post-tag-link post";
 
-                link.textContent = tagText;
+                link.textContent =
+                    tag.name;
 
                 link.href =
-                    `Codex.html?tag=${encodeURIComponent(tagText)}`;
+                    `Codex.html?tag=${encodeURIComponent(tag.id)}`;
 
                 wrapper.appendChild(link);
 

@@ -32,6 +32,8 @@
     let tagDataPromise = null;
     let catalogPostMarks = new Map();
     let catalogNodeMarks = new Map();
+    let catalogPostStorageToPublic = new Map();
+    let catalogPostPublicToStorage = new Map();
     let tagFilterData = null;
     let tagFilterPopup = null;
     let activeTagSelection = [];
@@ -58,6 +60,33 @@
             tagDataPromise = loadFreshJSON("Codex-W/W-Tag.json");
         }
         return tagDataPromise;
+    }
+
+    function indexCatalogPostIds(catalogs) {
+        catalogPostStorageToPublic = new Map();
+        catalogPostPublicToStorage = new Map();
+
+        function walk(nodes) {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) return;
+
+            for (const node of Object.values(nodes)) {
+                if (!node || typeof node !== "object") continue;
+
+                if (node.post_ids && typeof node.post_ids === "object" && !Array.isArray(node.post_ids)) {
+                    for (const [storageId, publicId] of Object.entries(node.post_ids)) {
+                        const storage = String(storageId);
+                        const publicValue = String(publicId || "");
+                        if (!storage || !publicValue) continue;
+                        catalogPostStorageToPublic.set(storage, publicValue);
+                        catalogPostPublicToStorage.set(publicValue, storage);
+                    }
+                }
+
+                walk(node.children);
+            }
+        }
+
+        walk(catalogs);
     }
 
     loadSelectors();
@@ -96,6 +125,7 @@
                                 buildCatalogPostMarks(data);
                             catalogNodeMarks =
                                 buildCatalogNodeMarks(data);
+                            indexCatalogPostIds(data?.catalogs || {});
 
                             return loadCodexResult();
                         })
@@ -379,6 +409,18 @@
         ) === "true";
     }
 
+    function getCatalogPostStorageId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            return String(
+                postRef.file ||
+                postRef.storage ||
+                postRef.filename ||
+                ""
+            );
+        }
+        return String(postRef || "");
+    }
+
     function collectCatalogPostIds(nodes, result = [], seen = new Set()) {
         if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
             return result;
@@ -389,9 +431,10 @@
 
             if (Array.isArray(node.posts)) {
                 for (const postId of node.posts) {
-                    if (!postId || seen.has(postId)) continue;
-                    seen.add(postId);
-                    result.push(postId);
+                    const storageId = getCatalogPostStorageId(postId);
+                    if (!storageId || seen.has(storageId)) continue;
+                    seen.add(storageId);
+                    result.push(storageId);
                 }
             }
 
@@ -435,7 +478,6 @@
     ) {
         clearResult();
 
-
         /*
          * Root Codex page:
          * show the user's favorites as a small
@@ -448,7 +490,6 @@
         ) {
             await renderFavoriteBox();
         }
-
 
         const title = "𖤐 Codex";
 
@@ -472,60 +513,46 @@
                     : []
             );
 
-
         let node =
             data?.catalogs || {};
-
 
         if (
             catalogQuery &&
             catalogQuery !== "All"
         ) {
-            node =
-                findCatalogNode(
+            const target =
+                findCatalogTarget(
                     node,
-                    catalogQuery.split("/")
+                    catalogQuery
                 );
-        }
 
+            if (!target) {
+                renderMessage(
+                    "Catalog not found."
+                );
+                return;
+            }
 
-        if (!node) {
-            renderMessage(
-                "Catalog not found."
+            await renderCatalogNode(
+                target.name,
+                target.node,
+                target.path,
+                0,
+                true,
+                false,
+                false,
+                target.id
             );
-
             return;
         }
 
-
-        if (
-            catalogQuery === null ||
-            catalogQuery === "All"
-        ) {
-            await renderCatalogNodes(
-                node,
-                "",
-                true,
-                hidePosts,
-                separatorBefore
-            );
-
-        } else {
-            /*
-             * Direct catalog view is the explicit exception:
-             * hidden Catalogs show their Posts here.
-             */
-            await renderCatalogNode(
-                getLastPathPart(
-                    catalogQuery
-                ),
-                node,
-                catalogQuery,
-                0,
-                true,
-                false
-            );
-        }
+        await renderCatalogNodes(
+            node,
+            "",
+            true,
+            hidePosts,
+            separatorBefore
+        );
     }
 
 
@@ -542,15 +569,32 @@
                 const [name, node]
                 of Object.entries(nodes)
             ) {
-                await renderCatalogNode(
-                    name,
-                    node,
-                    name,
-                    0,
-                    true,
-                    hidePosts.has(name),
-                    separatorBefore.has(name)
-                );
+                const singleLeaf =
+                    getSingleLeafChild(node);
+
+                if (singleLeaf) {
+                    await renderCatalogNode(
+                        name,
+                        singleLeaf.node,
+                        `${name}/${singleLeaf.name}`,
+                        0,
+                        true,
+                        hidePosts.has(name),
+                        separatorBefore.has(name),
+                        String(singleLeaf.node.id || "")
+                    );
+                } else {
+                    await renderCatalogNode(
+                        name,
+                        node,
+                        name,
+                        0,
+                        true,
+                        hidePosts.has(name),
+                        separatorBefore.has(name),
+                        String(node?.id || "")
+                    );
+                }
             }
 
             return;
@@ -585,7 +629,8 @@
         depth,
         showTitle = true,
         hideDirectPosts = false,
-        separatorBefore = false
+        separatorBefore = false,
+        catalogId = ""
     ) {
         if (separatorBefore) {
             const divider =
@@ -601,6 +646,9 @@
          * Keep Codex rendering consistent with the
          * Catalog selector: empty Catalog branches
          * are hidden instead of being rendered.
+         *
+         * The Catalog ID still remains in W-Catalog,
+         * even when its node has no Posts yet.
          */
         if (!catalogHasPosts(node)) {
             return;
@@ -611,11 +659,9 @@
                 catalogTemplate
             );
 
-
         if (!catalog) {
             return;
         }
-
 
         const catalogTitle =
             catalog.querySelector(
@@ -642,15 +688,21 @@
                 '[data-codex="catalog-name"]'
             );
 
-
         if (
             showTitle &&
             catalogTitle &&
             catalogLink
         ) {
+            const queryId =
+                String(
+                    catalogId ||
+                    node?.id ||
+                    path
+                );
+
             catalogLink.href =
                 `Codex.html?catalog=${encodeURIComponent(
-                    path
+                    queryId
                 )}`;
 
             if (catalogPrefix) {
@@ -662,7 +714,6 @@
                 catalogName.textContent =
                     ` ${name}`;
             } else {
-                // Backward-safe fallback for older cached templates.
                 catalogLink.appendChild(
                     document.createTextNode(
                         ` ${name}`
@@ -675,13 +726,13 @@
                 catalogNodeMarks.get(name);
 
             if (catalogIcon) {
-                catalogIcon.removeAttribute('data-lucide');
-                catalogIcon.removeAttribute('style');
+                catalogIcon.removeAttribute("data-lucide");
+                catalogIcon.removeAttribute("style");
                 catalogIcon.hidden = true;
 
                 if (mark?.icon) {
                     catalogIcon.setAttribute(
-                        'data-lucide',
+                        "data-lucide",
                         mark.icon
                     );
                     catalogIcon.hidden = false;
@@ -692,23 +743,19 @@
                     }
                 }
             }
-
         } else if (catalogTitle) {
             catalogTitle.remove();
         }
-
 
         const postList =
             catalog.querySelector(
                 '[data-codex="post-list"]'
             );
 
-
         const posts =
             Array.isArray(node?.posts)
                 ? node.posts
                 : [];
-
 
         if (
             postList &&
@@ -718,11 +765,7 @@
             const postData =
                 await loadPostData(posts);
 
-
-            for (
-                const postId
-                of posts
-            ) {
+            for (const postId of posts) {
                 if (isCodexHidden(postId)) {
                     continue;
                 }
@@ -736,29 +779,16 @@
                         false
                     );
 
-
                 if (post) {
-                    postList.appendChild(
-                        post
-                    );
+                    postList.appendChild(post);
                 }
             }
         }
 
-
-        /*
-         * Catalog is always rendered,
-         * even when it has no Posts.
-         */
         resultRoot.appendChild(
             catalog
         );
 
-
-        /*
-         * Children are independent
-         * from Posts.
-         */
         if (
             node?.children &&
             typeof node.children === "object"
@@ -780,7 +810,12 @@
                         : childName,
                     depth + 1,
                     true,
-                    hideDirectPosts
+                    hideDirectPosts,
+                    false,
+                    String(
+                        childNode?.id ||
+                        ""
+                    )
                 );
             }
         }
@@ -1056,7 +1091,10 @@
 
         await Promise.all(
             postIds.map(
-                async postId => {
+                async postRef => {
+                    const postId =
+                        getCatalogPostStorageId(postRef);
+
                     try {
                         const response =
                             await fetch(
@@ -1368,7 +1406,7 @@
         if (titleLink) {
             titleLink.href =
                 `Post.html?id=${encodeURIComponent(
-                    postId
+                    getPublicPostId(postId)
                 )}`;
 
             titleLink.textContent =
@@ -1795,67 +1833,170 @@
     }
 
 
-    function findCatalogNode(
-        catalogs,
-        parts
-    ) {
-        let current =
-            catalogs;
-
-
-        for (
-            let i = 0;
-            i < parts.length;
-            i++
-        ) {
-            const part =
-                parts[i];
-
-
-            if (
-                !current ||
-                typeof current !== "object"
-            ) {
-                return null;
-            }
-
-
-            const node =
-                current[part];
-
-
-            if (!node) {
-                return null;
-            }
-
-
-            if (
-                i === parts.length - 1
-            ) {
-                return node;
-            }
-
-
-            current =
-                node.children;
+    function getSingleLeafChild(node) {
+        if (!node || typeof node !== "object" || !node.children || typeof node.children !== "object") {
+            return null;
         }
 
+        const entries = Object.entries(node.children);
+        if (entries.length !== 1) return null;
 
-        return null;
+        const [name, child] = entries[0];
+        if (!child || typeof child !== "object") return null;
+        if (child.children && Object.keys(child.children).length > 0) return null;
+
+        return { name, node: child };
     }
 
-
-    function getLastPathPart(
-        path
+    function findCatalogTarget(
+        catalogs,
+        query
     ) {
+        const value =
+            String(query || "").trim();
+
+        if (!value) {
+            return null;
+        }
+
         const parts =
-            String(path || "")
-                .split("/");
+            value
+                .split("/")
+                .filter(Boolean);
 
+        function findByNamedPath(
+            nodes,
+            pathParts,
+            parentPath = ""
+        ) {
+            if (
+                !nodes ||
+                typeof nodes !== "object" ||
+                Array.isArray(nodes) ||
+                pathParts.length === 0
+            ) {
+                return null;
+            }
 
-        return (
-            parts[parts.length - 1] ||
-            "Codex"
+            const wanted =
+                pathParts[0];
+
+            for (const [name, node] of Object.entries(nodes)) {
+                if (!node || typeof node !== "object") {
+                    continue;
+                }
+
+                if (
+                    name !== wanted &&
+                    String(node.id || "") !== wanted
+                ) {
+                    continue;
+                }
+
+                const path =
+                    parentPath
+                        ? `${parentPath}/${name}`
+                        : name;
+
+                if (pathParts.length === 1) {
+                    return {
+                        id: String(node.id || path),
+                        name,
+                        path,
+                        node
+                    };
+                }
+
+                const child =
+                    findByNamedPath(
+                        node.children,
+                        pathParts.slice(1),
+                        path
+                    );
+
+                if (child) {
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
+        /*
+         * A single ID such as Paa may point to a node
+         * anywhere in the Catalog tree.
+         */
+        if (parts.length === 1) {
+            function walk(
+                nodes,
+                parentPath = ""
+            ) {
+                if (
+                    !nodes ||
+                    typeof nodes !== "object" ||
+                    Array.isArray(nodes)
+                ) {
+                    return null;
+                }
+
+                for (const [name, node] of Object.entries(nodes)) {
+                    if (!node || typeof node !== "object") {
+                        continue;
+                    }
+
+                    const path =
+                        parentPath
+                            ? `${parentPath}/${name}`
+                            : name;
+
+                    if (
+                        name === value ||
+                        String(node.id || "") === value
+                    ) {
+                        const singleLeaf =
+                            getSingleLeafChild(node);
+
+                        if (singleLeaf) {
+                            return {
+                                id: String(singleLeaf.node.id || path),
+                                name: singleLeaf.name,
+                                path: `${path}/${singleLeaf.name}`,
+                                node: singleLeaf.node
+                            };
+                        }
+
+                        return {
+                            id: String(node.id || path),
+                            name,
+                            path,
+                            node
+                        };
+                    }
+
+                    const child =
+                        walk(
+                            node.children,
+                            path
+                        );
+
+                    if (child) {
+                        return child;
+                    }
+                }
+
+                return null;
+            }
+
+            return walk(catalogs);
+        }
+
+        /*
+         * Keep the historical name-based / path-based
+         * Catalog URLs working as well.
+         */
+        return findByNamedPath(
+            catalogs,
+            parts
         );
     }
 
@@ -1868,26 +2009,21 @@
                 "select"
             );
 
-
         if (!select) {
             return;
         }
-
 
         const placeholder =
             select.querySelector(
                 'option[value=""]'
             );
 
-
         select.textContent = "";
-
 
         if (placeholder) {
             select.appendChild(
                 placeholder
             );
-
         } else {
             const option =
                 createOption(
@@ -1895,7 +2031,6 @@
                     "⛛ Select Catalog",
                     "placeholder"
                 );
-
 
             option.disabled =
                 true;
@@ -1906,16 +2041,11 @@
             option.hidden =
                 true;
 
-
             select.appendChild(
                 option
             );
         }
 
-
-        /*
-         * Favorite
-         */
         select.appendChild(
             createOption(
                 "Favorite",
@@ -1925,9 +2055,6 @@
             )
         );
 
-        /*
-         * Codex root.
-         */
         select.appendChild(
             createOption(
                 "All",
@@ -1936,7 +2063,6 @@
                 "All"
             )
         );
-
 
         const printPosts =
             new Set(
@@ -1947,11 +2073,6 @@
                     : []
             );
 
-        /*
-         * Catalogs listed here keep their Catalog entry,
-         * but never print their Posts in the SELECT.
-         * This applies to every Post ID, with or without "_".
-         */
         const hidePosts =
             new Set(
                 Array.isArray(
@@ -1970,15 +2091,9 @@
                     : []
             );
 
-
         const catalogs =
             data?.catalogs || {};
 
-
-        /*
-         * Only show Catalog entries that contain
-         * at least one Post somewhere in their tree.
-         */
         const visibleCatalogs =
             Object.fromEntries(
                 Object.entries(catalogs)
@@ -1987,15 +2102,12 @@
                     )
             );
 
-
         if (Object.keys(visibleCatalogs).length === 0) {
             catalogRoot.hidden = true;
             return;
         }
 
-
         catalogRoot.hidden = false;
-
 
         await appendCatalogs(
             select,
@@ -2007,12 +2119,6 @@
             separatorBefore
         );
 
-
-        /*
-         * Show Hidden stays immediately above Home.
-         * Keep this selector entry intentionally text-only so it
-         * remains lightweight even when Lucide is unavailable.
-         */
         select.appendChild(
             createOption(
                 "Hidden",
@@ -2022,11 +2128,6 @@
             )
         );
 
-
-        /*
-         * Home stays at the bottom so it is not confused
-         * with the content/navigation entries above.
-         */
         select.appendChild(
             createOption(
                 "Home",
@@ -2036,7 +2137,6 @@
             )
         );
 
-
         select.addEventListener(
             "change",
             () => {
@@ -2045,11 +2145,9 @@
                         select.selectedIndex
                     ];
 
-
                 if (!option) {
                     return;
                 }
-
 
                 if (
                     option.dataset.type ===
@@ -2057,7 +2155,6 @@
                 ) {
                     window.location.href =
                         "Codex.html?catalog=Favorite";
-
                     return;
                 }
 
@@ -2067,7 +2164,6 @@
                 ) {
                     window.location.href =
                         "Codex.html?catalog=Hidden";
-
                     return;
                 }
 
@@ -2077,10 +2173,8 @@
                 ) {
                     window.location.href =
                         "index.html";
-
                     return;
                 }
-
 
                 if (
                     option.dataset.type ===
@@ -2088,12 +2182,12 @@
                 ) {
                     window.location.href =
                         `Post.html?id=${encodeURIComponent(
-                            option.value
+                            getPublicPostId(
+                                option.value
+                            )
                         )}`;
-
                     return;
                 }
-
 
                 if (
                     option.value ===
@@ -2101,10 +2195,8 @@
                 ) {
                     window.location.href =
                         "Codex.html";
-
                     return;
                 }
-
 
                 window.location.href =
                     `Codex.html?catalog=${encodeURIComponent(
@@ -2125,28 +2217,29 @@
         separatorBefore
     ) {
         for (
-            const [name, node]
-            of Object.entries(
+            const [name, node] of Object.entries(
                 catalogs
             )
         ) {
-            /* Skip empty Catalog branches. */
             if (!catalogHasPosts(node)) {
                 continue;
             }
-
 
             const path =
                 parentPath
                     ? `${parentPath}/${name}`
                     : name;
 
+            const singleLeaf =
+                getSingleLeafChild(node);
 
-            /*
-             * Use a disabled OPTION for separators instead of
-             * OPTGROUP, so the Catalog itself keeps its normal
-             * depth and the separator does not wrap on mobile.
-             */
+            const catalogId =
+                String(
+                    singleLeaf?.node?.id ||
+                    node?.id ||
+                    path
+                );
+
             if (separatorBefore.has(path)) {
                 const separatorOption =
                     document.createElement("option");
@@ -2164,7 +2257,7 @@
 
             const catalogOption =
                 createOption(
-                    path,
+                    catalogId,
                     `${indent(depth)}✧ ${name}`,
                     "catalog",
                     path
@@ -2174,25 +2267,21 @@
                 catalogOption
             );
 
-
             if (
                 printPosts.has(path) &&
                 !hidePosts.has(path) &&
-                Array.isArray(
-                    node?.posts
-                )
+                Array.isArray(node?.posts)
             ) {
                 const titles =
                     await loadPostTitles(
                         node.posts
                     );
 
-
                 node.posts.forEach(
                     postId => {
                         select.appendChild(
                             createOption(
-                                postId,
+                                getPublicPostId(postId),
                                 `${indent(depth + 1)}✦ ${
                                     titles.get(postId) ||
                                     humanizeId(postId)
@@ -2205,11 +2294,10 @@
                 );
             }
 
-
             if (
                 node?.children &&
-                typeof node.children ===
-                    "object"
+                typeof node.children === "object" &&
+                !singleLeaf
             ) {
                 await appendCatalogs(
                     select,
@@ -2225,28 +2313,35 @@
     }
 
 
-    function catalogHasPosts(node) {
+    function catalogHasPosts(
+        node
+    ) {
         if (!node || typeof node !== "object") {
             return false;
         }
 
-
         if (
             Array.isArray(node.posts) &&
-            node.posts.some(postId => !isCodexHidden(postId))
+            node.posts.some(
+                postRef => {
+                    const postId = getCatalogPostStorageId(postRef);
+                    return postId && !isCodexHidden(postId);
+                }
+            )
         ) {
             return true;
         }
-
 
         if (
             node.children &&
             typeof node.children === "object"
         ) {
-            return Object.values(node.children)
-                .some(child => catalogHasPosts(child));
+            return Object.values(
+                node.children
+            ).some(
+                child => catalogHasPosts(child)
+            );
         }
-
 
         return false;
     }
@@ -3028,6 +3123,56 @@
         return "\u3000".repeat(
             depth
         );
+    }
+
+
+    function getPublicPostId(
+        postId
+    ) {
+        const value =
+            String(postId || "");
+
+        const fixedPublicId =
+            catalogPostStorageToPublic.get(value);
+
+        if (fixedPublicId) {
+            return fixedPublicId;
+        }
+
+        /*
+         * News storage IDs:
+         *   ~260929-01
+         * Public URL:
+         *   N260929-01
+         */
+        let match =
+            value.match(
+                /^~(\d{6})-(\d{2})$/
+            );
+
+        if (match) {
+            return `N${match[1]}-${match[2]}`;
+        }
+
+        /*
+         * Novel / Post storage IDs:
+         *   20260929-02
+         * Legacy files may still carry a human-readable suffix:
+         *   20260929-02_S_Five-Bottles
+         *
+         * Both resolve to:
+         *   P20260929-02
+         */
+        match =
+            value.match(
+                /^(\d{8})-(\d{2})(?:_|$)/
+            );
+
+        if (match) {
+            return `P${match[1]}-${match[2]}`;
+        }
+
+        return value;
     }
 
 
