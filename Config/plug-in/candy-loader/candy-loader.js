@@ -24,6 +24,36 @@
         return catalogPromise;
     }
 
+    function getCatalogPostStorageId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            return String(
+                postRef.name ||
+                postRef.file ||
+                postRef.storage ||
+                postRef.filename ||
+                ""
+            );
+        }
+
+        return String(postRef || "");
+    }
+
+    function getCatalogPostPublicId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            const explicitId = String(postRef.id || "");
+            if (explicitId) return explicitId;
+        }
+
+        const value = getCatalogPostStorageId(postRef);
+        let match = value.match(/^~(\d{6})-(\d{2})$/);
+        if (match) return `N${match[1]}-${match[2]}`;
+
+        match = value.match(/^(\d{8})-(\d{2})(?:_|$)/);
+        if (match) return `P${match[1]}-${match[2]}`;
+
+        return value;
+    }
+
     loadNewestCover()
         .catch(error => {
             console.warn("Candy Loader: unable to load newest cover.", error);
@@ -35,14 +65,14 @@
 
         try {
             const data = await loadCatalog();
-            const postIds = new Set();
+            const postRefs = new Map();
 
             collectPosts(
                 data?.catalogs || {},
-                postIds
+                postRefs
             );
 
-            const posts = [...postIds].map(postId => ({
+            const posts = [...postRefs.keys()].map(postId => ({
                 postId,
                 date: (String(postId).match(/^(\d{8})-/) || [])[1] || "",
                 number: getNumericIdOrder(postId)
@@ -129,15 +159,15 @@
     async function loadPosts() {
         const data = await loadCatalog();
 
-        const postIds = new Set();
+        const postRefs = new Map();
 
         collectPosts(
             data?.catalogs || {},
-            postIds
+            postRefs
         );
 
         const posts = await loadPostData(
-            [...postIds]
+            [...postRefs.entries()]
         );
 
         /*
@@ -164,14 +194,17 @@
         return posts;
     }
 
-    function collectPosts(catalogs, postIds) {
-        for (const node of Object.values(catalogs)) {
-
+    function collectPosts(catalogs, postRefs) {
+        for (const node of Object.values(catalogs || {})) {
             if (Array.isArray(node?.posts)) {
-                node.posts.forEach(postId => {
-                    if (postId) {
-                        postIds.add(String(postId));
-                    }
+                node.posts.forEach(postRef => {
+                    const storageId = getCatalogPostStorageId(postRef);
+                    if (!storageId || postRefs.has(storageId)) return;
+
+                    postRefs.set(
+                        storageId,
+                        getCatalogPostPublicId(postRef)
+                    );
                 });
             }
 
@@ -181,17 +214,17 @@
             ) {
                 collectPosts(
                     node.children,
-                    postIds
+                    postRefs
                 );
             }
         }
     }
 
-    async function loadPostData(postIds) {
+    async function loadPostData(postRefs) {
         const posts = [];
 
         await Promise.all(
-            postIds.map(async postId => {
+            postRefs.map(async ([postId, publicId]) => {
                 try {
                     const response = await fetch(
                         `Codex-Text/${encodeURIComponent(postId)}.json`
@@ -208,6 +241,7 @@
                     ) {
                         posts.push({
                             id: postId,
+                            publicId: publicId || getCatalogPostPublicId(postId),
                             title:
                                 data.title ||
                                 postId
@@ -245,7 +279,7 @@
 
             link.href =
                 `Post.html?id=${encodeURIComponent(
-                    post.id
+                    post.publicId || getCatalogPostPublicId(post.id)
                 )}`;
 
             const imageBlock =

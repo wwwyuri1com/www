@@ -116,6 +116,19 @@
             return match ? Number(match[1]) : -1;
         };
 
+        const getCatalogPostStorageId = postRef => {
+            if (typeof postRef === 'object' && postRef !== null) {
+                return String(
+                    postRef.name ||
+                    postRef.file ||
+                    postRef.storage ||
+                    postRef.filename ||
+                    ''
+                );
+            }
+            return String(postRef || '');
+        };
+
         // The automatic Backup Card cover is always the newest catalog post.
         // It is independent from the currently opened post and from the cover
         // remembered for each post.
@@ -137,8 +150,9 @@
                     const collectPosts = node => {
                         if (!node || typeof node !== 'object') return;
                         if (Array.isArray(node.posts)) {
-                            node.posts.forEach(postId => {
-                                if (postId) ids.add(String(postId));
+                            node.posts.forEach(postRef => {
+                                const postId = getCatalogPostStorageId(postRef);
+                                if (postId) ids.add(postId);
                             });
                         }
                         if (node.children && typeof node.children === 'object') {

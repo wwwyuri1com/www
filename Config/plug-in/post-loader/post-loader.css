@@ -38,7 +38,7 @@
 }
 
 .post-title.index h3 {
-    text-shadow: -1px -1px 15px rgb(172 172 172 / 70%), 4px 4px 8px rgb(0 0 0 / 19%);
+    text-shadow: -1px -1px 15px rgb(172 172 172 / 70%), 4px 4px 8px rgb(0 0 0 / 19%); text-align:left;
 }
 
 .post-image.index {

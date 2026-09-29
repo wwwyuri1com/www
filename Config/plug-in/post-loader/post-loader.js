@@ -44,6 +44,33 @@
     let catalogPostPublicToStorage = new Map();
     let catalogIndexReady = false;
 
+    function getCatalogPostStorageId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            return String(
+                postRef.name ||
+                postRef.file ||
+                postRef.storage ||
+                postRef.filename ||
+                ""
+            );
+        }
+
+        return String(postRef || "");
+    }
+
+    function getCatalogPostPublicId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            const explicitId = String(postRef.id || "");
+            if (explicitId) {
+                return explicitId;
+            }
+        }
+
+        return getPublicPostId(
+            getCatalogPostStorageId(postRef)
+        );
+    }
+
     function indexCatalogPostIds(catalogs) {
         catalogPostStorageToPublic = new Map();
         catalogPostPublicToStorage = new Map();
@@ -58,10 +85,10 @@
                     continue;
                 }
 
-                if (node.post_ids && typeof node.post_ids === "object" && !Array.isArray(node.post_ids)) {
-                    for (const [storageId, publicId] of Object.entries(node.post_ids)) {
-                        const storage = String(storageId);
-                        const publicValue = String(publicId || "");
+                if (Array.isArray(node.posts)) {
+                    for (const postRef of node.posts) {
+                        const storage = getCatalogPostStorageId(postRef);
+                        const publicValue = getCatalogPostPublicId(postRef);
                         if (!storage || !publicValue) continue;
                         catalogPostStorageToPublic.set(storage, publicValue);
                         catalogPostPublicToStorage.set(publicValue, storage);
@@ -243,9 +270,9 @@
                 if (Array.isArray(node.posts)) {
                     for (const postRef of node.posts) {
                         const value =
-                            typeof postRef === "object" && postRef !== null
-                                ? String(postRef.file || postRef.storage || postRef.filename || "")
-                                : String(postRef);
+                            getCatalogPostStorageId(
+                                postRef
+                            );
 
                         if (
                             value === base ||
@@ -773,7 +800,10 @@
                 )
                     ? [...new Set(
                         context.node.posts
-                            .map(String)
+                            .map(
+                                getCatalogPostStorageId
+                            )
+                            .filter(Boolean)
                     )]
                     : [];
 
@@ -1049,17 +1079,35 @@
                         node.posts
                     ) &&
                     node.posts.some(
-                        id =>
-                            String(id) ===
+                        postRef =>
+                            getCatalogPostStorageId(
+                                postRef
+                            ) ===
                             String(postId)
                     )
                 ) {
                     const root =
                         nextTrail[0];
 
+                    const visibleTrail = [];
+
+                    // The first Catalog entry is a namespace (N/P/F/U/I/Y),
+                    // so it is never shown in the Post breadcrumb.
+                    nextTrail.slice(1).forEach(part => {
+                        const previous = visibleTrail[visibleTrail.length - 1];
+                        // Structural nodes may intentionally reuse the same
+                        // display name. Keep the deepest matching node so the
+                        // breadcrumb links to the real selectable Catalog ID.
+                        if (previous && previous.name === part.name) {
+                            visibleTrail[visibleTrail.length - 1] = part;
+                        } else {
+                            visibleTrail.push(part);
+                        }
+                    });
+
                     return {
                         trail:
-                            nextTrail,
+                            visibleTrail,
                         node,
                         leafName:
                             name,
@@ -1372,7 +1420,7 @@
 
                 wrapper.appendChild(link);
 
-                if (index < tags.length - 1) {
+                if (index < tagEntries.length - 1) {
                     wrapper.appendChild(
                         document.createTextNode(" ")
                     );

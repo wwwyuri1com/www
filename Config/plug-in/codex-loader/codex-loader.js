@@ -62,6 +62,33 @@
         return tagDataPromise;
     }
 
+    function getCatalogPostStorageId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            return String(
+                postRef.name ||
+                postRef.file ||
+                postRef.storage ||
+                postRef.filename ||
+                ""
+            );
+        }
+
+        return String(postRef || "");
+    }
+
+    function getCatalogPostPublicId(postRef) {
+        if (typeof postRef === "object" && postRef !== null) {
+            const explicitId = String(postRef.id || "");
+            if (explicitId) {
+                return explicitId;
+            }
+        }
+
+        return getPublicPostId(
+            getCatalogPostStorageId(postRef)
+        );
+    }
+
     function indexCatalogPostIds(catalogs) {
         catalogPostStorageToPublic = new Map();
         catalogPostPublicToStorage = new Map();
@@ -72,11 +99,13 @@
             for (const node of Object.values(nodes)) {
                 if (!node || typeof node !== "object") continue;
 
-                if (node.post_ids && typeof node.post_ids === "object" && !Array.isArray(node.post_ids)) {
-                    for (const [storageId, publicId] of Object.entries(node.post_ids)) {
-                        const storage = String(storageId);
-                        const publicValue = String(publicId || "");
+                if (Array.isArray(node.posts)) {
+                    for (const postRef of node.posts) {
+                        const storage = getCatalogPostStorageId(postRef);
+                        const publicValue = getCatalogPostPublicId(postRef);
+
                         if (!storage || !publicValue) continue;
+
                         catalogPostStorageToPublic.set(storage, publicValue);
                         catalogPostPublicToStorage.set(publicValue, storage);
                     }
@@ -403,22 +432,58 @@
         resultRoot.appendChild(postList);
     }
 
-    function isCodexHidden(postId) {
-        return localStorage.getItem(
-            `yuri1.reader.codex-hidden.${postId}`
-        ) === "true";
+    function getPostStateId(postId) {
+        return getPublicPostId(postId);
     }
 
-    function getCatalogPostStorageId(postRef) {
-        if (typeof postRef === "object" && postRef !== null) {
-            return String(
-                postRef.file ||
-                postRef.storage ||
-                postRef.filename ||
-                ""
-            );
+    function getPostStateKey(prefix, postId) {
+        return `${prefix}${getPostStateId(postId)}`;
+    }
+
+    function getLegacyPostStateKey(prefix, postId) {
+        const storageId = getCatalogPostStorageId(postId);
+        const publicId = getPostStateId(storageId);
+
+        if (!storageId || storageId === publicId) {
+            return null;
         }
-        return String(postRef || "");
+
+        return `${prefix}${storageId}`;
+    }
+
+    function hasPostState(prefix, postId) {
+        const canonicalKey = getPostStateKey(prefix, postId);
+        if (localStorage.getItem(canonicalKey) === "true") {
+            return true;
+        }
+
+        const legacyKey = getLegacyPostStateKey(prefix, postId);
+        return Boolean(legacyKey && localStorage.getItem(legacyKey) === "true");
+    }
+
+    function setPostState(prefix, postId, active) {
+        const canonicalKey = getPostStateKey(prefix, postId);
+        const legacyKey = getLegacyPostStateKey(prefix, postId);
+
+        if (active) {
+            localStorage.setItem(canonicalKey, "true");
+            if (legacyKey) {
+                localStorage.removeItem(legacyKey);
+            }
+            return;
+        }
+
+        localStorage.removeItem(canonicalKey);
+        if (legacyKey) {
+            localStorage.removeItem(legacyKey);
+        }
+    }
+
+    function isCodexHidden(postId) {
+        return hasPostState(
+            "yuri1.reader.codex-hidden.",
+            postId
+        );
     }
 
     function collectCatalogPostIds(nodes, result = [], seen = new Set()) {
@@ -444,11 +509,33 @@
         return result;
     }
 
+    function getStorageIdFromPublicId(postId) {
+        const value = String(postId || "");
+
+        const fixedStorage = catalogPostPublicToStorage.get(value);
+        if (fixedStorage) {
+            return fixedStorage;
+        }
+
+        let match = value.match(/^N(\d{6})-(\d{2})$/);
+        if (match) {
+            return `~${match[1]}-${match[2]}`;
+        }
+
+        match = value.match(/^P(\d{8})-(\d{2})$/);
+        if (match) {
+            return `${match[1]}-${match[2]}`;
+        }
+
+        return value;
+    }
+
     function getFavoritePostIds() {
         const prefix =
             "yuri1.reader.favorite.";
 
         const ids = [];
+        const seenPublicIds = new Set();
 
         for (let index = 0; index < localStorage.length; index++) {
             const key = localStorage.key(index);
@@ -461,11 +548,16 @@
                 continue;
             }
 
-            const postId =
-                key.slice(prefix.length);
+            const stateId = key.slice(prefix.length);
+            if (!stateId) continue;
 
-            if (postId && !ids.includes(postId)) {
-                ids.push(postId);
+            const publicId = getPostStateId(stateId);
+            if (seenPublicIds.has(publicId)) continue;
+            seenPublicIds.add(publicId);
+
+            const storageId = getStorageIdFromPublicId(publicId);
+            if (storageId && !ids.includes(storageId)) {
+                ids.push(storageId);
             }
         }
 
@@ -533,6 +625,12 @@
                 return;
             }
 
+            if (target.id && String(target.id) !== String(catalogQuery)) {
+                const canonicalURL = new URL(window.location.href);
+                canonicalURL.searchParams.set("catalog", target.id);
+                window.history.replaceState(null, "", canonicalURL);
+            }
+
             await renderCatalogNode(
                 target.name,
                 target.node,
@@ -564,52 +662,42 @@
         separatorBefore = new Set()
     ) {
         if (showAllRoots) {
-
-            for (
-                const [name, node]
-                of Object.entries(nodes)
-            ) {
-                const singleLeaf =
-                    getSingleLeafChild(node);
-
-                if (singleLeaf) {
-                    await renderCatalogNode(
-                        name,
-                        singleLeaf.node,
-                        `${name}/${singleLeaf.name}`,
-                        0,
-                        true,
-                        hidePosts.has(name),
-                        separatorBefore.has(name),
-                        String(singleLeaf.node.id || "")
-                    );
-                } else {
-                    await renderCatalogNode(
-                        name,
-                        node,
-                        name,
-                        0,
-                        true,
-                        hidePosts.has(name),
-                        separatorBefore.has(name),
-                        String(node?.id || "")
-                    );
+            for (const [name, node] of Object.entries(nodes || {})) {
+                if (!catalogHasPosts(node)) {
+                    continue;
                 }
+
+                const entry = collapseSingleChildChain(
+                    name,
+                    node,
+                    name
+                );
+
+                if (!entry) {
+                    continue;
+                }
+
+                await renderCatalogNode(
+                    entry.name,
+                    entry.node,
+                    entry.path,
+                    0,
+                    true,
+                    hidePosts.has(name) || hidePosts.has(entry.name),
+                    separatorBefore.has(name) || separatorBefore.has(entry.path),
+                    entry.id
+                );
             }
 
             return;
         }
-
 
         if (
             nodes &&
             typeof nodes === "object" &&
             !Array.isArray(nodes)
         ) {
-            const name =
-                getLastPathPart(
-                    parentPath
-                );
+            const name = getLastPathPart(parentPath);
 
             await renderCatalogNode(
                 name,
@@ -765,15 +853,18 @@
             const postData =
                 await loadPostData(posts);
 
-            for (const postId of posts) {
-                if (isCodexHidden(postId)) {
+            for (const postRef of posts) {
+                const storageId =
+                    getCatalogPostStorageId(postRef);
+
+                if (!storageId || isCodexHidden(storageId)) {
                     continue;
                 }
 
                 const post =
                     createPostElement(
-                        postId,
-                        postData.get(postId),
+                        storageId,
+                        postData.get(storageId),
                         depth +
                             (showTitle ? 1 : 0),
                         false
@@ -1195,9 +1286,14 @@
                     resolveMark(path, name, inherited);
 
                 if (mark && Array.isArray(node.posts)) {
-                    for (const postId of node.posts) {
-                        if (!map.has(postId)) {
-                            map.set(postId, mark);
+                    for (const postRef of node.posts) {
+                        const storageId =
+                            getCatalogPostStorageId(
+                                postRef
+                            );
+
+                        if (storageId && !map.has(storageId)) {
+                            map.set(storageId, mark);
                         }
                     }
                 }
@@ -1416,19 +1512,17 @@
                 displayTitle;
         }
 
-        const doneKey =
-            `yuri1.reader.done.${postId}`;
+        const donePrefix =
+            "yuri1.reader.done.";
 
-        const favoriteKey =
-            `yuri1.reader.favorite.${postId}`;
+        const favoritePrefix =
+            "yuri1.reader.favorite.";
 
         let isReadDone =
-            localStorage.getItem(doneKey) ===
-            "true";
+            hasPostState(donePrefix, postId);
 
         let isFavorite =
-            localStorage.getItem(favoriteKey) ===
-            "true";
+            hasPostState(favoritePrefix, postId);
 
         if (
             titleContainer &&
@@ -1459,7 +1553,7 @@
         const createStatusButton = (
             type,
             iconName,
-            key,
+            statePrefix,
             active,
             activeLabel,
             inactiveLabel
@@ -1515,20 +1609,16 @@
                     event.stopPropagation();
 
                     const current =
-                        localStorage.getItem(key) ===
-                        "true";
-
-                    if (current) {
-                        localStorage.removeItem(key);
-                    } else {
-                        localStorage.setItem(
-                            key,
-                            "true"
-                        );
-                    }
+                        hasPostState(statePrefix, postId);
 
                     const next =
                         !current;
+
+                    setPostState(
+                        statePrefix,
+                        postId,
+                        next
+                    );
 
                     button.classList.toggle(
                         "is-active",
@@ -1576,7 +1666,7 @@
         createStatusButton(
             "favorite",
             "book-heart",
-            favoriteKey,
+            favoritePrefix,
             isFavorite,
             "Remove from favorites",
             "Add to favorites"
@@ -1585,7 +1675,7 @@
         createStatusButton(
             "read-done",
             "book-check",
-            doneKey,
+            donePrefix,
             isReadDone,
             "Mark as unread",
             "Mark as read"
@@ -1833,36 +1923,65 @@
     }
 
 
-    function getSingleLeafChild(node) {
-        if (!node || typeof node !== "object" || !node.children || typeof node.children !== "object") {
-            return null;
+    function getCatalogChildren(node) {
+        if (
+            !node ||
+            typeof node !== "object" ||
+            !node.children ||
+            typeof node.children !== "object" ||
+            Array.isArray(node.children)
+        ) {
+            return [];
         }
 
-        const entries = Object.entries(node.children);
-        if (entries.length !== 1) return null;
+        return Object.entries(node.children)
+            .filter(([, child]) => child && typeof child === "object");
+    }
 
-        const [name, child] = entries[0];
-        if (!child || typeof child !== "object") return null;
-        if (child.children && Object.keys(child.children).length > 0) return null;
+    function collapseSingleChildChain(
+        name,
+        node,
+        path
+    ) {
+        let currentName = String(name || "");
+        let currentNode = node;
+        let currentPath = String(path || currentName);
 
-        return { name, node: child };
+        while (
+            currentNode &&
+            typeof currentNode === "object" &&
+            !Array.isArray(currentNode.posts) &&
+            getCatalogChildren(currentNode).length === 1
+        ) {
+            const [childName, childNode] = getCatalogChildren(currentNode)[0];
+            currentName = childName;
+            currentNode = childNode;
+            currentPath = currentPath
+                ? `${currentPath}/${childName}`
+                : childName;
+        }
+
+        return {
+            id: String(currentNode?.id || currentPath),
+            name: currentName,
+            path: currentPath,
+            node: currentNode
+        };
     }
 
     function findCatalogTarget(
         catalogs,
         query
     ) {
-        const value =
-            String(query || "").trim();
+        const value = String(query || "").trim();
 
         if (!value) {
             return null;
         }
 
-        const parts =
-            value
-                .split("/")
-                .filter(Boolean);
+        const parts = value
+            .split("/")
+            .filter(Boolean);
 
         function findByNamedPath(
             nodes,
@@ -1878,8 +1997,7 @@
                 return null;
             }
 
-            const wanted =
-                pathParts[0];
+            const wanted = pathParts[0];
 
             for (const [name, node] of Object.entries(nodes)) {
                 if (!node || typeof node !== "object") {
@@ -1893,26 +2011,23 @@
                     continue;
                 }
 
-                const path =
-                    parentPath
-                        ? `${parentPath}/${name}`
-                        : name;
+                const path = parentPath
+                    ? `${parentPath}/${name}`
+                    : name;
 
                 if (pathParts.length === 1) {
-                    return {
-                        id: String(node.id || path),
+                    return collapseSingleChildChain(
                         name,
-                        path,
-                        node
-                    };
-                }
-
-                const child =
-                    findByNamedPath(
-                        node.children,
-                        pathParts.slice(1),
+                        node,
                         path
                     );
+                }
+
+                const child = findByNamedPath(
+                    node.children,
+                    pathParts.slice(1),
+                    path
+                );
 
                 if (child) {
                     return child;
@@ -1922,15 +2037,8 @@
             return null;
         }
 
-        /*
-         * A single ID such as Paa may point to a node
-         * anywhere in the Catalog tree.
-         */
         if (parts.length === 1) {
-            function walk(
-                nodes,
-                parentPath = ""
-            ) {
+            function walk(nodes, parentPath = "") {
                 if (
                     !nodes ||
                     typeof nodes !== "object" ||
@@ -1944,41 +2052,22 @@
                         continue;
                     }
 
-                    const path =
-                        parentPath
-                            ? `${parentPath}/${name}`
-                            : name;
+                    const path = parentPath
+                        ? `${parentPath}/${name}`
+                        : name;
 
                     if (
                         name === value ||
                         String(node.id || "") === value
                     ) {
-                        const singleLeaf =
-                            getSingleLeafChild(node);
-
-                        if (singleLeaf) {
-                            return {
-                                id: String(singleLeaf.node.id || path),
-                                name: singleLeaf.name,
-                                path: `${path}/${singleLeaf.name}`,
-                                node: singleLeaf.node
-                            };
-                        }
-
-                        return {
-                            id: String(node.id || path),
+                        return collapseSingleChildChain(
                             name,
-                            path,
-                            node
-                        };
-                    }
-
-                    const child =
-                        walk(
-                            node.children,
+                            node,
                             path
                         );
+                    }
 
+                    const child = walk(node.children, path);
                     if (child) {
                         return child;
                     }
@@ -1990,14 +2079,7 @@
             return walk(catalogs);
         }
 
-        /*
-         * Keep the historical name-based / path-based
-         * Catalog URLs working as well.
-         */
-        return findByNamedPath(
-            catalogs,
-            parts
-        );
+        return findByNamedPath(catalogs, parts);
     }
 
 
@@ -2109,11 +2191,9 @@
 
         catalogRoot.hidden = false;
 
-        await appendCatalogs(
+        await appendCatalogRoots(
             select,
             visibleCatalogs,
-            "",
-            0,
             printPosts,
             hidePosts,
             separatorBefore
@@ -2207,6 +2287,42 @@
     }
 
 
+    async function appendCatalogRoots(
+        select,
+        catalogs,
+        printPosts,
+        hidePosts,
+        separatorBefore
+    ) {
+        for (const [rootName, rootNode] of Object.entries(catalogs || {})) {
+            if (!catalogHasPosts(rootNode)) {
+                continue;
+            }
+
+            const entry = collapseSingleChildChain(
+                rootName,
+                rootNode,
+                rootName
+            );
+
+            if (!entry || !catalogHasPosts(entry.node)) {
+                continue;
+            }
+
+            await appendCatalogEntry(
+                select,
+                entry.name,
+                entry.node,
+                entry.path,
+                0,
+                printPosts,
+                hidePosts,
+                separatorBefore,
+                rootName
+            );
+        }
+    }
+
     async function appendCatalogs(
         select,
         catalogs,
@@ -2216,99 +2332,103 @@
         hidePosts,
         separatorBefore
     ) {
-        for (
-            const [name, node] of Object.entries(
-                catalogs
-            )
-        ) {
+        for (const [name, node] of Object.entries(catalogs || {})) {
             if (!catalogHasPosts(node)) {
                 continue;
             }
 
-            const path =
-                parentPath
-                    ? `${parentPath}/${name}`
-                    : name;
+            const path = parentPath
+                ? `${parentPath}/${name}`
+                : name;
 
-            const singleLeaf =
-                getSingleLeafChild(node);
+            await appendCatalogEntry(
+                select,
+                name,
+                node,
+                path,
+                depth,
+                printPosts,
+                hidePosts,
+                separatorBefore,
+                path
+            );
+        }
+    }
 
-            const catalogId =
-                String(
-                    singleLeaf?.node?.id ||
-                    node?.id ||
-                    path
-                );
+    async function appendCatalogEntry(
+        select,
+        name,
+        node,
+        path,
+        depth,
+        printPosts,
+        hidePosts,
+        separatorBefore,
+        separatorKey
+    ) {
+        const catalogId = String(node?.id || path);
 
-            if (separatorBefore.has(path)) {
-                const separatorOption =
-                    document.createElement("option");
+        if (
+            separatorBefore.has(separatorKey) ||
+            separatorBefore.has(path) ||
+            separatorBefore.has(name)
+        ) {
+            const separatorOption = document.createElement("option");
+            separatorOption.disabled = true;
+            separatorOption.textContent = "────────────";
+            select.appendChild(separatorOption);
+        }
 
-                separatorOption.disabled =
-                    true;
+        const catalogOption = createOption(
+            catalogId,
+            `${indent(depth)}✧ ${name}`,
+            "catalog",
+            path
+        );
 
-                separatorOption.textContent =
-                    "────────────";
+        select.appendChild(catalogOption);
+
+        const posts = Array.isArray(node?.posts) ? node.posts : [];
+
+        if (
+            printPosts.has(path) &&
+            !hidePosts.has(path) &&
+            posts.length > 0
+        ) {
+            const titles = await loadPostTitles(posts);
+
+            posts.forEach(postRef => {
+                const storageId = getCatalogPostStorageId(postRef);
+                if (!storageId) return;
+
+                const publicId = getCatalogPostPublicId(postRef);
 
                 select.appendChild(
-                    separatorOption
+                    createOption(
+                        publicId,
+                        `${indent(depth + 1)}✦ ${
+                            titles.get(storageId) || humanizeId(storageId)
+                        }`,
+                        "post",
+                        storageId
+                    )
                 );
-            }
+            });
+        }
 
-            const catalogOption =
-                createOption(
-                    catalogId,
-                    `${indent(depth)}✧ ${name}`,
-                    "catalog",
-                    path
-                );
-
-            select.appendChild(
-                catalogOption
+        if (
+            node?.children &&
+            typeof node.children === "object"
+        ) {
+            await appendCatalogs(
+                select,
+                node.children,
+                path,
+                depth + 1,
+                printPosts,
+                hidePosts,
+                separatorBefore
             );
-
-            if (
-                printPosts.has(path) &&
-                !hidePosts.has(path) &&
-                Array.isArray(node?.posts)
-            ) {
-                const titles =
-                    await loadPostTitles(
-                        node.posts
-                    );
-
-                node.posts.forEach(
-                    postId => {
-                        select.appendChild(
-                            createOption(
-                                getPublicPostId(postId),
-                                `${indent(depth + 1)}✦ ${
-                                    titles.get(postId) ||
-                                    humanizeId(postId)
-                                }`,
-                                "post",
-                                postId
-                            )
-                        );
-                    }
-                );
-            }
-
-            if (
-                node?.children &&
-                typeof node.children === "object" &&
-                !singleLeaf
-            ) {
-                await appendCatalogs(
-                    select,
-                    node.children,
-                    path,
-                    depth + 1,
-                    printPosts,
-                    hidePosts,
-                    separatorBefore
-                );
-            }
         }
     }
 
@@ -2356,7 +2476,14 @@
 
         await Promise.all(
             postIds.map(
-                async postId => {
+                async postRef => {
+                    const postId =
+                        getCatalogPostStorageId(
+                            postRef
+                        );
+
+                    if (!postId) return;
+
                     try {
                         const response =
                             await fetch(
@@ -3032,7 +3159,12 @@
                     hideDirectRoots.has(name);
 
                 if (!hideDirect && Array.isArray(node.posts)) {
-                    for (const postId of node.posts) {
+                    for (const postRef of node.posts) {
+                        const postId =
+                            getCatalogPostStorageId(
+                                postRef
+                            );
+
                         if (!postId || seen.has(postId) || isCodexHidden(postId)) {
                             continue;
                         }
