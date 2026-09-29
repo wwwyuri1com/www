@@ -1,286 +1,325 @@
 {
-    "groups": {
-        "Love Emo": [
-            "Sweet",
-            "Spicy",
-            "Wild",
-            "Dominant",
-            "Metaphorical",
-            "Flirting"
-        ],
-        "OC Trait": [
-            "Tsundere",
-            "Yandere",
-            "Aloof",
-            "Forward",
-            "Gap Moe",
-            "Duplicity",
-            "Girlboss",
-            "GL Awakening"
-        ],
-        "Style": [
-            "Romance",
-            "Humor",
-            "Sexual Humor",
-            "Plot",
-            "Suspense"
-        ],
-        "Background": [
-            "Modern",
-            "Technology",
-            "Fantasy",
-            "Campus"
-        ],
-        "Main Story CP": [
-            "🩵🩷",
-            "🩵🩶",
-            "❤️💛",
-            "❤️💜"
-        ],
-        "Intimacy Context Level": [
-            "Intimacy-Surface",
-            "Intimacy-Suggestive",
-            "Intimacy-Candid",
-            "Intimacy-Very Pervasive"
-        ],
-        "Word Count": [
-            "Under 2.5k",
-            "2.5k-7k",
-            "7k-20k",
-            "20k-50k",
-            "50k-1m",
-            "1m-3m",
-            "Over 3m"
-        ]
+  "_filter_settings": {
+    "single_select_groups": [
+      "Intimacy Context Level",
+      "Word Count"
+    ],
+    "single_select_note": "Tags in the groups listed below can only be selected one at a time."
+  },
+  "groups": {
+    "Love Emo": [
+      "Sweet",
+      "Spicy",
+      "Wild",
+      "Dominant",
+      "Metaphorical",
+      "Flirting",
+      "Love-Triangle"
+    ],
+    "OC Trait": [
+      "Tsundere",
+      "Yandere",
+      "Aloof",
+      "Forward",
+      "Gap Moe",
+      "Duplicity",
+      "Girlboss",
+      "GL Awakening"
+    ],
+    "Style": [
+      "Romance",
+      "Humor",
+      "Sexual Humor",
+      "Plot",
+      "Suspense"
+    ],
+    "Background": [
+      "Modern",
+      "Technology",
+      "Fantasy",
+      "Campus"
+    ],
+    "Main Story CP": [
+      "🩵🩷",
+      "🩵🩶",
+      "❤️💛",
+      "❤️💜"
+    ],
+    "Intimacy Context Level": [
+      "Intimacy-Surface",
+      "Intimacy-Suggestive",
+      "Intimacy-Candid",
+      "Intimacy-Very Pervasive"
+    ],
+    "Word Count": [
+      "Under 2.5k",
+      "2.5k-7k",
+      "7k-20k",
+      "20k-50k",
+      "50k-1m",
+      "1m-3m",
+      "Over 3m"
+    ]
+  },
+  "tags": {
+    "Sweet": {
+      "posts": [
+        "20260927-01_I_Icys-Patisserie",
+        "20260924-03_D_AI-Lover-CYAN-V0001",
+        "20260924-02_S_LadyL",
+        "20260924-01_S_LittleBunny"
+      ]
     },
-    "tags": {
-        "Sweet": {
-            "posts": [
-                "20260927-01_I_Icys-Patisserie",
-                "20260924-03_D_AI-Lover-CYAN-V0001",
-                "20260924-02_S_LadyL",
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "Metaphorical": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob",
-                "20260926-02_S_Doberman",
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "Tsundere": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob",
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "Humor": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-02_O_Cat-Fighting",
-                "20260926-01_R_VIP-Client",
-                "20260926-02_S_Doberman",
-                "20260925-01_S_Sorry",
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "Modern": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-02_O_Cat-Fighting",
-                "20260927-01_O_Miss you",
-                "20260927-01_I_Icys-Patisserie",
-                "20260926-01_R_VIP-Client",
-                "20260926-02_S_Doberman",
-                "20260925-01_S_Sorry",
-                "20260924-02_S_LadyL",
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "2.5k-7k": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-01_L_Contract-Me",
-                "20260927-01_I_Icys-Patisserie",
-                "20260926-02_S_Doberman",
-                "20260925-01_S_Sorry",
-                "20260924-04_L_Yuri-Succubus",
-                "20260924-03_D_AI-Lover-CYAN-V0001",
-                "20260924-01_S_LittleBunny",
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "Wild": {
-            "posts": [
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "Under 2.5k": {
-            "posts": [
-                "20260928-02_O_Cat-Fighting",
-                "20260927-01_O_Miss you",
-                "20260926-01_R_VIP-Client"
-            ]
-        },
-        "Sexual Humor": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-01_L_Contract-Me",
-                "20260924-04_L_Yuri-Succubus",
-                "20260924-03_D_AI-Lover-CYAN-V0001",
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "Spicy": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-01_L_Contract-Me",
-                "20260924-04_L_Yuri-Succubus",
-                "20260924-03_D_AI-Lover-CYAN-V0001",
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "Gap Moe": {
-            "posts": [
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "Duplicity": {
-            "posts": [
-                "20260924-01_S_LittleBunny"
-            ]
-        },
-        "Girlboss": {
-            "posts": [
-                "20260926-01_R_VIP-Client",
-                "20260926-02_S_Doberman",
-                "20260924-02_S_LadyL"
-            ]
-        },
-        "GL Awakening": {
-            "posts": [
-                "20260926-02_S_Doberman",
-                "20260924-03_D_AI-Lover-CYAN-V0001"
-            ]
-        },
-        "Technology": {
-            "posts": [
-                "20260924-03_D_AI-Lover-CYAN-V0001"
-            ]
-        },
-        "Intimacy-Very Pervasive": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-01_L_Contract-Me",
-                "20260924-04_L_Yuri-Succubus",
-                "20260924-03_D_AI-Lover-CYAN-V0001"
-            ]
-        },
-        "Fantasy": {
-            "posts": [
-                "20260928-01_L_Contract-Me",
-                "20260924-04_L_Yuri-Succubus"
-            ]
-        },
-        "Flirting": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-01_L_Contract-Me",
-                "20260927-01_O_Miss you",
-                "20260927-01_I_Icys-Patisserie",
-                "20260926-01_R_VIP-Client",
-                "20260925-01_S_Sorry",
-                "20260924-04_L_Yuri-Succubus"
-            ]
-        },
-        "Clingy": {
-            "posts": [
-                "20260924-04_L_Yuri-Succubus"
-            ]
-        },
-        "Aloof": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-03_D_Campus-Heartthrob",
-                "20260926-01_R_VIP-Client",
-                "20260925-01_S_Sorry"
-            ]
-        },
-        "Intimacy-Surface": {
-            "posts": [
-                "20260928-02_O_Cat-Fighting",
-                "20260925-01_S_Sorry"
-            ]
-        },
-        "Intimacy-Candid": {
-            "posts": [
-                "20260927-01_I_Icys-Patisserie",
-                "20260926-01_R_VIP-Client"
-            ]
-        },
-        "Dominant": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260926-02_S_Doberman"
-            ]
-        },
-        "Intimacy-Suggestive": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob",
-                "20260927-01_O_Miss you",
-                "20260926-02_S_Doberman"
-            ]
-        },
-        "Forward": {
-            "posts": [
-                "20260928-04_C_15x-Massage",
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-01_L_Contract-Me",
-                "20260927-01_O_Miss you",
-                "20260927-01_I_Icys-Patisserie"
-            ]
-        },
-        "Romance": {
-            "posts": [
-                "20260927-01_O_Miss you",
-                "20260927-01_I_Icys-Patisserie"
-            ]
-        },
-        "🩵🩷": {
-            "posts": [
-                "20260927-01_I_Icys-Patisserie"
-            ]
-        },
-        "❤️💛": {
-            "posts": [
-                "20260927-01_O_Miss you"
-            ]
-        },
-        "❤️💜": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob",
-                "20260928-01_L_Contract-Me",
-                "20260924-04_L_Yuri-Succubus"
-            ]
-        },
-        "❤️💙": {
-            "posts": [
-                "20260924-03_D_AI-Lover-CYAN-V0001"
-            ]
-        },
-        "Campus": {
-            "posts": [
-                "20260928-03_D_Campus-Heartthrob"
-            ]
-        },
-        "🩵🩶": {
-            "posts": [
-                "20260928-04_C_15x-Massage"
-            ]
-        }
+    "Metaphorical": {
+      "posts": [
+        "20260928-03_D_Campus-Heartthrob",
+        "20260926-02_S_Doberman",
+        "20260924-01_S_LittleBunny"
+      ]
+    },
+    "Tsundere": {
+      "posts": [
+        "20260929-01_L_Self-Defense",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260924-01_S_LittleBunny"
+      ]
+    },
+    "Humor": {
+      "posts": [
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-02_O_Cat-Fighting",
+        "20260926-01_R_VIP-Client",
+        "20260926-02_S_Doberman",
+        "20260925-01_S_Sorry",
+        "20260924-01_S_LittleBunny"
+      ]
+    },
+    "Modern": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-02_O_Cat-Fighting",
+        "20260927-01_O_Miss you",
+        "20260927-01_I_Icys-Patisserie",
+        "20260926-01_R_VIP-Client",
+        "20260926-02_S_Doberman",
+        "20260925-01_S_Sorry",
+        "20260924-02_S_LadyL",
+        "20260924-01_S_LittleBunny"
+      ]
+    },
+    "2.5k-7k": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-01_L_Contract-Me",
+        "20260927-01_I_Icys-Patisserie",
+        "20260926-02_S_Doberman",
+        "20260925-01_S_Sorry",
+        "20260924-04_L_Yuri-Succubus",
+        "20260924-03_D_AI-Lover-CYAN-V0001",
+        "20260924-01_S_LittleBunny",
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "Wild": {
+      "posts": [
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "Under 2.5k": {
+      "posts": [
+        "20260928-02_O_Cat-Fighting",
+        "20260927-01_O_Miss you",
+        "20260926-01_R_VIP-Client"
+      ]
+    },
+    "Sexual Humor": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260928-04_C_15x-Massage",
+        "20260928-01_L_Contract-Me",
+        "20260924-04_L_Yuri-Succubus",
+        "20260924-03_D_AI-Lover-CYAN-V0001",
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "Spicy": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-01_L_Contract-Me",
+        "20260924-04_L_Yuri-Succubus",
+        "20260924-03_D_AI-Lover-CYAN-V0001",
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "Gap Moe": {
+      "posts": [
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "Duplicity": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260924-01_S_LittleBunny"
+      ]
+    },
+    "Girlboss": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260926-01_R_VIP-Client",
+        "20260926-02_S_Doberman",
+        "20260924-02_S_LadyL"
+      ]
+    },
+    "GL Awakening": {
+      "posts": [
+        "20260926-02_S_Doberman",
+        "20260924-03_D_AI-Lover-CYAN-V0001"
+      ]
+    },
+    "Technology": {
+      "posts": [
+        "20260924-03_D_AI-Lover-CYAN-V0001"
+      ]
+    },
+    "Intimacy-Very Pervasive": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-01_L_Contract-Me",
+        "20260924-04_L_Yuri-Succubus",
+        "20260924-03_D_AI-Lover-CYAN-V0001"
+      ]
+    },
+    "Fantasy": {
+      "posts": [
+        "20260928-01_L_Contract-Me",
+        "20260924-04_L_Yuri-Succubus"
+      ]
+    },
+    "Flirting": {
+      "posts": [
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-01_L_Contract-Me",
+        "20260927-01_O_Miss you",
+        "20260927-01_I_Icys-Patisserie",
+        "20260926-01_R_VIP-Client",
+        "20260925-01_S_Sorry",
+        "20260924-04_L_Yuri-Succubus"
+      ]
+    },
+    "Clingy": {
+      "posts": [
+        "20260924-04_L_Yuri-Succubus"
+      ]
+    },
+    "Aloof": {
+      "posts": [
+        "20260928-04_C_15x-Massage",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260926-01_R_VIP-Client",
+        "20260925-01_S_Sorry"
+      ]
+    },
+    "Intimacy-Surface": {
+      "posts": [
+        "20260928-02_O_Cat-Fighting",
+        "20260925-01_S_Sorry"
+      ]
+    },
+    "Intimacy-Candid": {
+      "posts": [
+        "20260927-01_I_Icys-Patisserie",
+        "20260926-01_R_VIP-Client"
+      ]
+    },
+    "Dominant": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260928-04_C_15x-Massage",
+        "20260926-02_S_Doberman"
+      ]
+    },
+    "Intimacy-Suggestive": {
+      "posts": [
+        "20260928-03_D_Campus-Heartthrob",
+        "20260927-01_O_Miss you",
+        "20260926-02_S_Doberman"
+      ]
+    },
+    "Forward": {
+      "posts": [
+        "20260929-01_L_Self-Defense",
+        "20260928-04_C_15x-Massage",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-01_L_Contract-Me",
+        "20260927-01_O_Miss you",
+        "20260927-01_I_Icys-Patisserie"
+      ]
+    },
+    "Romance": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260927-01_O_Miss you",
+        "20260927-01_I_Icys-Patisserie"
+      ]
+    },
+    "🩵🩷": {
+      "posts": [
+        "20260927-01_I_Icys-Patisserie"
+      ]
+    },
+    "❤️💛": {
+      "posts": [
+        "20260929-01_L_Self-Defense",
+        "20260927-01_O_Miss you"
+      ]
+    },
+    "❤️💜": {
+      "posts": [
+        "20260929-01_L_Self-Defense",
+        "20260928-03_D_Campus-Heartthrob",
+        "20260928-01_L_Contract-Me",
+        "20260924-04_L_Yuri-Succubus"
+      ]
+    },
+    "❤️💙": {
+      "posts": [
+        "20260924-03_D_AI-Lover-CYAN-V0001"
+      ]
+    },
+    "Campus": {
+      "posts": [
+        "20260928-03_D_Campus-Heartthrob"
+      ]
+    },
+    "🩵🩶": {
+      "posts": [
+        "20260928-04_C_15x-Massage"
+      ]
+    },
+    "Love-Triangle": {
+      "posts": [
+        "20260929-02_S_Five-Bottles",
+        "20260929-01_L_Self-Defense",
+        "20260928-03_D_Campus-Heartthrob"
+      ]
+    },
+    "Yandere": {
+      "posts": [
+        "20260929-02_S_Five-Bottles"
+      ]
     }
+  }
 }

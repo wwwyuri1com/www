@@ -32,6 +32,10 @@
     let tagDataPromise = null;
     let catalogPostMarks = new Map();
     let catalogNodeMarks = new Map();
+    let tagFilterData = null;
+    let tagFilterPopup = null;
+    let activeTagSelection = [];
+    let tagFilterCountRequest = 0;
 
     function loadFreshJSON(path) {
         return fetch(path, { cache: "no-cache" }).then(async response => {
@@ -122,14 +126,16 @@
         const catalogQuery =
             params.get("catalog");
 
-        const tagQuery =
-            params.get("tag");
+        const tagQueries =
+            params.getAll("tag").filter(Boolean);
 
+        const hasTagQuery =
+            tagQueries.length > 0;
 
         try {
             if (
                 catalogQuery === "Favorite" &&
-                tagQuery === null
+                !hasTagQuery
             ) {
                 await renderFavoriteResult();
                 return;
@@ -137,14 +143,13 @@
 
             if (
                 catalogQuery === "Hidden" &&
-                tagQuery === null
+                !hasTagQuery
             ) {
                 await renderHiddenResult();
                 return;
             }
 
             const requests = [];
-
 
             if (catalogQuery !== null) {
                 requests.push(
@@ -156,8 +161,7 @@
                 );
             }
 
-
-            if (tagQuery !== null) {
+            if (hasTagQuery) {
                 requests.push(
                     getTagData()
                         .then(data => ({
@@ -167,10 +171,9 @@
                 );
             }
 
-
             if (
                 catalogQuery === null &&
-                tagQuery === null
+                !hasTagQuery
             ) {
                 requests.push(
                     getCatalogData()
@@ -181,31 +184,27 @@
                 );
             }
 
-
             const results =
                 await Promise.all(requests);
 
-
             const result =
                 results[0];
-
 
             if (!result) {
                 renderMessage(
                     "Unable to load Codex."
                 );
-
                 return;
             }
 
-
             if (result.type === "tag") {
+                activeTagSelection = [...tagQueries];
                 await renderTagResult(
                     result.data,
-                    tagQuery
+                    tagQueries
                 );
-
             } else {
+                activeTagSelection = [];
                 await renderCatalogResult(
                     result.data,
                     catalogQuery
@@ -217,7 +216,6 @@
                 "Codex result:",
                 error
             );
-
             renderMessage(
                 "Unable to load Codex."
             );
@@ -439,7 +437,7 @@
          */
         if (
             catalogQuery === null &&
-            new URLSearchParams(window.location.search).get("tag") === null
+            new URLSearchParams(window.location.search).getAll("tag").filter(Boolean).length === 0
         ) {
             await renderFavoriteBox();
         }
@@ -784,39 +782,41 @@
 
     async function renderTagResult(
         data,
-        tag
+        tags
     ) {
         clearResult();
 
+        const selectedTags =
+            Array.isArray(tags)
+                ? tags.filter(Boolean)
+                : [];
 
         appendResultHeader(
-            `✦ #${tag}`
+            formatTagResultTitle(selectedTags)
         );
 
-
-        const tagData =
-            data?.tags?.[tag];
-
-
-        if (
-            !tagData ||
-            !Array.isArray(
-                tagData.posts
-            )
-        ) {
-            renderMessage(
-                "Tag not found."
-            );
-
+        if (selectedTags.length === 0) {
+            renderMessage("Select at least one Tag.");
             return;
         }
 
+        const postIds =
+            getTagFilterPostIds(
+                data,
+                selectedTags
+            );
+
+        if (postIds.length === 0) {
+            renderMessage(
+                "No posts match these Tags."
+            );
+            return;
+        }
 
         const posts =
             await loadPostData(
-                tagData.posts
+                postIds
             );
-
 
         const postList =
             document.createElement(
@@ -826,22 +826,16 @@
         postList.className =
             "codex-post-list";
 
-
         for (
             const postId
-            of tagData.posts
+            of postIds
         ) {
-            if (isCodexHidden(postId)) {
-                continue;
-            }
-
             const post =
                 createPostElement(
                     postId,
                     posts.get(postId),
                     0
                 );
-
 
             if (post) {
                 postList.appendChild(
@@ -850,9 +844,89 @@
             }
         }
 
+        if (postList.children.length === 0) {
+            renderMessage(
+                "No posts match these Tags."
+            );
+            return;
+        }
 
         resultRoot.appendChild(
             postList
+        );
+    }
+
+
+    function formatTagLabel(tag) {
+        return /^\p{Extended_Pictographic}/u.test(tag)
+            ? tag
+            : `#${tag}`;
+    }
+
+
+    function formatTagResultTitle(tags) {
+        if (!tags.length) {
+            return "✦ Tags";
+        }
+
+        if (tags.length <= 3) {
+            return `✦ ${tags.map(formatTagLabel).join(" + ")}`;
+        }
+
+        return `✦ ${tags.slice(0, 2).map(formatTagLabel).join(" + ")} + ${tags.length - 2} more`;
+    }
+
+
+    function getSingleSelectGroups(data) {
+        const configured =
+            data?._filter_settings?.single_select_groups;
+
+        return new Set(
+            Array.isArray(configured)
+                ? configured.map(String)
+                : []
+        );
+    }
+
+
+    function getTagFilterPostIds(data, selectedTags) {
+        if (!Array.isArray(selectedTags) || selectedTags.length === 0) {
+            return [];
+        }
+
+        const tagSets = [];
+        let baseOrder = null;
+
+        for (const tag of selectedTags) {
+            const posts =
+                Array.isArray(data?.tags?.[tag]?.posts)
+                    ? data.tags[tag].posts
+                    : [];
+
+            const set = new Set();
+            const order = [];
+
+            for (const postId of posts) {
+                if (isCodexHidden(postId)) continue;
+                const id = String(postId);
+                if (set.has(id)) continue;
+                set.add(id);
+                order.push(id);
+            }
+
+            if (baseOrder === null) {
+                baseOrder = order;
+            }
+
+            tagSets.push(set);
+
+            if (set.size === 0) {
+                return [];
+            }
+        }
+
+        return baseOrder.filter(postId =>
+            tagSets.every(set => set.has(postId))
         );
     }
 
@@ -2124,58 +2198,38 @@
     function buildTagSelector(
         data
     ) {
+        tagFilterData = data || {};
+
         const select =
             tagRoot.querySelector(
                 "select"
             );
 
-
         if (!select) {
             return;
         }
-
 
         const placeholder =
             select.querySelector(
                 'option[value=""]'
             );
 
-
         select.textContent = "";
 
-
-        if (placeholder) {
-            select.appendChild(
-                placeholder
+        const placeholderOption =
+            placeholder ||
+            createOption(
+                "",
+                "⛛ Select Tag",
+                "placeholder"
             );
 
-        } else {
-            const option =
-                createOption(
-                    "",
-                    "⛛ Select Tag",
-                    "placeholder"
-                );
-
-
-            option.disabled =
-                true;
-
-            option.selected =
-                true;
-
-            option.hidden =
-                true;
-
-
-            select.appendChild(
-                option
-            );
-        }
-
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        placeholderOption.hidden = false;
+        select.appendChild(placeholderOption);
 
         let visibleGroupCount = 0;
-
 
         for (
             const [groupName, tags]
@@ -2187,11 +2241,6 @@
                 continue;
             }
 
-
-            /*
-             * A Tag is visible only when W-Tag.json
-             * actually maps it to at least one Post.
-             */
             const visibleTags =
                 tags.filter(tag =>
                     Array.isArray(
@@ -2200,21 +2249,17 @@
                     data.tags[tag].posts.length > 0
                 );
 
-
             if (visibleTags.length === 0) {
                 continue;
             }
-
 
             const group =
                 document.createElement(
                     "optgroup"
                 );
 
-
             group.label =
                 `✥ ${groupName}`;
-
 
             visibleTags.forEach(
                 tag => {
@@ -2229,39 +2274,571 @@
                 }
             );
 
-
-            select.appendChild(
-                group
-            );
-
+            select.appendChild(group);
             visibleGroupCount += 1;
         }
-
 
         tagRoot.hidden =
             visibleGroupCount === 0;
 
+        const currentTags =
+            new URLSearchParams(
+                window.location.search
+            ).getAll("tag").filter(Boolean);
 
-        select.addEventListener(
-            "change",
-            () => {
-                const option =
-                    select.options[
-                        select.selectedIndex
-                    ];
+        activeTagSelection = [...currentTags];
+        updateTagSelectSummary(
+            select,
+            currentTags
+        );
+
+        /* Native SELECT remains underneath as the fallback layer. */
+        select.onchange = () => {
+            const option =
+                select.options[
+                    select.selectedIndex
+                ];
+
+            if (!option || option.dataset.type !== "tag") {
+                return;
+            }
+
+            window.location.href =
+                `Codex.html?tag=${encodeURIComponent(
+                    option.value
+                )}`;
+        };
+
+        installTagFilterTrigger(select);
+        ensureTagFilterPopup();
+    }
 
 
-                if (!option) {
-                    return;
+    function updateTagSelectSummary(
+        select,
+        selectedTags
+    ) {
+        const placeholder =
+            select.querySelector(
+                'option[value=""]'
+            );
+
+        if (!placeholder) {
+            return;
+        }
+
+        if (!selectedTags.length) {
+            placeholder.textContent =
+                "⛛ Select Tag";
+        } else if (selectedTags.length === 1) {
+            placeholder.textContent =
+                `⛛ ${formatTagLabel(selectedTags[0])}`;
+        } else {
+            placeholder.textContent =
+                `⛛ ${selectedTags.length} Tags Selected`;
+        }
+    }
+
+
+    function installTagFilterTrigger(select) {
+        if (tagRoot.dataset.codexTagPopupReady === "true") {
+            return;
+        }
+
+        tagRoot.dataset.codexTagPopupReady = "true";
+        tagRoot.style.position = "relative";
+
+        const trigger =
+            document.createElement("button");
+
+        trigger.type = "button";
+        trigger.className = "codex-tag-filter-trigger";
+        trigger.setAttribute(
+            "aria-label",
+            "Open Tag Filter"
+        );
+        trigger.setAttribute(
+            "aria-haspopup",
+            "dialog"
+        );
+        trigger.title = "Tag Filter";
+
+        trigger.addEventListener(
+            "click",
+            openTagFilterPopup
+        );
+
+        tagRoot.appendChild(trigger);
+
+        /* Keep the original SELECT in place for fallback / future rollback. */
+        select.tabIndex = -1;
+        select.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+        select.style.pointerEvents = "none";
+    }
+
+
+    function ensureTagFilterPopup() {
+        if (tagFilterPopup) {
+            return;
+        }
+
+        const modal =
+            document.createElement("div");
+
+        modal.id = "codex-tag-filter-modal";
+        modal.className =
+            "reader-data-modal codex-tag-filter-modal";
+        modal.hidden = true;
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        const backdrop =
+            document.createElement("div");
+        backdrop.className =
+            "reader-data-modal-backdrop";
+
+        const dialog =
+            document.createElement("div");
+        dialog.className =
+            "reader-data-dialog codex-tag-filter-dialog";
+        dialog.setAttribute("role", "dialog");
+        dialog.setAttribute("aria-modal", "true");
+        dialog.setAttribute(
+            "aria-labelledby",
+            "codex-tag-filter-title"
+        );
+
+        const titleRow =
+            document.createElement("div");
+        titleRow.className =
+            "codex-tag-filter-title-row";
+
+        const title =
+            document.createElement("div");
+        title.id =
+            "codex-tag-filter-title";
+        title.className =
+            "reader-data-dialog-title codex-tag-filter-title";
+        title.textContent =
+            "Tag Filter";
+
+        const close =
+            document.createElement("button");
+        close.type = "button";
+        close.className =
+            "codex-tag-filter-close";
+        close.setAttribute(
+            "aria-label",
+            "Close Tag Filter"
+        );
+        close.title = "Close";
+
+        const closeIcon =
+            document.createElement("i");
+        closeIcon.setAttribute(
+            "data-lucide",
+            "x"
+        );
+        close.appendChild(closeIcon);
+        close.addEventListener(
+            "click",
+            closeTagFilterPopup
+        );
+
+        titleRow.append(
+            title,
+            close
+        );
+
+        const selected =
+            document.createElement("div");
+        selected.id =
+            "codex-tag-filter-selected";
+        selected.className =
+            "codex-tag-filter-selected";
+
+        const groups =
+            document.createElement("div");
+        groups.id =
+            "codex-tag-filter-groups";
+        groups.className =
+            "codex-tag-filter-groups";
+
+        const note =
+            document.createElement("div");
+        note.className =
+            "codex-tag-filter-note";
+        note.textContent =
+            "All selected Tags must match.";
+
+        const match =
+            document.createElement("div");
+        match.id =
+            "codex-tag-filter-match";
+        match.className =
+            "codex-tag-filter-match";
+
+        const actions =
+            document.createElement("div");
+        actions.className =
+            "reader-data-dialog-actions codex-tag-filter-actions";
+
+        const confirm =
+            document.createElement("button");
+        confirm.type = "button";
+        confirm.className =
+            "reader-data-dialog-button primary codex-tag-filter-confirm";
+        confirm.textContent = "Confirm";
+        confirm.addEventListener(
+            "click",
+            confirmTagFilter
+        );
+
+        actions.appendChild(confirm);
+        dialog.append(
+            titleRow,
+            groups,
+            note,
+            selected,
+            match,
+            actions
+        );
+        modal.append(
+            backdrop,
+            dialog
+        );
+        document.body.appendChild(modal);
+
+        tagFilterPopup = {
+            modal,
+            dialog,
+            selected,
+            groups,
+            match,
+            confirm,
+            close
+        };
+
+        renderStatusIcons();
+
+        document.addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Escape" &&
+                    !modal.hidden
+                ) {
+                    closeTagFilterPopup();
                 }
-
-
-                window.location.href =
-                    `Codex.html?tag=${encodeURIComponent(
-                        option.value
-                    )}`;
             }
         );
+    }
+
+
+    function openTagFilterPopup() {
+        ensureTagFilterPopup();
+
+        if (!tagFilterPopup) {
+            return;
+        }
+
+        const current =
+            new URLSearchParams(
+                window.location.search
+            ).getAll("tag").filter(Boolean);
+
+        tagFilterPopup.modal._draftTags =
+            new Set(current);
+
+        tagFilterPopup.modal.hidden = false;
+        tagFilterPopup.modal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        renderTagFilterPopup();
+
+        requestAnimationFrame(() => {
+            tagFilterPopup.close.focus();
+        });
+    }
+
+
+    function closeTagFilterPopup() {
+        if (!tagFilterPopup) {
+            return;
+        }
+
+        tagFilterPopup.modal.hidden = true;
+        tagFilterPopup.modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+    }
+
+
+    function renderTagFilterPopup() {
+        if (!tagFilterPopup) {
+            return;
+        }
+
+        const draft =
+            tagFilterPopup.modal._draftTags ||
+            new Set();
+
+        tagFilterPopup.selected.replaceChildren();
+
+        for (const tag of draft) {
+            const chip =
+                document.createElement("span");
+            chip.className =
+                "codex-tag-filter-chip";
+            chip.textContent =
+                formatTagLabel(tag);
+            tagFilterPopup.selected.appendChild(chip);
+        }
+
+        tagFilterPopup.selected.hidden =
+            draft.size === 0;
+
+        tagFilterPopup.groups.replaceChildren();
+
+        const data =
+            tagFilterData || {};
+        const singleSelectGroups =
+            getSingleSelectGroups(data);
+
+        for (const [groupName, tags] of Object.entries(data.groups || {})) {
+            if (!Array.isArray(tags)) continue;
+
+            const visibleTags = tags.filter(tag =>
+                Array.isArray(data?.tags?.[tag]?.posts) &&
+                data.tags[tag].posts.length > 0
+            );
+
+            if (!visibleTags.length) continue;
+
+            const isSingleSelect =
+                singleSelectGroups.has(groupName);
+
+            const group =
+                document.createElement("section");
+            group.className =
+                "codex-tag-filter-group" +
+                (isSingleSelect ? " is-single-select" : "");
+
+            const heading =
+                document.createElement("div");
+            heading.className =
+                "codex-tag-filter-group-title";
+            heading.textContent =
+                groupName;
+            group.appendChild(heading);
+
+            const optionWrap =
+                document.createElement("div");
+            optionWrap.className =
+                "codex-tag-filter-options";
+
+            for (const tag of visibleTags) {
+                const button =
+                    document.createElement("button");
+                const active =
+                    draft.has(tag);
+
+                button.type = "button";
+                button.className =
+                    "codex-tag-filter-option" +
+                    (isSingleSelect ? " is-single" : "") +
+                    (active ? " is-selected" : "");
+                button.textContent =
+                    formatTagLabel(tag);
+                button.setAttribute(
+                    "aria-pressed",
+                    String(active)
+                );
+
+                button.addEventListener(
+                    "click",
+                    () => {
+                        if (isSingleSelect) {
+                            if (draft.has(tag)) {
+                                return;
+                            }
+
+                            for (const otherTag of tags) {
+                                draft.delete(otherTag);
+                            }
+                            draft.add(tag);
+                        } else if (draft.has(tag)) {
+                            draft.delete(tag);
+                        } else {
+                            draft.add(tag);
+                        }
+                        renderTagFilterPopup();
+                    }
+                );
+
+                optionWrap.appendChild(button);
+            }
+
+            group.appendChild(optionWrap);
+            tagFilterPopup.groups.appendChild(group);
+        }
+
+        updateTagFilterMatchCount();
+    }
+
+    async function updateTagFilterMatchCount() {
+        if (!tagFilterPopup) {
+            return;
+        }
+
+        const draft =
+            tagFilterPopup.modal._draftTags ||
+            new Set();
+
+        const requestId =
+            ++tagFilterCountRequest;
+
+        tagFilterPopup.match.textContent =
+            "Checking…";
+        tagFilterPopup.confirm.disabled = true;
+
+        try {
+            const postIds =
+                await getTagFilterMatchPostIdsAsync(
+                    [...draft]
+                );
+
+            if (requestId !== tagFilterCountRequest || tagFilterPopup.modal.hidden) {
+                return;
+            }
+
+            const count = postIds.length;
+            tagFilterPopup.match.textContent =
+                count === 1
+                    ? "1 post matches"
+                    : `${count} posts match`;
+
+            tagFilterPopup.confirm.disabled =
+                count === 0;
+        } catch (error) {
+            if (requestId !== tagFilterCountRequest || tagFilterPopup.modal.hidden) {
+                return;
+            }
+
+            console.error(
+                "Codex tag filter count:",
+                error
+            );
+            tagFilterPopup.match.textContent =
+                "Unable to calculate matches.";
+            tagFilterPopup.confirm.disabled = true;
+        }
+    }
+
+
+    async function getTagFilterMatchPostIdsAsync(
+        selectedTags
+    ) {
+        if (!selectedTags.length) {
+            const catalogData =
+                await getCatalogData();
+
+            return collectVisibleCodexPostIds(
+                catalogData
+            );
+        }
+
+        return getTagFilterPostIds(
+            tagFilterData || {},
+            selectedTags
+        );
+    }
+
+
+    function collectVisibleCodexPostIds(data) {
+        const result = [];
+        const seen = new Set();
+
+        const hideDirectRoots =
+            new Set(
+                Array.isArray(data?.selector?.hide_posts)
+                    ? data.selector.hide_posts
+                    : []
+            );
+
+        function walk(nodes, inheritedHidden = false) {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+                return;
+            }
+
+            for (const [name, node] of Object.entries(nodes)) {
+                if (!node || typeof node !== "object") continue;
+
+                const hideDirect =
+                    inheritedHidden ||
+                    hideDirectRoots.has(name);
+
+                if (!hideDirect && Array.isArray(node.posts)) {
+                    for (const postId of node.posts) {
+                        if (!postId || seen.has(postId) || isCodexHidden(postId)) {
+                            continue;
+                        }
+                        seen.add(postId);
+                        result.push(postId);
+                    }
+                }
+
+                walk(node.children, hideDirect);
+            }
+        }
+
+        walk(data?.catalogs);
+        return result;
+    }
+
+
+    async function confirmTagFilter() {
+        if (!tagFilterPopup) {
+            return;
+        }
+
+        const draft =
+            tagFilterPopup.modal._draftTags ||
+            new Set();
+
+        const selected = [...draft];
+        const postIds =
+            await getTagFilterMatchPostIdsAsync(
+                selected
+            );
+
+        if (postIds.length === 0) {
+            return;
+        }
+
+        activeTagSelection = selected;
+        closeTagFilterPopup();
+
+        if (selected.length === 0) {
+            window.location.href = "Codex.html";
+            return;
+        }
+
+        const params = new URLSearchParams();
+        for (const tag of selected) {
+            params.append("tag", tag);
+        }
+
+        window.location.href =
+            `Codex.html?${params.toString()}`;
     }
 
 
