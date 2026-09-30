@@ -64,6 +64,15 @@
         if (!boss) return;
 
         try {
+            // Optional homepage hero override:
+            // If Codex-Img-hd/_index.jpg exists, use it.
+            // Otherwise fall back to the newest post cover.
+            const overrideSrc = await loadOptionalIndexCover();
+            if (overrideSrc) {
+                boss.style.backgroundImage = `url("${overrideSrc}")`;
+                return;
+            }
+
             const data = await loadCatalog();
             const postRefs = new Map();
 
@@ -114,6 +123,31 @@
             // Keep cover-def.jpg as the emergency fallback only.
             throw error;
         }
+    }
+
+    async function loadOptionalIndexCover() {
+        const candidates = [
+            "./Codex-Img-hd/_index.jpg",
+            "./Codex-Img-hd/_index.jpeg",
+            "./Codex-Img-hd/_index.png",
+            "./Codex-Img-hd/_index.webp"
+        ];
+
+        for (const src of candidates) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    image.onload = () => resolve();
+                    image.onerror = () => reject(new Error("Image unavailable"));
+                    image.src = src;
+                });
+                return src;
+            } catch (error) {
+                // Try the next extension.
+            }
+        }
+
+        return null;
     }
 
     async function loadOriginalCover(postId, number = 1) {
