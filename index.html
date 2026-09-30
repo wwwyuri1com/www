@@ -21,7 +21,8 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-N5579QC33B');
+      const yuri1GaDebug = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+      gtag('config', 'G-N5579QC33B', yuri1GaDebug ? { debug_mode: true } : {});
     </script>
     <script src="Config/js/ga.js" defer></script>
 

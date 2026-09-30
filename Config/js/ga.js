@@ -19,6 +19,7 @@
     const IDLE_TIMEOUT_MS = 3 * 60 * 1000;
     const HEARTBEAT_MS = 60 * 1000;
     const GA_EVENT_RETRY_MS = 1000;
+    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
     const hasGtag = () => typeof window.gtag === "function";
 
@@ -28,12 +29,12 @@
             // Keep a tiny retry window so the first custom event is not lost if
             // the network-loaded Google script is a little slower.
             window.setTimeout(() => {
-                if (hasGtag()) window.gtag("event", name, params);
+                if (hasGtag()) window.gtag("event", name, isLocalhost ? { ...params, debug_mode: true } : params);
             }, GA_EVENT_RETRY_MS);
             return;
         }
 
-        window.gtag("event", name, params);
+        window.gtag("event", name, isLocalhost ? { ...params, debug_mode: true } : params);
     };
 
     const getPostId = () => {
@@ -153,18 +154,17 @@
     const tick = () => {
         const now = Date.now();
         const elapsed = Math.max(0, now - state.lastTickAt);
-        state.lastTickAt = now;
 
         if (document.visibilityState !== "visible") {
+            state.lastTickAt = now;
             state.idle = true;
             return;
         }
 
         if (now - state.lastActivityAt >= IDLE_TIMEOUT_MS) {
             if (!state.idle) {
-                // Count only until the exact 3-minute inactivity boundary.
-                // This avoids counting the portion of the current interval that
-                // happened after the user had already gone idle.
+                // Count only from the previous tick until the exact 3-minute
+                // inactivity boundary.
                 const activeEnd = Math.min(
                     now,
                     state.lastActivityAt + IDLE_TIMEOUT_MS
@@ -178,9 +178,12 @@
                 if (state.dark) state.darkSeconds += activeMs / 1000;
                 flushAll(true);
             }
+            state.lastTickAt = now;
             state.idle = true;
             return;
         }
+
+        state.lastTickAt = now;
 
         if (state.idle) return;
 
