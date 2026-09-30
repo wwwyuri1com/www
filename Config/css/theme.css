@@ -37,3 +37,86 @@ hr { border: 0;     border-top: 1px solid #fa669940;    box-shadow: 1px 1px 2px 
 /*  WEB PLUGIN  */
 /* ------------ */
 
+/* =========================================
+   16+ Content Notice
+   Displayed only on Post.html via content-notice.js
+   ========================================= */
+
+.yuri1-content-notice-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.yuri1-content-notice {
+    width: min(520px, 100%);
+    background: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 12px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.20);
+    padding: 28px 28px 24px;
+    color: #242424;
+}
+
+.yuri1-content-notice h2 {
+    margin: 0 0 18px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid #fa669940;
+    font-size: clamp(21px, 2.2vw, 28px);
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.yuri1-content-notice p {
+    margin: 0 0 14px;
+    font-size: clamp(14px, 1.2vw, 17px);
+    line-height: 1.75;
+}
+
+.yuri1-content-notice .notice-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.yuri1-content-notice button {
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 18px;
+    background: #fa6699;
+    color: #ffffff;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.yuri1-content-notice button:hover {
+    opacity: 0.86;
+}
+
+.yuri1-content-notice button:focus-visible {
+    outline: 2px solid #242424;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .yuri1-content-notice {
+        padding: 24px 20px 20px;
+    }
+
+    .yuri1-content-notice .notice-actions {
+        justify-content: stretch;
+    }
+
+    .yuri1-content-notice button {
+        width: 100%;
+    }
+}
+
