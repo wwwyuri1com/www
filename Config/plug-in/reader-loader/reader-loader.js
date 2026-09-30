@@ -42,7 +42,7 @@
         }
 
         const BACKUP_VERSION = 1;
-        const BACKUP_CARD_SYSTEM_VERSION = '1.008';
+        const BACKUP_CARD_SYSTEM_VERSION = '1.009';
         const BACKUP_SCOPE_PREFIXES = [
             'yuri1.reader.',
             'yuri1.codex.'
@@ -808,13 +808,22 @@
             } catch (error) {
                 // Restore the pre-import state so a failed restore can never
                 // leave localStorage partially overwritten.
-                Object.keys(BACKUP_SCOPE_PREFIXES.length ? previous : {}).forEach(
-                    key => {
-                        try {
-                            localStorage.removeItem(key);
-                        } catch {}
+                const currentScopedKeys = [];
+                for (let index = 0; index < localStorage.length; index += 1) {
+                    const key = localStorage.key(index);
+                    if (
+                        key &&
+                        BACKUP_SCOPE_PREFIXES.some(prefix => key.startsWith(prefix))
+                    ) {
+                        currentScopedKeys.push(key);
                     }
-                );
+                }
+
+                currentScopedKeys.forEach(key => {
+                    try {
+                        localStorage.removeItem(key);
+                    } catch {}
+                });
 
                 Object.keys(previous).forEach(key => {
                     try {
