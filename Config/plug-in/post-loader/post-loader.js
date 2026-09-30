@@ -442,9 +442,11 @@
             throw new Error("Post Loader DOM structure is incomplete.");
         }
 
-        document.title = data.title
-            ? `${data.title} \\ YURI1♡Short Novel IPs in Girls' Love`
-            : "YURI1♡Short Novel IPs in Girls' Love";
+        updatePostMetadata(
+            data,
+            storageId,
+            publicId
+        );
 
         // Let the consent/analytics loader know the final dynamic page title
         // is ready before Google Analytics sends its automatic page_view.
@@ -492,6 +494,165 @@
             backto,
             storageId
         );
+    }
+
+    function updatePostMetadata(
+        data,
+        storageId,
+        publicId
+    ) {
+        const siteName = "YURI1♡Short Novel IPs in Girls' Love";
+        const pageTitle = data.title
+            ? `${data.title} \\ ${siteName}`
+            : siteName;
+
+        const absoluteBase = "https://www.yuri1.com";
+        const canonicalUrl =
+            `${absoluteBase}/Post.html?id=${encodeURIComponent(publicId)}`;
+        const jsonUrl =
+            `${absoluteBase}/Codex-Text/${encodeURIComponent(storageId)}.json`;
+
+        document.title = pageTitle;
+
+        const kind = String(publicId || "").charAt(0).toUpperCase();
+        let description;
+        let schemaType = "WebPage";
+        let ogType = "website";
+
+        switch (kind) {
+            case "P":
+                description = `${data.title || "YURI1 story"} — Girls' Love (YURI) fiction on YURI1, presented through YURI1's Human Creation × AI Expansion format.`;
+                schemaType = "CreativeWork";
+                ogType = "article";
+                break;
+            case "N":
+                description = `${data.title || "YURI1 update"} — news and updates from YURI1.`;
+                schemaType = "Article";
+                ogType = "article";
+                break;
+            case "I":
+                description = `${data.title || "YURI1 character"} — an original character profile from YURI1.`;
+                break;
+            case "Y":
+                description = `${data.title || "YURI1 policy"} — YURI1 policy and site information.`;
+                break;
+            case "U":
+                description = `${data.title || "YURI1 guide"} — YURI1 user guide and reading information.`;
+                break;
+            case "F":
+                description = `${data.title || "YURI1 feature"} — information about YURI1 and its creative works.`;
+                break;
+            default:
+                description = `${data.title || "YURI1"} — YURI1♡Short Novel IPs in Girls' Love.`;
+                break;
+        }
+
+        const setMeta = (selector, attrs) => {
+            let node = document.head.querySelector(selector);
+            if (!node) {
+                node = document.createElement("meta");
+                document.head.appendChild(node);
+            }
+            for (const [name, value] of Object.entries(attrs)) {
+                node.setAttribute(name, value);
+            }
+        };
+
+        setMeta('meta[name="description"]', {
+            name: "description",
+            content: description
+        });
+        setMeta('meta[property="og:title"]', {
+            property: "og:title",
+            content: data.title || siteName
+        });
+        setMeta('meta[property="og:description"]', {
+            property: "og:description",
+            content: description
+        });
+        setMeta('meta[property="og:url"]', {
+            property: "og:url",
+            content: canonicalUrl
+        });
+        setMeta('meta[property="og:type"]', {
+            property: "og:type",
+            content: ogType
+        });
+        setMeta('meta[name="twitter:title"]', {
+            name: "twitter:title",
+            content: data.title || siteName
+        });
+        setMeta('meta[name="twitter:description"]', {
+            name: "twitter:description",
+            content: description
+        });
+        setMeta('meta[name="yuri1:content-source"]', {
+            name: "yuri1:content-source",
+            content: jsonUrl
+        });
+
+        let canonical = document.getElementById("yuri1-canonical");
+        if (!canonical) {
+            canonical = document.createElement("link");
+            canonical.id = "yuri1-canonical";
+            canonical.rel = "canonical";
+            document.head.appendChild(canonical);
+        }
+        canonical.href = canonicalUrl;
+
+        let jsonAlternate = document.getElementById("yuri1-post-json-alternate");
+        if (!jsonAlternate) {
+            jsonAlternate = document.createElement("link");
+            jsonAlternate.id = "yuri1-post-json-alternate";
+            jsonAlternate.rel = "alternate";
+            jsonAlternate.type = "application/json";
+            jsonAlternate.title = "Machine-readable post data";
+            document.head.appendChild(jsonAlternate);
+        }
+        jsonAlternate.href = jsonUrl;
+
+        const dataLink = document.getElementById("yuri1-post-data-link");
+        if (dataLink) {
+            dataLink.href = jsonUrl;
+            dataLink.type = "application/json";
+            dataLink.title = "Machine-readable post data (JSON)";
+        }
+
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": schemaType,
+            "name": data.title || siteName,
+            "url": canonicalUrl,
+            "isAccessibleForFree": true,
+            "isPartOf": {
+                "@type": "WebSite",
+                "name": "YURI1",
+                "url": `${absoluteBase}/`
+            },
+            "encoding": {
+                "@type": "MediaObject",
+                "encodingFormat": "application/json",
+                "contentUrl": jsonUrl
+            }
+        };
+
+        if (kind === "P") {
+            schema.genre = ["Girls' Love", "Yuri", "Fiction"];
+            schema.contentRating = "16+ maximum";
+        }
+
+        if (data.date) {
+            schema.datePublished = data.date;
+        }
+
+        let structured = document.getElementById("yuri1-structured-data");
+        if (!structured) {
+            structured = document.createElement("script");
+            structured.id = "yuri1-structured-data";
+            structured.type = "application/ld+json";
+            document.head.appendChild(structured);
+        }
+        structured.textContent = JSON.stringify(schema);
     }
 
     async function renderCatalog(

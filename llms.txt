@@ -1,0 +1,170 @@
+# YURI1
+
+> YURI1 (YURI NO1) is a public Girls' Love (YURI) mixed-media fiction website. Reader pages use JavaScript; the same published content is also available as public JSON.
+
+## Machine-readable access
+
+- Reader URL pattern: `https://www.yuri1.com/Post.html?id=<PUBLIC_ID>`
+- Canonical catalog: [W-Catalog.json](https://www.yuri1.com/Codex-W/W-Catalog.json)
+- Tag index: [W-Tag.json](https://www.yuri1.com/Codex-W/W-Tag.json)
+- Content files: `https://www.yuri1.com/Codex-Text/<STORAGE_ID>.json`
+- The entries below map each public reader ID directly to its public JSON content. The JSON and reader represent the same published work/data.
+- Content is public and may include material marked up to 16+; see the site Content Rating Guide and AI & Content Policy for details.
+
+## Public posts and data
+
+### News / Website News
+
+- **N260930-03 — About Fixes & Debugging**
+  - Reader: https://www.yuri1.com/Post.html?id=N260930-03
+  - JSON: https://www.yuri1.com/Codex-Text/~260930-03.json
+- **N260930-01 — Day1 Open Beta**
+  - Reader: https://www.yuri1.com/Post.html?id=N260930-01
+  - JSON: https://www.yuri1.com/Codex-Text/~260930-01.json
+- **N260924-01 — Domain Registered**
+  - Reader: https://www.yuri1.com/Post.html?id=N260924-01
+  - JSON: https://www.yuri1.com/Codex-Text/~260924-01.json
+
+### News / Creator's Talk
+
+- **N260930-02 — The Meaning of NO1**
+  - Reader: https://www.yuri1.com/Post.html?id=N260930-02
+  - JSON: https://www.yuri1.com/Codex-Text/~260930-02.json
+
+### Feature / Feature
+
+- **Faa01 — Introduction**
+  - Reader: https://www.yuri1.com/Post.html?id=Faa01
+  - JSON: https://www.yuri1.com/Codex-Text/_Introduction.json
+- **Faa02 — IP Story**
+  - Reader: https://www.yuri1.com/Post.html?id=Faa02
+  - JSON: https://www.yuri1.com/Codex-Text/_IP-Story.json
+- **Faa03 — Special Thanks**
+  - Reader: https://www.yuri1.com/Post.html?id=Faa03
+  - JSON: https://www.yuri1.com/Codex-Text/_Special-Thanks.json
+
+### User Guide / User Guide
+
+- **Uaa01 — Backup Card**
+  - Reader: https://www.yuri1.com/Post.html?id=Uaa01
+  - JSON: https://www.yuri1.com/Codex-Text/_Backup-Card.json
+- **Uaa02 — Reading Settings**
+  - Reader: https://www.yuri1.com/Post.html?id=Uaa02
+  - JSON: https://www.yuri1.com/Codex-Text/_Reading-Settings.json
+
+### IP Original Characters / IP Original Characters
+
+- **Iaa01 — Arte**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa01
+  - JSON: https://www.yuri1.com/Codex-Text/-Arte.json
+- **Iaa02 — Icy**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa02
+  - JSON: https://www.yuri1.com/Codex-Text/-Icy.json
+- **Iaa03 — N.White**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa03
+  - JSON: https://www.yuri1.com/Codex-Text/-N.White.json
+- **Iaa04 — D.Cyan**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa04
+  - JSON: https://www.yuri1.com/Codex-Text/-D.Cyan.json
+- **Iaa05 — D.Golden**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa05
+  - JSON: https://www.yuri1.com/Codex-Text/-D.Golden.json
+- **Iaa06 — E.Red**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa06
+  - JSON: https://www.yuri1.com/Codex-Text/-E.Red.json
+- **Iaa07 — L.Night**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa07
+  - JSON: https://www.yuri1.com/Codex-Text/-L.Night.json
+- **Iaa08 — C.Curo**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa08
+  - JSON: https://www.yuri1.com/Codex-Text/-C.Curo.json
+- **Iaa09 — D.Dark**
+  - Reader: https://www.yuri1.com/Post.html?id=Iaa09
+  - JSON: https://www.yuri1.com/Codex-Text/-D.Dark.json
+
+### Novels / IP : Icy & Arte
+
+- **P20260927-01 — Icy's Patisserie**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260927-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260927-01_I_Icys-Patisserie.json
+
+### Novels / IP : DDD Presents
+
+- **P20260928-03 — Campus Heartthrob**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260928-03
+  - JSON: https://www.yuri1.com/Codex-Text/20260928-03_D_Campus-Heartthrob.json
+- **P20260924-03 — Yuri AI Lover**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260924-03
+  - JSON: https://www.yuri1.com/Codex-Text/20260924-03_D_AI-Lover-CYAN-V0001.json
+
+### Novels / IP : Loading Night
+
+- **P20260929-01 — Self-Defense**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260929-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260929-01_L_Self-Defense.json
+- **P20260928-01 — Contract Me**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260928-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260928-01_L_Contract-Me.json
+- **P20260924-04 — Yuri Succubus**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260924-04
+  - JSON: https://www.yuri1.com/Codex-Text/20260924-04_L_Yuri-Succubus.json
+
+### Novels / Single : IP Collab
+
+- **P20260929-03 — DDD Special Operations**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260929-03
+  - JSON: https://www.yuri1.com/Codex-Text/20260929-03_C_DDD-Special-Operations.json
+- **P20260928-04 — 15x Massage**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260928-04
+  - JSON: https://www.yuri1.com/Codex-Text/20260928-04_C_15x-Massage.json
+
+### Novels / Single : OC's Off Script Time
+
+- **P20260928-02 — Cat Fighting**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260928-02
+  - JSON: https://www.yuri1.com/Codex-Text/20260928-02_O_Cat-Fighting.json
+- **P20260927-02 — Miss you**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260927-02
+  - JSON: https://www.yuri1.com/Codex-Text/20260927-02_O_Miss%20you.json
+
+### Novels / Single : Shorts
+
+- **P20260930-01 — Carnivore**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260930-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260930-01_S_Carnivore.json
+- **P20260929-02 — Five Bottles**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260929-02
+  - JSON: https://www.yuri1.com/Codex-Text/20260929-02_S_Five-Bottles.json
+- **P20260926-01 — VIP Client**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260926-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260926-01_R_VIP-Client.json
+- **P20260926-02 — Doberman**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260926-02
+  - JSON: https://www.yuri1.com/Codex-Text/20260926-02_S_Doberman.json
+- **P20260925-01 — Sorry**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260925-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260925-01_S_Sorry.json
+- **P20260924-02 — Lady L**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260924-02
+  - JSON: https://www.yuri1.com/Codex-Text/20260924-02_S_LadyL.json
+- **P20260924-01 — Little Bunny**
+  - Reader: https://www.yuri1.com/Post.html?id=P20260924-01
+  - JSON: https://www.yuri1.com/Codex-Text/20260924-01_S_LittleBunny.json
+
+### Policy / Policy
+
+- **Yaa01 — Terms**
+  - Reader: https://www.yuri1.com/Post.html?id=Yaa01
+  - JSON: https://www.yuri1.com/Codex-Text/_Terms.json
+- **Yaa02 — Content Rating Guide**
+  - Reader: https://www.yuri1.com/Post.html?id=Yaa02
+  - JSON: https://www.yuri1.com/Codex-Text/_Content-Rating-Guide.json
+- **Yaa03 — AI & Content Policy**
+  - Reader: https://www.yuri1.com/Post.html?id=Yaa03
+  - JSON: https://www.yuri1.com/Codex-Text/_AI-%26-Content-Policy.json
+- **Yaa04 — Privacy Policy**
+  - Reader: https://www.yuri1.com/Post.html?id=Yaa04
+  - JSON: https://www.yuri1.com/Codex-Text/_Privacy-Policy.json
+- **Yaa05 — Fan Content Guidelines**
+  - Reader: https://www.yuri1.com/Post.html?id=Yaa05
+  - JSON: https://www.yuri1.com/Codex-Text/_Fan-Content-Guidelines.json
