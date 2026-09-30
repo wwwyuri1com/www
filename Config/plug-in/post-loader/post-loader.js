@@ -1344,7 +1344,7 @@
                 "post-related-link post";
 
             link.href = item.url;
-            link.textContent = item.url;
+            link.textContent = item.label || item.text || item.url;
 
             if (item._blank === true) {
                 link.target = "_blank";

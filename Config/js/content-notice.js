@@ -70,7 +70,23 @@
         button.focus();
     }
 
+    function shouldForceShow() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("content-notice") === "1";
+        } catch (_) {
+            return false;
+        }
+    }
+
     function init() {
+        // Explicit manual link: show the notice even when the 3-day
+        // acknowledgement is still valid. This is used by Content Rating Guide.
+        if (shouldForceShow()) {
+            showNotice();
+            return;
+        }
+
         if (isAcknowledged()) return;
         showNotice();
     }
