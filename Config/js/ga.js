@@ -7,6 +7,7 @@
      * Custom reader metrics:
      *   - yuri_read_time  : active reading time by AI / HDraft / Prompt / All
      *   - yuri_dark_time  : active reading time while reader dark mode is on
+ *   - yuri_light_time : active reading time while reader light mode is on
      *
      * "Active" means:
      *   - the tab is visible, and
@@ -60,9 +61,12 @@
         p: "Prompt"
     };
 
+    // The rendered body class is the single source of truth for the
+    // currently active theme. The preference in localStorage is only used
+    // by the reader itself to restore the theme; using it here as an OR
+    // condition could keep GA in dark mode after the visual theme changed.
     const isDarkMode = () =>
-        document.body.classList.contains("reader-dark") ||
-        localStorage.getItem("yuri1.reader.dark-mode") === "1";
+        document.body.classList.contains("reader-dark");
 
     const state = {
         lastActivityAt: Date.now(),
@@ -72,8 +76,10 @@
         dark: isDarkMode(),
         modeSeconds: 0,
         darkSeconds: 0,
+        lightSeconds: 0,
         lastModeEventSeconds: 0,
-        lastDarkEventSeconds: 0
+        lastDarkEventSeconds: 0,
+        lastLightEventSeconds: 0
     };
 
     const contentId = getPostId();
@@ -116,13 +122,39 @@
         state.lastDarkEventSeconds = seconds;
     };
 
+    const flushLightTime = (force = false) => {
+        const seconds = Math.floor(state.lightSeconds);
+        if (!force && seconds < 1) return;
+
+        const delta = seconds - state.lastLightEventSeconds;
+        if (delta < 1) return;
+
+        sendEvent("yuri_light_time", {
+            ...commonParams(),
+            active_seconds: delta
+        });
+
+        state.lastLightEventSeconds = seconds;
+    };
+
     const flushAll = (force = false) => {
         flushModeTime(force);
         flushDarkTime(force);
+        flushLightTime(force);
     };
 
     const setActivity = () => {
         const now = Date.now();
+
+        // If timing was already paused, do not let the idle gap become active
+        // time just because the next interaction happened before the heartbeat.
+        if (document.visibilityState === "visible" && state.idle) {
+            state.lastActivityAt = now;
+            state.lastTickAt = now;
+            state.idle = false;
+            return;
+        }
+
         state.lastActivityAt = now;
 
         if (document.visibilityState === "visible") {
@@ -133,7 +165,10 @@
     const switchMode = (nextMode) => {
         if (!nextMode || nextMode === state.mode) return;
 
+        // Capture time up to the exact moment the mode changes.
+        tick();
         flushModeTime(true);
+
         state.mode = nextMode;
         state.modeSeconds = 0;
         state.lastModeEventSeconds = 0;
@@ -144,10 +179,19 @@
         const nextDark = isDarkMode();
         if (nextDark === state.dark) return;
 
-        flushDarkTime(true);
+        // Capture time up to the exact moment dark mode changes.
+        tick();
+        if (state.dark) {
+            flushDarkTime(true);
+        } else {
+            flushLightTime(true);
+        }
+
         state.dark = nextDark;
         state.darkSeconds = 0;
+        state.lightSeconds = 0;
         state.lastDarkEventSeconds = 0;
+        state.lastLightEventSeconds = 0;
         setActivity();
     };
 
@@ -175,7 +219,11 @@
                 );
 
                 state.modeSeconds += activeMs / 1000;
-                if (state.dark) state.darkSeconds += activeMs / 1000;
+                if (state.dark) {
+                    state.darkSeconds += activeMs / 1000;
+                } else {
+                    state.lightSeconds += activeMs / 1000;
+                }
                 flushAll(true);
             }
             state.lastTickAt = now;
@@ -188,7 +236,11 @@
         if (state.idle) return;
 
         state.modeSeconds += elapsed / 1000;
-        if (state.dark) state.darkSeconds += elapsed / 1000;
+        if (state.dark) {
+            state.darkSeconds += elapsed / 1000;
+        } else {
+            state.lightSeconds += elapsed / 1000;
+        }
     };
 
     const handleVisibilityChange = () => {
@@ -251,6 +303,7 @@
         syncDarkMode();
         flushModeTime(false);
         flushDarkTime(false);
+        flushLightTime(false);
     }, HEARTBEAT_MS);
 
     window.addEventListener("pagehide", () => {
