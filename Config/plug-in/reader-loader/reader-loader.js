@@ -599,13 +599,10 @@
             const codeBytes = await buildCodeBytes(backup);
             drawDataCode(ctx, codeBytes);
 
-            const logo = await loadImage('Config/img/icon-xs.png');
-            ctx.drawImage(logo, 205, 3045, 135, 135);
-
             ctx.fillStyle = '#fa6699';
             ctx.textAlign = 'left';
             ctx.font = '62px Georgia, serif';
-            ctx.fillText('Backup Card', 380, 3158);
+            ctx.fillText('YURI1 Backup Card', 205, 3158);
 
             ctx.font = '21px Georgia, serif';
             ctx.fillText('Please keep the original image unchanged.', 820, 3128);

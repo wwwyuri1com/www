@@ -684,7 +684,9 @@
                     0,
                     true,
                     hidePosts.has(name) || hidePosts.has(entry.name),
-                    separatorBefore.has(name) || separatorBefore.has(entry.path),
+                    separatorBefore.has(name) ||
+                    separatorBefore.has(entry.name) ||
+                    separatorBefore.has(entry.path),
                     entry.id
                 );
             }

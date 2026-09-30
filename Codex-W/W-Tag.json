@@ -222,6 +222,7 @@
         },
         "Modern": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
                 "20260928-04_C_15x-Massage",
@@ -238,6 +239,7 @@
         },
         "2.5k-7k": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-03_C_DDD-Special-Operations",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
@@ -267,6 +269,7 @@
         },
         "Sexual Humor": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260928-04_C_15x-Massage",
                 "20260928-01_L_Contract-Me",
@@ -300,6 +303,7 @@
         },
         "Girlboss": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-03_C_DDD-Special-Operations",
                 "20260929-02_S_Five-Bottles",
                 "20260926-01_R_VIP-Client",
@@ -320,6 +324,7 @@
         },
         "Intimacy-Very Pervasive": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
                 "20260928-04_C_15x-Massage",
@@ -336,6 +341,7 @@
         },
         "Flirting": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-01_L_Self-Defense",
                 "20260928-04_C_15x-Massage",
                 "20260928-03_D_Campus-Heartthrob",
@@ -349,6 +355,7 @@
         },
         "Aloof": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260928-04_C_15x-Massage",
                 "20260928-03_D_Campus-Heartthrob",
                 "20260926-01_R_VIP-Client",
@@ -396,6 +403,7 @@
         },
         "Romance": {
             "posts": [
+                "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
                 "20260927-01_O_Miss you",
@@ -451,6 +459,11 @@
         "Military": {
             "posts": [
                 "20260929-03_C_DDD-Special-Operations"
+            ]
+        },
+        "Suspense": {
+            "posts": [
+                "20260930-01_S_Carnivore"
             ]
         }
     }
