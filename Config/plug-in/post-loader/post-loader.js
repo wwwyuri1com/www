@@ -444,7 +444,17 @@
 
         document.title = data.title
             ? `${data.title} \\ YURI1♡Short Novel IPs in Girls' Love`
-            : "READ \\ YURI1♡Short Novel IPs in Girls' Love";
+            : "YURI1♡Short Novel IPs in Girls' Love";
+
+        // Let the consent/analytics loader know the final dynamic page title
+        // is ready before Google Analytics sends its automatic page_view.
+        window.__YURI1_POST_ANALYTICS_READY = true;
+        window.dispatchEvent(new CustomEvent("yuri1:post-ready", {
+            detail: {
+                title: document.title,
+                publicId
+            }
+        }));
 
         await renderCatalog(
             catalog,

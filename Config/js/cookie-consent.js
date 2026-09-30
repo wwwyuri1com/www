@@ -61,6 +61,27 @@
         });
     }
 
+    function isPostPage() {
+        return Boolean(document.getElementById("post-loader"));
+    }
+
+    function enableGoogleAnalyticsWhenReady() {
+        // Post.html loads its article title from JSON. Wait until post-loader
+        // has replaced the fallback <title> so GA records the real post title.
+        if (!isPostPage() || window.__YURI1_POST_ANALYTICS_READY) {
+            enableGoogleAnalytics();
+            return;
+        }
+
+        if (window.__YURI1_GA_WAITING_FOR_POST) return;
+        window.__YURI1_GA_WAITING_FOR_POST = true;
+
+        window.addEventListener("yuri1:post-ready", () => {
+            window.__YURI1_GA_WAITING_FOR_POST = false;
+            enableGoogleAnalytics();
+        }, { once: true });
+    }
+
     async function enableGoogleAnalytics() {
         if (window.__YURI1_GA_ENABLED) return;
         window.__YURI1_GA_ENABLED = true;
@@ -91,7 +112,7 @@
         if (value === "granted") {
             // Enable only standard Google Analytics collection.
             // No site-specific reader-time or mode tracking is loaded here.
-            enableGoogleAnalytics();
+            enableGoogleAnalyticsWhenReady();
         }
 
         removeBanner();
@@ -247,7 +268,7 @@
             );
 
             if (consent === "granted") {
-                enableGoogleAnalytics();
+                enableGoogleAnalyticsWhenReady();
             }
 
             openSettings({ keepBanner: true });
@@ -255,7 +276,7 @@
         }
 
         if (consent === "granted") {
-            enableGoogleAnalytics();
+            enableGoogleAnalyticsWhenReady();
             return;
         }
 
