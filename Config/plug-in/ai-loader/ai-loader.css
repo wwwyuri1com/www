@@ -89,6 +89,24 @@
     margin: 28px 0;
 }
 
+/* Markdown blockquote in AI-rendered content. */
+.post-text.post .llm blockquote.ai-markdown-quote {
+    margin: 18px 0;
+    padding: 10px 14px;
+    border-left: 3px solid #fa6699;
+    background: rgba(250, 102, 153, 0.05);
+    color: inherit;
+    font-style: normal;
+}
+
+.post-text.post .llm blockquote.ai-markdown-quote:first-child {
+    margin-top: 0;
+}
+
+.post-text.post .llm blockquote.ai-markdown-quote:last-child {
+    margin-bottom: 0;
+}
+
 /* All mode: highlight user content */
 .user{margin:10px;}
 body:has(#ai-loader:not([hidden]):not([data-mode]),

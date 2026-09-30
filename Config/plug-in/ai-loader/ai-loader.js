@@ -79,7 +79,7 @@
     }
 
     function getHLines(lines) {
-        // Handmade view: hide instruction sections beginning with "！"
+        // Handmade view: hide instruction sections beginning with "!" or "！"
         // until the next / or \ separator. Separators themselves are hidden.
         // "！END" is the one exception: show it as "（完結）".
         const result = [];
@@ -99,7 +99,7 @@
                 return;
             }
 
-            if (trimmed.startsWith("！")) {
+            if (trimmed.startsWith("!") || trimmed.startsWith("！")) {
                 hidden = true;
                 return;
             }
@@ -121,56 +121,116 @@
             return;
         }
 
-        let rest = line;
-        const tokenPattern = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/;
+        // Small, safe inline Markdown subset used by YURI1 posts:
+        // **bold**, __bold__, *italic*, _italic_.
+        // Avoid lookbehind so this also works reliably in cached / embedded
+        // browser contexts. Single-underscore italics are accepted only when
+        // the marker is not embedded inside an identifier such as file_name_x.
+        const tokenPattern = /(\*\*[^*\n]+\*\*|__[^_\n]+__|\*[^*\n]+\*|_[^_\n]+_)/g;
+        let cursor = 0;
+        let match;
 
-        while (rest) {
-            const match = rest.match(tokenPattern);
+        while ((match = tokenPattern.exec(line)) !== null) {
+            const token = match[0];
+            const tokenStart = match.index;
+            const tokenEnd = tokenStart + token.length;
+            const singleUnderscore =
+                token.startsWith("_") && !token.startsWith("__");
 
-            if (!match) {
-                parent.appendChild(document.createTextNode(rest));
-                return;
+            if (singleUnderscore) {
+                const before = tokenStart > 0 ? line[tokenStart - 1] : "";
+                const after = tokenEnd < line.length ? line[tokenEnd] : "";
+                const wordLike = /[A-Za-z0-9_]/;
+
+                if (wordLike.test(before) || wordLike.test(after)) {
+                    continue;
+                }
             }
 
-            const index = match.index;
-            if (index > 0) {
+            if (tokenStart > cursor) {
                 parent.appendChild(
-                    document.createTextNode(rest.slice(0, index))
+                    document.createTextNode(line.slice(cursor, tokenStart))
                 );
             }
 
-            const token = match[0];
-            const strong = token.startsWith("**");
+            const strong = token.startsWith("**") || token.startsWith("__");
+            const edgeLength = strong ? 2 : 1;
             const element = document.createElement(strong ? "strong" : "em");
-            element.textContent = strong
-                ? token.slice(2, -2)
-                : token.slice(1, -1);
-
+            element.textContent = token.slice(edgeLength, -edgeLength);
             parent.appendChild(element);
-            rest = rest.slice(index + token.length);
+
+            cursor = tokenEnd;
         }
+
+        if (cursor < line.length) {
+            parent.appendChild(document.createTextNode(line.slice(cursor)));
+        }
+    }
+
+    function isBlockquoteLine(line) {
+        return /^\s*>/.test(line);
+    }
+
+    function getBlockquoteText(line) {
+        return line.replace(/^\s*>\s?/, "");
     }
 
     function renderBlockContent(blockElement, lines, parseMarkup) {
         blockElement.textContent = "";
 
-        lines.forEach((line, index) => {
+        let index = 0;
+
+        while (index < lines.length) {
+            const line = lines[index];
+
             // A standalone --- is a horizontal rule in every reading mode.
             if (line.trim() === "---") {
                 blockElement.appendChild(
                     document.createElement("hr")
                 );
-                return;
+                index += 1;
+                continue;
+            }
+
+            // In AI-rendered content, consecutive Markdown quote lines are
+            // rendered as one blockquote. A bare ">" line becomes a blank
+            // line inside the quote instead of being printed literally.
+            if (parseMarkup && isBlockquoteLine(line)) {
+                const quote = document.createElement("blockquote");
+                quote.className = "ai-markdown-quote";
+
+                while (index < lines.length && isBlockquoteLine(lines[index])) {
+                    appendInlineText(
+                        quote,
+                        getBlockquoteText(lines[index]),
+                        true
+                    );
+
+                    if (index + 1 < lines.length && isBlockquoteLine(lines[index + 1])) {
+                        quote.appendChild(document.createElement("br"));
+                    }
+
+                    index += 1;
+                }
+
+                blockElement.appendChild(quote);
+                continue;
             }
 
             appendInlineText(blockElement, line, parseMarkup);
 
-            if (index < lines.length - 1 && lines[index + 1].trim() !== "---") {
+            const nextLine = lines[index + 1];
+            const nextIsRule = nextLine !== undefined && nextLine.trim() === "---";
+            const nextIsQuote = parseMarkup && nextLine !== undefined && isBlockquoteLine(nextLine);
+
+            if (index < lines.length - 1 && !nextIsRule && !nextIsQuote) {
                 blockElement.appendChild(
                     document.createElement("br")
                 );
             }
-        });
+
+            index += 1;
+        }
     }
 
     function renderAllBlocks(mode) {
