@@ -25,7 +25,7 @@
     "selector": {
         "print_posts": [],
         "hide_posts": [
-            "Website News",
+            "News",
             "Policy",
             "Feature",
             "User Guide",
@@ -51,6 +51,13 @@
                             "posts": [
                                 "~260930-01",
                                 "~260924-01"
+                            ]
+                        },
+                        "Creator's Talk": {
+                            "id": "Naf",
+                            "children": {},
+                            "posts": [
+                                "~260930-02"
                             ]
                         }
                     }
