@@ -91,7 +91,7 @@
 
         return Array.from(posts).every(post => {
             const postId = post.dataset.postId || '';
-            return postId.startsWith('_');
+            return postId.startsWith('_') || postId.startsWith('~');
         });
     }
 
@@ -154,9 +154,9 @@
         posts.forEach(post => {
             const postId = post.dataset.postId;
 
-            // IDs beginning with "_" are internal/system entries.
+            // IDs beginning with "_" or "~" are internal/news entries.
             // Keep them in List (Notofu), but never expose them in Tofu Grid.
-            if (!postId || postId.startsWith("_")) {
+            if (!postId || postId.startsWith("_") || postId.startsWith("~")) {
                 return;
             }
 
@@ -168,7 +168,7 @@
         });
 
         // If the selected Catalog contains only Posts that Tofu intentionally
-        // hides (for example IDs beginning with "_"), an empty Grid looks
+        // hides (for example IDs beginning with "_" or "~"), an empty Grid looks
         // broken to users. Fall back to List instead of showing a blank page.
         // This applies to direct Catalog views; the root/Favorite views keep
         // their existing behavior.
@@ -182,7 +182,7 @@
             posts.length > 0 &&
             !Array.from(posts).some(post => {
                 const postId = post.dataset.postId || "";
-                return postId && !postId.startsWith("_");
+                return postId && !postId.startsWith("_") && !postId.startsWith("~");
             })
         ) {
             showList();
@@ -199,7 +199,7 @@
         posts.forEach(post => {
             const postId = post.dataset.postId;
 
-            if (!postId || postId.startsWith("_")) {
+            if (!postId || postId.startsWith("_") || postId.startsWith("~")) {
                 return;
             }
 
