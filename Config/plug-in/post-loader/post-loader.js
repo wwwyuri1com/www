@@ -443,8 +443,8 @@
         }
 
         document.title = data.title
-            ? `${data.title} | Derive Dimension Demon`
-            : "Derive Dimension Demon Official Website";
+            ? `${data.title} \\ YURI1♡Short Novel IPs in Girls' Love`
+            : "READ \\ YURI1♡Short Novel IPs in Girls' Love";
 
         await renderCatalog(
             catalog,
