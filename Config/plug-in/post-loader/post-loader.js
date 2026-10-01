@@ -501,7 +501,7 @@
         storageId,
         publicId
     ) {
-        const siteName = "YURI1♡Short Novel IPs in Girls' Love";
+        const siteName = "YURI NO1 – Girls Love ♡ AI Novels & Prompts";
         const pageTitle = data.title
             ? `${data.title} \\ ${siteName}`
             : siteName;
@@ -521,29 +521,29 @@
 
         switch (kind) {
             case "P":
-                description = `${data.title || "YURI1 story"} — Girls' Love (YURI) fiction on YURI1, presented through YURI1's Human Creation × AI Expansion format.`;
+                description = `${data.title || "YURI NO1 story"} — Girls' Love (Yuri) fiction from YURI NO1, created from human prompts with AI expansion.`;
                 schemaType = "CreativeWork";
                 ogType = "article";
                 break;
             case "N":
-                description = `${data.title || "YURI1 update"} — news and updates from YURI1.`;
+                description = `${data.title || "YURI NO1 update"} — news and updates from YURI NO1.`;
                 schemaType = "Article";
                 ogType = "article";
                 break;
             case "I":
-                description = `${data.title || "YURI1 character"} — an original character profile from YURI1.`;
+                description = `${data.title || "YURI NO1 character"} — an original character profile from YURI NO1.`;
                 break;
             case "Y":
-                description = `${data.title || "YURI1 policy"} — YURI1 policy and site information.`;
+                description = `${data.title || "YURI NO1 policy"} — YURI NO1 policy and site information.`;
                 break;
             case "U":
-                description = `${data.title || "YURI1 guide"} — YURI1 user guide and reading information.`;
+                description = `${data.title || "YURI NO1 guide"} — YURI NO1 user guide and reading information.`;
                 break;
             case "F":
-                description = `${data.title || "YURI1 feature"} — information about YURI1 and its creative works.`;
+                description = `${data.title || "YURI NO1 feature"} — information about YURI NO1 and its creative works.`;
                 break;
             default:
-                description = `${data.title || "YURI1"} — YURI1♡Short Novel IPs in Girls' Love.`;
+                description = `${data.title || "YURI NO1"} — YURI NO1 Girls Love AI novels and prompts.`;
                 break;
         }
 
@@ -626,7 +626,8 @@
             "isAccessibleForFree": true,
             "isPartOf": {
                 "@type": "WebSite",
-                "name": "YURI1",
+                "name": "YURI NO1",
+                "alternateName": "YURI1",
                 "url": `${absoluteBase}/`
             },
             "encoding": {

@@ -1,6 +1,6 @@
-# YURI1
+# YURI NO1
 
-> YURI1 (YURI NO1) is a public Girls' Love (YURI) mixed-media fiction website. Reader pages use JavaScript; the same published content is also available as public JSON.
+> YURI NO1 (also known as YURI1) is a public Girls' Love (Yuri) mixed-media fiction website with AI-expanded novels and human prompts. Reader pages use JavaScript; the same published content is also available as public JSON.
 
 ## Machine-readable access
 

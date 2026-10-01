@@ -187,7 +187,7 @@
         })
         .catch(error => {
             console.error("Candy Loader:", error);
-            river.textContent = "";
+            river.querySelectorAll(".candy-guideline").forEach(node => node.remove());
         });
 
     async function loadPosts() {
@@ -295,7 +295,9 @@
     }
 
     function renderPosts(posts) {
+        const intro = river.querySelector(".candy-intro");
         river.replaceChildren();
+        if (intro) river.appendChild(intro);
 
         posts.forEach(post => {
 
