@@ -135,6 +135,10 @@
             {
                 "id": "e05",
                 "name": "❤️💙"
+            },
+            {
+                "id": "e06",
+                "name": "❤️🩶"
             }
         ],
         "Intimacy Context Level": [
@@ -197,6 +201,7 @@
         },
         "Metaphorical": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260928-03_D_Campus-Heartthrob",
                 "20260926-02_S_Doberman",
                 "20260924-01_S_LittleBunny"
@@ -204,6 +209,7 @@
         },
         "Tsundere": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260929-01_L_Self-Defense",
                 "20260928-03_D_Campus-Heartthrob",
                 "20260924-01_S_LittleBunny"
@@ -222,6 +228,7 @@
         },
         "Modern": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
@@ -271,6 +278,7 @@
         },
         "Sexual Humor": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260928-04_C_15x-Massage",
@@ -298,6 +306,7 @@
         },
         "Duplicity": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260929-03_C_DDD-Special-Operations",
                 "20260929-02_S_Five-Bottles",
                 "20260924-01_S_LittleBunny"
@@ -326,6 +335,7 @@
         },
         "Intimacy-Very Pervasive": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
@@ -343,6 +353,7 @@
         },
         "Flirting": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore",
                 "20260929-01_L_Self-Defense",
@@ -429,6 +440,7 @@
         },
         "❤️💜": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260929-01_L_Self-Defense",
                 "20260928-03_D_Campus-Heartthrob",
                 "20260928-01_L_Contract-Me",
@@ -452,6 +464,7 @@
         },
         "Love-Triangle": {
             "posts": [
+                "20261003-01_D_King of no mercy",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
                 "20260928-03_D_Campus-Heartthrob"
@@ -471,6 +484,16 @@
             "posts": [
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore"
+            ]
+        },
+        "❤️🩶": {
+            "posts": [
+                "20261003-01_D_King of no mercy"
+            ]
+        },
+        "7k-20k": {
+            "posts": [
+                "20261003-01_D_King of no mercy"
             ]
         }
     }
