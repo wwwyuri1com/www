@@ -30,7 +30,7 @@
             "Feature",
             "User Guide",
             "IP Original Characters",
-            "IP Items"
+            "IP Presents"
         ],
         "separator_before": [
             "News",
@@ -120,7 +120,7 @@
         "I-Char": {
             "id": "I",
             "children": {
-                "IP Original Characters": {
+                "IP Presents": {
                     "id": "Ia",
                     "children": {
                         "IP Original Characters": {
@@ -161,6 +161,16 @@
                                 {
                                     "id": "Iaa09",
                                     "name": "-D.Dark"
+                                }
+                            ]
+                        },
+                        "IP Albums": {
+                            "id": "Iab",
+                            "children": {},
+                            "posts": [
+                                {
+                                    "id": "Iab01",
+                                    "name": "-IP_Album-Icy-Mini-Vol1"
                                 }
                             ]
                         }
