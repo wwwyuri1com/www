@@ -78,12 +78,12 @@
                             "id": "Faa",
                             "posts": [
                                 {
-                                    "id": "Faa01",
-                                    "name": "_Introduction"
-                                },
-                                {
                                     "id": "Faa02",
                                     "name": "_IP-Story"
+                                },
+                                {
+                                    "id": "Faa01",
+                                    "name": "_Introduction"
                                 },
                                 {
                                     "id": "Faa03",
@@ -162,6 +162,10 @@
                                 {
                                     "id": "Iaa09",
                                     "name": "-D.Dark"
+                                },
+                                {
+                                    "id": "Iaa10",
+                                    "name": "-NO6"
                                 }
                             ]
                         },
