@@ -139,6 +139,10 @@
             {
                 "id": "e06",
                 "name": "❤️🩶"
+            },
+            {
+                "id": "e07",
+                "name": "🩵🩵"
             }
         ],
         "Intimacy Context Level": [
@@ -193,6 +197,7 @@
     "tags": {
         "Sweet": {
             "posts": [
+                "20261008-01_o_touch",
                 "20260927-01_I_Icys-Patisserie",
                 "20260924-03_D_AI-Lover-CYAN-V0001",
                 "20260924-02_S_LadyL",
@@ -228,6 +233,7 @@
         },
         "Modern": {
             "posts": [
+                "20261008-01_o_touch",
                 "20261003-01_D_King of no mercy",
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore",
@@ -271,6 +277,7 @@
         },
         "Under 2.5k": {
             "posts": [
+                "20261008-01_o_touch",
                 "20260928-02_O_Cat-Fighting",
                 "20260927-02_O_Miss you",
                 "20260926-01_R_VIP-Client"
@@ -353,6 +360,7 @@
         },
         "Flirting": {
             "posts": [
+                "20261008-01_o_touch",
                 "20261003-01_D_King of no mercy",
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore",
@@ -369,6 +377,7 @@
         },
         "Aloof": {
             "posts": [
+                "20261008-01_o_touch",
                 "20260930-01_S_Carnivore",
                 "20260928-04_C_15x-Massage",
                 "20260928-03_D_Campus-Heartthrob",
@@ -378,6 +387,7 @@
         },
         "Intimacy-Surface": {
             "posts": [
+                "20261008-01_o_touch",
                 "20260928-02_O_Cat-Fighting",
                 "20260925-01_S_Sorry"
             ]
@@ -419,6 +429,7 @@
         },
         "Romance": {
             "posts": [
+                "20261008-01_o_touch",
                 "20261002-01_S_Black Cherry",
                 "20260930-01_S_Carnivore",
                 "20260929-02_S_Five-Bottles",
@@ -464,6 +475,7 @@
         },
         "Love-Triangle": {
             "posts": [
+                "20261008-01_o_touch",
                 "20261003-01_D_King of no mercy",
                 "20260929-02_S_Five-Bottles",
                 "20260929-01_L_Self-Defense",
@@ -494,6 +506,11 @@
         "7k-20k": {
             "posts": [
                 "20261003-01_D_King of no mercy"
+            ]
+        },
+        "🩵🩵": {
+            "posts": [
+                "20261008-01_o_touch"
             ]
         }
     }
