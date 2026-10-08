@@ -1,0 +1,517 @@
+{
+    "_filter_settings": {
+        "single_select_groups": [
+            "Intimacy Context Level",
+            "Word Count"
+        ],
+        "single_select_note": "Tags in the groups listed below can only be selected one at a time."
+    },
+    "groups": {
+        "Love Emo": [
+            {
+                "id": "a01",
+                "name": "Sweet"
+            },
+            {
+                "id": "a02",
+                "name": "Spicy"
+            },
+            {
+                "id": "a03",
+                "name": "Wild"
+            },
+            {
+                "id": "a04",
+                "name": "Dominant"
+            },
+            {
+                "id": "a05",
+                "name": "Metaphorical"
+            },
+            {
+                "id": "a06",
+                "name": "Flirting"
+            },
+            {
+                "id": "a07",
+                "name": "Love-Triangle"
+            }
+        ],
+        "OC Trait": [
+            {
+                "id": "b01",
+                "name": "Tsundere"
+            },
+            {
+                "id": "b02",
+                "name": "Yandere"
+            },
+            {
+                "id": "b03",
+                "name": "Aloof"
+            },
+            {
+                "id": "b04",
+                "name": "Forward"
+            },
+            {
+                "id": "b05",
+                "name": "Gap Moe"
+            },
+            {
+                "id": "b06",
+                "name": "Duplicity"
+            },
+            {
+                "id": "b07",
+                "name": "Girlboss"
+            },
+            {
+                "id": "b08",
+                "name": "GL Awakening"
+            }
+        ],
+        "Style": [
+            {
+                "id": "c01",
+                "name": "Romance"
+            },
+            {
+                "id": "c02",
+                "name": "Humor"
+            },
+            {
+                "id": "c03",
+                "name": "Sexual Humor"
+            },
+            {
+                "id": "c04",
+                "name": "Plot"
+            },
+            {
+                "id": "c05",
+                "name": "Suspense"
+            }
+        ],
+        "Background": [
+            {
+                "id": "d01",
+                "name": "Modern"
+            },
+            {
+                "id": "d02",
+                "name": "Technology"
+            },
+            {
+                "id": "d03",
+                "name": "Fantasy"
+            },
+            {
+                "id": "d04",
+                "name": "Campus"
+            },
+            {
+                "id": "d05",
+                "name": "Military"
+            }
+        ],
+        "Main Story CP": [
+            {
+                "id": "e01",
+                "name": "🩵🩷"
+            },
+            {
+                "id": "e02",
+                "name": "🩵🩶"
+            },
+            {
+                "id": "e03",
+                "name": "❤️💜"
+            },
+            {
+                "id": "e04",
+                "name": "❤️💛"
+            },
+            {
+                "id": "e05",
+                "name": "❤️💙"
+            },
+            {
+                "id": "e06",
+                "name": "❤️🩶"
+            },
+            {
+                "id": "e07",
+                "name": "🩵🩵"
+            }
+        ],
+        "Intimacy Context Level": [
+            {
+                "id": "f01",
+                "name": "Intimacy-Surface"
+            },
+            {
+                "id": "f02",
+                "name": "Intimacy-Suggestive"
+            },
+            {
+                "id": "f03",
+                "name": "Intimacy-Candid"
+            },
+            {
+                "id": "f04",
+                "name": "Intimacy-Very Pervasive"
+            }
+        ],
+        "Word Count": [
+            {
+                "id": "g01",
+                "name": "Under 2.5k"
+            },
+            {
+                "id": "g02",
+                "name": "2.5k-7k"
+            },
+            {
+                "id": "g03",
+                "name": "7k-20k"
+            },
+            {
+                "id": "g04",
+                "name": "20k-50k"
+            },
+            {
+                "id": "g05",
+                "name": "50k-1m"
+            },
+            {
+                "id": "g06",
+                "name": "1m-3m"
+            },
+            {
+                "id": "g07",
+                "name": "Over 3m"
+            }
+        ]
+    },
+    "tags": {
+        "Sweet": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260924-03-d-ai-lover-cyan-v0001",
+                "post-20260924-02-s-ladyl",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "Metaphorical": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260926-02-s-doberman",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "Tsundere": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "Humor": {
+            "posts": [
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-02-o-cat-fighting",
+                "post-20260926-01-r-vip-client",
+                "post-20260926-02-s-doberman",
+                "post-20260925-01-s-sorry",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "Modern": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20261002-01-s-black-cherry",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-02-o-cat-fighting",
+                "post-20260927-02-o-miss-you",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260926-01-r-vip-client",
+                "post-20260926-02-s-doberman",
+                "post-20260925-01-s-sorry",
+                "post-20260924-02-s-ladyl",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "2.5k-7k": {
+            "posts": [
+                "post-20261002-01-s-black-cherry",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-01-l-contract-me",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260926-02-s-doberman",
+                "post-20260925-01-s-sorry",
+                "post-20260924-04-l-yuri-succubus",
+                "post-20260924-03-d-ai-lover-cyan-v0001",
+                "post-20260924-01-s-littlebunny",
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "Wild": {
+            "posts": [
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "Under 2.5k": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20260928-02-o-cat-fighting",
+                "post-20260927-02-o-miss-you",
+                "post-20260926-01-r-vip-client"
+            ]
+        },
+        "Sexual Humor": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-02-s-five-bottles",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-01-l-contract-me",
+                "post-20260924-04-l-yuri-succubus",
+                "post-20260924-03-d-ai-lover-cyan-v0001",
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "Spicy": {
+            "posts": [
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-01-l-contract-me",
+                "post-20260924-04-l-yuri-succubus",
+                "post-20260924-03-d-ai-lover-cyan-v0001",
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "Gap Moe": {
+            "posts": [
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "Duplicity": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260929-02-s-five-bottles",
+                "post-20260924-01-s-littlebunny"
+            ]
+        },
+        "Girlboss": {
+            "posts": [
+                "post-20260930-01-s-carnivore",
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260929-02-s-five-bottles",
+                "post-20260926-01-r-vip-client",
+                "post-20260926-02-s-doberman",
+                "post-20260924-02-s-ladyl"
+            ]
+        },
+        "GL Awakening": {
+            "posts": [
+                "post-20260926-02-s-doberman",
+                "post-20260924-03-d-ai-lover-cyan-v0001"
+            ]
+        },
+        "Technology": {
+            "posts": [
+                "post-20260924-03-d-ai-lover-cyan-v0001"
+            ]
+        },
+        "Intimacy-Very Pervasive": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-01-l-contract-me",
+                "post-20260924-04-l-yuri-succubus",
+                "post-20260924-03-d-ai-lover-cyan-v0001"
+            ]
+        },
+        "Fantasy": {
+            "posts": [
+                "post-20260928-01-l-contract-me",
+                "post-20260924-04-l-yuri-succubus"
+            ]
+        },
+        "Flirting": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20261002-01-s-black-cherry",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-01-l-contract-me",
+                "post-20260927-02-o-miss-you",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260926-01-r-vip-client",
+                "post-20260925-01-s-sorry",
+                "post-20260924-04-l-yuri-succubus"
+            ]
+        },
+        "Aloof": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20260930-01-s-carnivore",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260926-01-r-vip-client",
+                "post-20260925-01-s-sorry"
+            ]
+        },
+        "Intimacy-Surface": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20260928-02-o-cat-fighting",
+                "post-20260925-01-s-sorry"
+            ]
+        },
+        "Intimacy-Candid": {
+            "posts": [
+                "post-20261002-01-s-black-cherry",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260926-01-r-vip-client"
+            ]
+        },
+        "Dominant": {
+            "posts": [
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260929-02-s-five-bottles",
+                "post-20260928-04-c-15x-massage",
+                "post-20260926-02-s-doberman"
+            ]
+        },
+        "Intimacy-Suggestive": {
+            "posts": [
+                "post-20260929-03-c-ddd-special-operations",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260927-02-o-miss-you",
+                "post-20260926-02-s-doberman"
+            ]
+        },
+        "Forward": {
+            "posts": [
+                "post-20261002-01-s-black-cherry",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-04-c-15x-massage",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-01-l-contract-me",
+                "post-20260927-02-o-miss-you",
+                "post-20260927-01-i-icys-patisserie",
+                "post-20260924-04-l-yuri-succubus"
+            ]
+        },
+        "Romance": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20261002-01-s-black-cherry",
+                "post-20260930-01-s-carnivore",
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260927-02-o-miss-you",
+                "post-20260927-01-i-icys-patisserie"
+            ]
+        },
+        "🩵🩷": {
+            "posts": [
+                "post-20260927-01-i-icys-patisserie"
+            ]
+        },
+        "❤️💛": {
+            "posts": [
+                "post-20260929-01-l-self-defense",
+                "post-20260927-02-o-miss-you"
+            ]
+        },
+        "❤️💜": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-03-d-campus-heartthrob",
+                "post-20260928-01-l-contract-me",
+                "post-20260924-04-l-yuri-succubus"
+            ]
+        },
+        "❤️💙": {
+            "posts": [
+                "post-20260924-03-d-ai-lover-cyan-v0001"
+            ]
+        },
+        "Campus": {
+            "posts": [
+                "post-20260928-03-d-campus-heartthrob"
+            ]
+        },
+        "🩵🩶": {
+            "posts": [
+                "post-20260928-04-c-15x-massage"
+            ]
+        },
+        "Love-Triangle": {
+            "posts": [
+                "post-20261008-01-o-touch",
+                "post-20261003-01-d-king-of-no-mercy",
+                "post-20260929-02-s-five-bottles",
+                "post-20260929-01-l-self-defense",
+                "post-20260928-03-d-campus-heartthrob"
+            ]
+        },
+        "Yandere": {
+            "posts": [
+                "post-20260929-02-s-five-bottles"
+            ]
+        },
+        "Military": {
+            "posts": [
+                "post-20260929-03-c-ddd-special-operations"
+            ]
+        },
+        "Suspense": {
+            "posts": [
+                "post-20261002-01-s-black-cherry",
+                "post-20260930-01-s-carnivore"
+            ]
+        },
+        "❤️🩶": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy"
+            ]
+        },
+        "7k-20k": {
+            "posts": [
+                "post-20261003-01-d-king-of-no-mercy"
+            ]
+        },
+        "🩵🩵": {
+            "posts": [
+                "post-20261008-01-o-touch"
+            ]
+        }
+    }
+}

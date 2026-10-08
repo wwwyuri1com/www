@@ -1,0 +1,296 @@
+{
+    "catalog_marks": {
+        "IP : Icy & Arte": {
+            "icon": "ice-cream-cone",
+            "color": "#a9d8e5"
+        },
+        "IP : DDD Presents": {
+            "icon": "sparkle",
+            "color": "#ffe09c"
+        },
+        "IP : Loading Night": {
+            "icon": "wine",
+            "color": "#b37eb3"
+        },
+        "Single : Shorts": {
+            "icon": "feather",
+            "color": "#81c986"
+        },
+        "Single : OC's Off Script Time": {
+            "icon": "sofa",
+            "color": "#cdcdcd"
+        }
+    },
+    "_comment": "=== Here's Will be list _.json in SELECT ===",
+    "selector": {
+        "print_posts": [],
+        "hide_posts": [
+            "News",
+            "Policy",
+            "Feature",
+            "User Guide",
+            "IP Original Characters",
+            "IP Presents"
+        ],
+        "separator_before": [
+            "News",
+            "Novels",
+            "Policy"
+        ]
+    },
+    "_comment_catalog": "=== Tell Which Post belong to What Catalog ===",
+    "catalogs": {
+        "N-Char": {
+            "id": "N",
+            "children": {
+                "News": {
+                    "id": "Na",
+                    "children": {
+                        "Website News": {
+                            "id": "Naa",
+                            "posts": [
+                                "news-261005-01",
+                                "news-261003-01",
+                                "news-260930-03",
+                                "news-260930-01",
+                                "news-260924-01"
+                            ]
+                        },
+                        "Creator's Talk": {
+                            "id": "Naf",
+                            "children": {},
+                            "posts": [
+                                "news-261008-02",
+                                "news-261008-01",
+                                "news-261004-01",
+                                "news-260930-02"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "F-Char": {
+            "id": "F",
+            "children": {
+                "Feature": {
+                    "id": "Fa",
+                    "children": {
+                        "Feature": {
+                            "id": "Faa",
+                            "posts": [
+                                {
+                                    "id": "Faa02",
+                                    "name": "yuri1-ip-story"
+                                },
+                                {
+                                    "id": "Faa01",
+                                    "name": "yuri1-introduction"
+                                },
+                                {
+                                    "id": "Faa03",
+                                    "name": "yuri1-special-thanks"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "U-Char": {
+            "id": "U",
+            "children": {
+                "User Guide": {
+                    "id": "Ua",
+                    "children": {
+                        "User Guide": {
+                            "id": "Uaa",
+                            "posts": [
+                                {
+                                    "id": "Uaa01",
+                                    "name": "yuri1-backup-card"
+                                },
+                                {
+                                    "id": "Uaa02",
+                                    "name": "yuri1-reading-settings"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "I-Char": {
+            "id": "I",
+            "children": {
+                "IP Presents": {
+                    "id": "Ia",
+                    "children": {
+                        "IP Original Characters": {
+                            "id": "Iaa",
+                            "posts": [
+                                {
+                                    "id": "Iaa01",
+                                    "name": "ip-arte"
+                                },
+                                {
+                                    "id": "Iaa02",
+                                    "name": "ip-icy"
+                                },
+                                {
+                                    "id": "Iaa03",
+                                    "name": "ip-n-white"
+                                },
+                                {
+                                    "id": "Iaa04",
+                                    "name": "ip-d-cyan"
+                                },
+                                {
+                                    "id": "Iaa05",
+                                    "name": "ip-d-golden"
+                                },
+                                {
+                                    "id": "Iaa06",
+                                    "name": "ip-e-red"
+                                },
+                                {
+                                    "id": "Iaa07",
+                                    "name": "ip-l-night"
+                                },
+                                {
+                                    "id": "Iaa08",
+                                    "name": "ip-c-curo"
+                                },
+                                {
+                                    "id": "Iaa09",
+                                    "name": "ip-d-dark"
+                                },
+                                {
+                                    "id": "Iaa10",
+                                    "name": "ip-no6"
+                                },
+                                {
+                                    "id": "Iaa11",
+                                    "name": "ip-no3"
+                                },
+                                {
+                                    "id": "Iaa12",
+                                    "name": "ip-no2"
+                                },
+                                {
+                                    "id": "Iaa13",
+                                    "name": "ip-no5"
+                                }
+                            ]
+                        },
+                        "IP Albums": {
+                            "id": "Iab",
+                            "children": {},
+                            "posts": [
+                                {
+                                    "id": "Iab01",
+                                    "name": "ip-album-icy-mini-vol1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "P-Char": {
+            "id": "P",
+            "children": {
+                "Novels": {
+                    "id": "Pa",
+                    "children": {
+                        "IP : Icy & Arte": {
+                            "id": "Paa",
+                            "posts": [
+                                "post-20260927-01-i-icys-patisserie"
+                            ]
+                        },
+                        "IP : DDD Presents": {
+                            "id": "Pab",
+                            "posts": [
+                                "post-20260928-03-d-campus-heartthrob",
+                                "post-20260924-03-d-ai-lover-cyan-v0001"
+                            ]
+                        },
+                        "IP : Loading Night": {
+                            "id": "Pac",
+                            "posts": [
+                                "post-20260929-01-l-self-defense",
+                                "post-20260928-01-l-contract-me",
+                                "post-20260924-04-l-yuri-succubus"
+                            ]
+                        },
+                        "Single : IP Collab": {
+                            "id": "Pad",
+                            "posts": [
+                                "post-20260929-03-c-ddd-special-operations",
+                                "post-20260928-04-c-15x-massage"
+                            ]
+                        },
+                        "Single : OC's Off Script Time": {
+                            "id": "Pae",
+                            "posts": [
+                                "post-20261008-01-o-touch",
+                                "post-20260928-02-o-cat-fighting",
+                                "post-20260927-02-o-miss-you"
+                            ]
+                        },
+                        "Single : Shorts": {
+                            "id": "Paf",
+                            "posts": [
+                                "post-20261003-01-d-king-of-no-mercy",
+                                "post-20261002-01-s-black-cherry",
+                                "post-20260930-01-s-carnivore",
+                                "post-20260929-02-s-five-bottles",
+                                "post-20260926-01-r-vip-client",
+                                "post-20260926-02-s-doberman",
+                                "post-20260925-01-s-sorry",
+                                "post-20260924-02-s-ladyl",
+                                "post-20260924-01-s-littlebunny"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "Y-Char": {
+            "id": "Y",
+            "children": {
+                "Policy": {
+                    "id": "Ya",
+                    "children": {
+                        "Policy": {
+                            "id": "Yaa",
+                            "posts": [
+                                {
+                                    "id": "Yaa01",
+                                    "name": "yuri1-terms"
+                                },
+                                {
+                                    "id": "Yaa02",
+                                    "name": "yuri1-content-rating-guide"
+                                },
+                                {
+                                    "id": "Yaa03",
+                                    "name": "yuri1-ai-and-content-policy"
+                                },
+                                {
+                                    "id": "Yaa04",
+                                    "name": "yuri1-privacy-policy"
+                                },
+                                {
+                                    "id": "Yaa05",
+                                    "name": "yuri1-fan-content-guidelines"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
