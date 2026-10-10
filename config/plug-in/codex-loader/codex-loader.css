@@ -1,0 +1,633 @@
+/* ------- EVERYWHERE --------- */
+.codex-selector.index {    display: flex;    justify-content: space-around;margin-left: auto;margin-right: auto;}
+.codex-selector.index select{
+    width: 100%;
+    height: 40px;
+    max-width: 340px;
+    border: #d7d7d7 1px solid;
+    font-family: "Noto Serif TC", "Source Han Serif TC", serif;
+    padding-left: 10px ;
+}
+
+/* ------- codex.html --------- */
+.codex-boss {    width: 100%;
+    box-sizing: border-box;
+    padding: 0 5px;
+    margin-top:0px;}
+.codex-banshee {margin-top: 100px;}
+
+.codex-post {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.codex-header,.codex-catalog{ margin:0 11px;}
+.post-image.codex {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.post-image.codex img.post.codex {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.codex-post-list {padding-left:10px;}
+.codex-post-title {
+    flex: 1;
+    text-align: left;
+    padding-left: 5px;
+    color: #242424;
+    font-size:0.95rem;
+}
+
+.codex-hidden-link-icon {
+    width: 11px;
+    height: 11px;
+    margin-right: 3px;
+    stroke-width: 1.5;
+    vertical-align: -0.12em;
+}
+
+.codex-series-icon {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    margin-right: 2px;
+    stroke-width: 1.5;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: -0.03em;
+}
+
+.codex-catalog-icon {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin: 0 2px 0 4px;
+    stroke-width: 1.5;
+    display: inline-block;
+    vertical-align: -0.17em;
+}
+
+.codex-catalog-icon[hidden] {
+    display: inline-block;
+    visibility: hidden;
+}
+
+.codex-catalog-prefix {
+    white-space: pre;
+}
+
+.codex-post-meta {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 75px 15px 15px;
+    column-gap: 5px;
+    align-items: center;
+    min-width: 115px;
+    height: 20px;
+}
+
+.codex-post-date {
+    width: 75px;
+    text-align: right;
+    padding-right: 0;
+    white-space: nowrap;
+}
+/* -- Sp -- */
+/* ========================================
+   Codex Hover Frame
+   ======================================== */
+
+.codex-post,
+.codex-catalog-title,
+.codex-header {
+    position: relative;
+    overflow: hidden;
+    font-size:0.9rem;
+    border: 1px solid #ffffff;
+    color:#696969;
+}
+
+/* Catalog section titles */
+.codex-catalog-title span {
+      font-size: 0.85rem;
+}
+
+.codex-post{border-bottom: 1px #cccccc dashed;    padding: 7px 0;}
+
+/* Hover 時只改 Border 顏色
+   不改尺寸，避免 Layout Shift */
+
+.codex-post:has(a:hover),
+.codex-catalog-title:has(a:hover),
+.codex-header:has(a:hover) {
+    border-color: #fa6699;
+}
+
+
+/* ========================================
+   Hover Dimension Effect
+   ======================================== */
+
+.codex-post::after,
+.codex-catalog-title::after,
+.codex-header::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    background:
+        repeating-linear-gradient(
+            112deg,
+            transparent 0px,
+            transparent 7px,
+            rgba(36, 36, 36, 0.35) 8px,
+            transparent 9px,
+            transparent 17px
+        ),
+        repeating-linear-gradient(
+            68deg,
+            transparent 0px,
+            transparent 13px,
+            rgba(36, 36, 36, 0.22) 14px,
+            transparent 15px,
+            transparent 25px
+        );
+
+    transform: translate(-35%, -10%);
+
+    z-index: 0;
+}
+
+
+/* Hover 瞬間播放一次 */
+
+.codex-post:has(a:hover)::after,
+.codex-catalog-title:has(a:hover)::after,
+.codex-header:has(a:hover)::after {
+    animation:
+        codex-dimension-barrage
+        0.75s
+        ease-out
+        1;
+}
+
+
+/* 保持文字在特效上方 */
+
+.codex-post > *,
+.codex-catalog-title > *,
+.codex-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ========================================
+   Dimension Barrage
+   ======================================== */
+
+@keyframes codex-dimension-barrage {
+
+    0% {
+        opacity: 0;
+        transform:
+            translate(-40%, -15%)
+            rotate(-1deg);
+    }
+
+    12% {
+        opacity: 1;
+    }
+
+    35% {
+        opacity: 0.75;
+        transform:
+            translate(-10%, 0%)
+            rotate(0deg);
+    }
+
+    65% {
+        opacity: 0.45;
+        transform:
+            translate(15%, 5%)
+            rotate(0.5deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(45%, 15%)
+            rotate(1deg);
+    }
+
+}
+
+/* Read-done Post title in Codex */
+.codex-post-title.is-read-done {
+    color: #69696970;
+}
+
+/* Read-done: emulate a lowered wavy line-through on a transparent
+   text duplicate so the line can sit above the glyphs. */
+.codex-post-title.is-read-done > a {
+    position: relative;
+    text-decoration: none;
+}
+
+.codex-post-title.is-read-done > a::after {
+    content: attr(data-read-done-text);
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    pointer-events: none;
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+    line-height: inherit;
+    font: inherit;
+    transform: translateY(0.14em);
+    z-index: 2;
+    text-decoration-line: line-through;
+    text-decoration-style: wavy;
+    text-decoration-color: #fa6699;
+    text-decoration-thickness: 1px;
+    text-decoration-skip-ink: none;
+}
+
+/* Codex Post Status Indicators */
+.codex-post-status-slot {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #24242420;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.codex-post-status-slot.is-active {
+    color: #242424;
+}
+
+.codex-post-status-slot:hover {
+    opacity: 0.72;
+}
+
+.codex-post-status-icon {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.25;
+    flex-shrink: 0;
+    pointer-events: none;
+    display: block;
+}
+
+.codex-post-status-slot:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+}
+
+
+/* ========================================
+   Codex Favorite Box
+   Reuse the visual language of the Post
+   page's .user card without touching Select.
+   ======================================== */
+
+.codex-favo-box {
+    width: calc(100% - 14px);
+    margin: 0 7px 28px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #fa669910;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.codex-favo-title {
+    font-size: clamp(18px, 1.44vw, 23px);
+    line-height: 25px;
+    margin-bottom: 12px;
+}
+
+.codex-favo-list .codex-post:first-child {
+    border-top: 0;
+}
+
+.codex-favo-list .codex-post:last-child {
+    border-bottom-color: #fa669940;
+}
+
+/* Catalog separator controlled by selector.separator_before */
+.codex-catalog-divider {
+    border: 0;
+    border-top: 1px dashed #cccccc;
+    margin: 14px 11px;
+}
+
+/* ========================================
+   Codex Tag Filter Popup
+   Standalone modal surface so Index pages do not need reader-loader.css.
+   ======================================== */
+
+.codex-tag-filter-modal[hidden] {
+    display: none;
+}
+
+.codex-tag-filter-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.codex-tag-filter-modal .reader-data-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(36, 36, 36, 0.28);
+    backdrop-filter: blur(2px);
+}
+
+.codex-tag-filter-dialog {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #fa669930;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.codex-tag-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.codex-tag-filter-confirm {
+    appearance: none;
+    min-width: 58px;
+    padding: 6px 12px;
+    border: 1px solid #fa6699;
+    border-radius: 5px;
+    background: #fa6699;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.codex-tag-filter-confirm:hover {
+    opacity: 0.78;
+}
+
+.codex-tag-filter-confirm:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+body.reader-dark .codex-tag-filter-dialog {
+    background: #111111;
+    color: #999999;
+    border-color: #99999930;
+}
+
+.codex-tag-filter-trigger {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: min(100%, 340px);
+    height: 100%;
+    transform: translateX(-50%);
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.codex-tag-filter-trigger:focus-visible {
+    outline: 1px solid #242424;
+    outline-offset: -1px;
+}
+
+.codex-tag-filter-dialog {
+    width: min(340px, calc(100vw - 28px));
+    height: min(82vh, 680px);
+    max-height: calc(100vh - 28px);
+    padding: 18px 16px 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.codex-tag-filter-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.codex-tag-filter-title-row .reader-data-dialog-title {
+    margin: 0;
+}
+
+.codex-tag-filter-close {
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    color: #242424;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.codex-tag-filter-close svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.25;
+}
+
+.codex-tag-filter-close:hover {
+    opacity: 0.72;
+}
+
+.codex-tag-filter-close:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+}
+
+.codex-tag-filter-selected {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.codex-tag-filter-chip {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid #24242422;
+    background: #f2f0ec;
+    color: #696969;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+.codex-tag-filter-groups {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+}
+
+.codex-tag-filter-group {
+    margin: 0 0 14px;
+}
+
+.codex-tag-filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.codex-tag-filter-group-title {
+    margin: 0 0 6px;
+    color: #696969;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.codex-tag-filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.codex-tag-filter-option {
+    appearance: none;
+    border: 1px solid #bbb;
+    background: #fff;
+    color: #262522;
+    padding: 6px 9px;
+    margin: 0;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.35;
+    cursor: pointer;
+}
+
+.codex-tag-filter-option:hover {
+    background: #f2f0ec;
+}
+
+/* Single-select groups use the same selected color as multi-select.
+   Their unselected options use a dashed border to subtly distinguish the mode. */
+.codex-tag-filter-group.is-single-select .codex-tag-filter-option:not(.is-selected) {
+    border-style: dashed;
+}
+
+.codex-tag-filter-option.is-selected {
+    background: #262522;
+    color: #fff;
+    border-color: #262522;
+}
+
+.codex-tag-filter-option:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+}
+
+.codex-tag-filter-note {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    color: #888;
+    font-size: 10px;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.codex-tag-filter-match {
+    flex: 0 0 auto;
+    margin-top: 12px;
+    color: #696969;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.codex-tag-filter-actions {
+    flex: 0 0 auto;
+    margin-top: 10px;
+}
+
+.codex-tag-filter-confirm:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+body.reader-dark .codex-tag-filter-close {
+    color: #999;
+}
+
+body.reader-dark .codex-tag-filter-chip {
+    background: #1b1b1b;
+    color: #777;
+    border-color: #99999930;
+}
+
+body.reader-dark .codex-tag-filter-group-title,
+body.reader-dark .codex-tag-filter-match {
+    color: #777;
+}
+
+body.reader-dark .codex-tag-filter-option {
+    background: #111;
+    color: #999;
+    border-color: #99999940;
+}
+
+body.reader-dark .codex-tag-filter-option:hover {
+    background: #1b1b1b;
+}
+
+body.reader-dark .codex-tag-filter-option.is-selected {
+    background: #999;
+    color: #111;
+    border-color: #999;
+}
+
