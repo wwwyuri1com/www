@@ -1,0 +1,73 @@
+/* YURI NO1 Music — Track Preview | independent, no player CSS coupling */
+:root{color-scheme:dark;--accent:#fa6699;--text:#fff;--muted:rgba(255,255,255,.73);--line:rgba(255,255,255,.15)}
+*{box-sizing:border-box}html{background:#07070a}body{margin:0;min-height:100vh;background:#07070a;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.backdrop{position:fixed;inset:-40px;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,9,.77),rgba(5,5,9,.94)),var(--art) center/cover no-repeat;filter:blur(45px) saturate(.75);opacity:.85}.backdrop:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 40% 20%,rgba(250,102,153,.09),transparent 56%)}
+.site-shell{position:relative;z-index:1;max-width:1120px;min-height:100vh;margin:auto;padding:24px clamp(16px,4vw,46px)}
+.topline,.footer{display:flex;align-items:center;justify-content:space-between;gap:16px}.topline{padding-bottom:26px;border-bottom:1px solid rgba(255,255,255,.08)}.brand{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.16em;font-weight:750}.brand-mark{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(250,102,153,.5);border-radius:50%;color:var(--accent);font-size:18px}.brand em{font-style:normal;font-weight:400;color:#ff9abb}.top-link,.footer{font-size:10px;letter-spacing:.18em;color:var(--muted)}.top-link:hover,.footer a:hover{color:#fff}
+.track-card{margin:38px auto 36px;background:linear-gradient(130deg,rgba(27,25,35,.82),rgba(9,9,15,.85));border:1px solid var(--line);border-radius:26px;box-shadow:0 25px 90px rgba(0,0,0,.45);backdrop-filter:blur(24px) saturate(115%);-webkit-backdrop-filter:blur(24px) saturate(115%);overflow:hidden}.hero{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:clamp(24px,4vw,60px);padding:clamp(18px,4vw,46px);align-items:center}.art-frame{aspect-ratio:9/16;background:#15141a;border-radius:12px;overflow:hidden;box-shadow:0 18px 48px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12)}.art-frame img{display:block;width:100%;height:100%;object-fit:contain}.song-info{min-width:0}.eyebrow{font-size:10px;letter-spacing:.27em;color:#ffa6c3;font-weight:750}.eyebrow span{color:#b29aa5;margin:0 5px}.song-info h1{font-size:clamp(36px,6vw,66px);font-weight:730;line-height:1.12;letter-spacing:-.045em;margin:15px 0 32px;overflow-wrap:anywhere}.info-lines{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:13px 0;margin-bottom:30px}.info-lines div{display:grid;grid-template-columns:115px 1fr;gap:8px;align-items:baseline;padding:9px 0;font-size:14px}.field-name{color:#c4abb7;font-size:10px;letter-spacing:.16em;font-weight:700}.listen-links{display:grid;gap:12px}.listen-link{display:flex;align-items:center;gap:15px;min-height:54px;padding:14px 19px;border-radius:12px;font-size:13px;font-weight:650;letter-spacing:.01em}.listen-link .play-symbol{font-size:12px}.listen-link .external{margin-left:auto;font-size:18px}.primary{background:linear-gradient(115deg,#ff7fa9,#e65089);color:#180812;box-shadow:0 9px 32px rgba(250,102,153,.18);transition:filter .2s,transform .2s}.primary:hover{filter:brightness(1.12);transform:translateY(-2px)}.disabled{color:rgba(255,255,255,.35);background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);cursor:not-allowed}
+.lyrics-section{padding:0 clamp(18px,4vw,46px) 48px}.section-header{display:flex;gap:18px;align-items:center;margin:12px 0 26px}.section-header h2{flex-shrink:0;font-weight:650;font-size:11px;letter-spacing:.20em;text-transform:uppercase}.section-header h2 span{color:var(--accent)}.section-rule{height:1px;flex:1;background:var(--line)}.lyrics-content{white-space:pre-wrap;overflow-wrap:anywhere;max-width:680px;margin:0 auto;color:rgba(255,255,255,.88);font-size:14px;line-height:2.05;letter-spacing:.015em}.footer{padding:3px 1px 26px}.footer span{color:var(--accent)}
+@media(max-width:700px){.site-shell{padding:15px 12px}.topline{padding:6px 5px 16px}.track-card{margin:20px auto 28px;border-radius:19px}.hero{grid-template-columns:1fr;gap:27px;padding:18px}.art-frame{width:min(100%,305px);margin:0 auto}.song-info h1{margin:12px 0 23px;font-size:43px}.eyebrow{font-size:9px}.lyrics-section{padding:0 19px 36px}.lyrics-content{font-size:13px;line-height:1.95}.top-link{font-size:9px}.footer{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.primary{transition:none}.primary:hover{transform:none}}
+
+/* Shared header icon, matching the player brand without a ring. */
+.brand-logo{display:block;flex:0 0 32px;width:32px;height:32px;object-fit:contain}
+.top-link{display:inline-flex;align-items:center;gap:8px;font-weight:650;white-space:nowrap}
+.top-link span{color:var(--accent);font-size:14px}
+.footer img{display:block;width:24px;height:24px;object-fit:contain}
+
+/* Track Collection — horizontal music-list rows, not cover cards. */
+.collection-main{width:min(100%,820px);margin:0 auto;padding:clamp(31px,5vw,66px) 0 52px}
+.collection-intro{display:flex;justify-content:space-between;align-items:end;gap:20px;padding-bottom:25px;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,.12)}
+.collection-kicker{margin:0 0 12px;color:#ff9abb;font-weight:730;font-size:10px;letter-spacing:.26em}
+.collection-heading{margin:0;font-size:clamp(34px,6.5vw,64px);letter-spacing:-.055em;line-height:1.08;font-weight:760}
+.collection-deck{margin:12px 0 0;color:var(--muted);font-size:12px;letter-spacing:.04em}
+.collection-tally{text-align:right;flex:0 0 auto;padding-bottom:3px}
+.collection-tally strong{display:block;font-size:27px;line-height:1.25;font-variant-numeric:tabular-nums;font-weight:680;color:#fff}
+.collection-tally span{font-size:9px;letter-spacing:.21em;color:#d1b3c2}
+.collection-list{display:flex;flex-direction:column;gap:3px}
+.collection-item{display:flex;align-items:center;gap:clamp(12px,2.5vw,22px);min-width:0;padding:12px clamp(8px,1.8vw,16px);border-radius:12px;border:1px solid transparent;border-bottom-color:rgba(255,255,255,.08);background:transparent;transition:background-color .2s,border-color .2s}
+.collection-item:hover,.collection-item:focus-visible{background:rgba(250,102,153,.105);border-color:rgba(250,102,153,.31)}
+.collection-art{display:block;flex:0 0 clamp(54px,7.5vw,66px);width:clamp(54px,7.5vw,66px);aspect-ratio:9/16;overflow:hidden;border-radius:9px;background:#15141b;box-shadow:0 5px 18px rgba(0,0,0,.2)}
+.collection-art img{display:block;width:100%;height:100%;object-fit:contain}
+.collection-details{display:flex;align-items:center;min-width:0;flex:1;gap:clamp(8px,2vw,20px)}
+.collection-primary{display:flex;flex-direction:column;min-width:0;flex:1;gap:6px}
+.collection-title{font-size:clamp(16px,2.2vw,21px);font-weight:730;line-height:1.23;letter-spacing:-.025em;overflow-wrap:anywhere}
+.collection-story{color:rgba(255,255,255,.72);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.collection-character{color:rgba(255,255,255,.72);flex:0 1 170px;min-width:0;text-align:right;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.collection-arrow{flex:0 0 25px;color:var(--accent);text-align:right;font-size:20px;line-height:1}
+.collection-footer-note{margin:34px 0 0;color:rgba(255,255,255,.42);letter-spacing:.12em;font-size:10px}
+@media(max-width:700px){.brand-logo{width:28px;height:28px;flex-basis:28px}.collection-intro{align-items:end}.collection-heading{font-size:40px}.collection-main{padding:33px 5px 34px}}
+@media(max-width:430px){.collection-item{gap:12px;padding:9px 5px}.collection-art{flex-basis:51px;width:51px}.collection-details{gap:8px}.collection-title{font-size:17px}.collection-story,.collection-character{font-size:12px}.collection-character{flex-basis:90px}.collection-arrow{flex-basis:18px;font-size:17px}.collection-deck{font-size:11px}.collection-tally strong{font-size:21px}.collection-tally span{font-size:8px}.collection-footer-note{margin-top:23px}.brand{font-size:11px;letter-spacing:.11em}}
+@media(max-width:350px){.collection-character{flex-basis:70px}.collection-title{font-size:15px}.collection-art{flex-basis:46px;width:46px}}
+@media(prefers-reduced-motion:reduce){.collection-item{transition:none}}
+
+/* Track index: display original song date below the character, with no label. */
+.collection-character{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.collection-date{display:block;font-size:11px;line-height:1.3;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:rgba(255,255,255,.48);white-space:nowrap}
+@media(max-width:430px){.collection-date{font-size:10px}}
+
+/* Codex Publish — minimal additions to Music Track presentation. */
+.article-card .art-frame{aspect-ratio:9/16}
+.article-card .lyrics-content{max-width:760px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.92;font-size:15px;letter-spacing:0}
+.article-card .lyrics-section{padding-bottom:55px}
+.article-card .song-info h1{font-size:clamp(32px,5vw,58px)}
+.art-gallery{max-width:760px;margin:40px auto 0;border-top:1px solid var(--line);padding-top:22px}
+.art-gallery h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#ff9abb}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,125px),1fr));gap:12px;margin-top:15px}
+.gallery-grid img{width:100%;height:auto;aspect-ratio:9/16;object-fit:contain;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.archive-notice{padding:12px 30px;background:rgba(250,102,153,.12);border-bottom:1px solid var(--line);font-size:12px}
+.archive-notice a{color:#ffb6d0;text-decoration:underline}
+.related-links{max-width:760px;margin:32px auto 0;display:flex;flex-wrap:wrap;gap:9px}
+.related-link{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:12px}
+.related-link:hover{border-color:var(--accent)}
+.collection-art img{object-fit:cover}
+.core-index{min-height:100vh;background:#0b0a0e}
+.core-table{max-width:1120px;margin:48px auto;padding:16px}
+.core-table h1{font-size:clamp(24px,4vw,42px)}
+.core-table p{color:var(--muted)}
+.core-table a{text-decoration:underline;color:#ffa0c3}
+.table-scroll{overflow-x:auto}
+.core-table table{width:100%;border-collapse:collapse;font-size:13px}
+.core-table th,.core-table td{padding:13px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.core-table th{color:#ffadc9;font-size:11px;letter-spacing:.12em}
+@media(max-width:700px){.article-card .lyrics-content{font-size:14px;line-height:1.85}.article-card .art-frame{max-width:255px}.gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.core-table{margin-top:16px}}
