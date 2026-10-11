@@ -1,1 +1,0 @@
-(()=>{const prefix='yuri1.codex.cover.';const normalize=n=>Math.max(1,Number(n)||1);window.YURI1Cover={get:n=>normalize(localStorage.getItem(prefix+n)),set:(n,i)=>{localStorage.setItem(prefix+n,normalize(i));return normalize(i)},next:(i,total)=>Number(i)>=total?1:Number(i)+1,src:(n,i)=>Y1Data.image(n,i,true),count:async n=>{await Y1Data.ready;return Y1Data.images(n).length}}})();
