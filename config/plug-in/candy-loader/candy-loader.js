@@ -164,38 +164,46 @@ Y1Data.ready.then(() => {
         });
 
     async function loadPosts() {
-        const data = await loadCatalog();
+    const data = await loadCatalog();
+    const postRefs = new Map();
+    collectPosts(data?.catalogs || {}, postRefs);
 
-        const postRefs = new Map();
-
-        collectPosts(
-            data?.catalogs || {},
-            postRefs
-        );
-
-        // Homepage is intentionally restricted to:
-        // 1) The two newest News entries (date + issue number).
-        // 2) Every story Post, newest to oldest.
-        // Policy, feature, guide and IP entries remain accessible in Codex.
-        // Use canonical *storage filenames* rather than Catalog group labels,
-        // so reorganizing the Catalog cannot silently change the homepage.
-        const storageIds = [...postRefs.keys()];
-        const newsIds = storageIds
-            .filter(id => Y1Data.isNews(id))
-            .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
-            .slice(0, 2);
-        const storyIds = storageIds
-            .filter(id => !Y1Data.isNews(id))
-            .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-
-        const orderedIds = [...newsIds, ...storyIds];
-        const loaded = await loadPostData(
-            orderedIds.map(id => [id, postRefs.get(id)])
-        );
-        // Fetches finish in arbitrary order, so restore the requested order.
-        const byStorageId = new Map(loaded.map(post => [post.id, post]));
-        return orderedIds.map(id => byStorageId.get(id)).filter(Boolean);
+    // Identify News from the actual Catalog 100 branch, including descendants.
+    const newsIds = new Set();
+    function collectNews(node) {
+        for (const ref of node?.posts || []) {
+            const id = getCatalogPostStorageId(ref);
+            if (id) newsIds.add(id);
+        }
+        for (const child of Object.values(node?.children || {})) collectNews(child);
     }
+    function locateNews(nodes) {
+        for (const node of Object.values(nodes || {})) {
+            if (String(node?.id) === '100') collectNews(node);
+            else locateNews(node?.children);
+        }
+    }
+    locateNews(data?.catalogs || {});
+
+    // Editable publication date takes precedence over the immutable ID date
+    // and CCC; the 3-digit work sequence breaks ties within a date.
+    function newestFirst(a, b) {
+        const byDate = String(Y1Data.date(b) || '').localeCompare(String(Y1Data.date(a) || ''));
+        if (byDate) return byDate;
+        const bySequence = getNumericIdOrder(b) - getNumericIdOrder(a);
+        return bySequence || String(b).localeCompare(String(a));
+    }
+    const ids = [...postRefs.keys()];
+    const news = ids.filter(id => newsIds.has(id)).sort(newestFirst).slice(0, 2);
+    const otherPosts = ids.filter(id => !newsIds.has(id)).sort(newestFirst);
+    const orderedIds = [...news, ...otherPosts];
+    const loaded = await loadPostData(orderedIds.map(id => [id, postRefs.get(id)]));
+    const byStorageId = new Map(loaded.map(post => [post.id, post]));
+    return orderedIds.map(id => {
+        const post = byStorageId.get(id);
+        return post ? {...post, isNews: newsIds.has(id)} : null;
+    }).filter(Boolean);
+}
 
     function collectPosts(catalogs, postRefs) {
         for (const node of Object.values(catalogs || {})) {
@@ -273,7 +281,7 @@ Y1Data.ready.then(() => {
             const row =
                 document.createElement("div");
 
-            row.className = Y1Data.isNews(post.id)
+            row.className = Boolean(post.isNews)
                 ? "candy-guideline candy-news"
                 : "candy-guideline candy-post";
 

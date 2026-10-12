@@ -1,0 +1,36 @@
+/* Isolated Get-only miniature player; does not alter reader or Music site styles. */
+#get-music-trigger svg { width:18px; height:18px; pointer-events:none; }
+#get-music-player[hidden], #get-music-player [hidden] { display:none!important; }
+#get-music-player { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:200px; z-index:1800; box-sizing:border-box; border:1px solid #e9c9d5; border-radius:12px; background:#fff; box-shadow:0 9px 35px #12121228; color:#302831; font-family:system-ui,sans-serif; }
+#get-music-player.is-lyrics-open { width:250px; height:400px; max-width:calc(100vw - 20px); max-height:calc(100dvh - 20px); }
+#get-music-player *,#get-music-player *::before,#get-music-player *::after { box-sizing:border-box; }
+#get-music-player button { cursor:pointer; }
+#get-music-player .get-music-main { display:flex; flex-direction:column; align-items:center; width:100%; height:100%; padding:8px 9px 9px; }
+#get-music-player .get-music-head { width:100%; flex:none; display:flex; align-items:center; gap:5px; height:22px; }
+#get-music-player .get-music-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; font-size:11px; font-weight:700; }
+#get-music-player .get-music-close { padding:0; width:20px; height:20px; border:0; background:transparent; color:inherit; font-size:20px; line-height:20px; }
+#get-music-player .get-music-disc { flex:none; position:relative; border-radius:50%; width:120px; height:120px; margin:2px auto 5px; border:0; padding:0; overflow:hidden; display:grid; place-items:center; background:repeating-radial-gradient(circle,#121419 0px,#121419 2px,#24262d 3px,#16181f 5px); box-shadow:0 2px 9px #1114; color:#fff; }
+#get-music-player .get-music-record { width:100%; height:100%; position:absolute; inset:0; display:grid; place-items:center; animation:get-music-spin 5s linear infinite; animation-play-state:paused; }
+#get-music-player .get-music-disc.is-playing .get-music-record { animation-play-state:running; }
+#get-music-player .get-music-player-image { position:absolute; width:120px; height:120px; object-fit:contain; filter:drop-shadow(0 1px 2px #0008); }
+/* Match the existing Music disc-play-btn: a small dark center button with visible state icon. */
+#get-music-player .get-music-disc-overlay { position:absolute; z-index:4; top:50%; left:50%; transform:translate(-50%,-50%); width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,.8); color:#fff; display:grid; place-items:center; opacity:.5; transition:opacity .01s ease .05s; pointer-events:none; }
+#get-music-player .get-music-disc-overlay svg { width:22px; height:22px; display:block; }
+#get-music-player .get-music-disc:hover .get-music-disc-overlay, #get-music-player .get-music-disc:focus-visible .get-music-disc-overlay { opacity:1; color:#fa6699; transition-delay:0s; }
+#get-music-player .get-music-disc:active .get-music-disc-overlay { transform:translate(-50%,-50%) scale(.96); }
+#get-music-player .get-music-controls { flex:1; display:flex; align-items:center; justify-content:space-around; width:100%; min-height:25px; gap:1px; }
+#get-music-player .get-music-control { border:0; border-radius:5px; padding:2px; background:transparent; color:#514353; min-width:24px; height:25px; font-size:15px; }
+#get-music-player .get-music-control:hover,#get-music-player .get-music-control.is-active { color:#ed6499; background:#fa669912; }
+/* Dim single-track navigation without disabling its restart action. */
+#get-music-player .get-music-control.is-single-track,
+#get-music-player .get-music-control.is-single-track:hover { color:#51435350; background:transparent; }
+#get-music-player .get-music-control:focus-visible,#get-music-player .get-music-close:focus-visible { outline:2px solid #fa6699; outline-offset:1px; }
+#get-music-player .get-music-control svg { width:16px; height:16px; }
+#get-music-player .get-music-lyrics-panel { display:flex; flex-direction:column; width:100%; height:100%; padding:9px; gap:6px; }
+#get-music-player .get-music-lyrics-head { display:flex; gap:4px; justify-content:space-between; align-items:center; font-size:11px; font-weight:bold; }
+#get-music-player .get-music-lyrics-text { flex:1; overflow-y:auto; min-height:0; white-space:pre-wrap; overflow-wrap:anywhere; font:12px/1.5 system-ui,sans-serif; margin:0; }
+#get-music-player .get-music-back { padding:2px 6px; border:1px solid #ddd; border-radius:4px; background:white; font-size:11px; }
+@keyframes get-music-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { #get-music-player .get-music-record {animation-duration:16s;} }
+
+#get-music-player .get-music-visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
