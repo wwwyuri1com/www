@@ -160,6 +160,8 @@ Y1Data.ready.then(() => {
                         })
                         .then(() => {
                             renderStatusIcons();
+                            resultRoot.dataset.studioReady = 'true';
+                            document.dispatchEvent(new Event('y1:codex-rendered'));
                         })
                 );
             }
@@ -745,7 +747,7 @@ Y1Data.ready.then(() => {
         }
 
         const studioCatalogQuery = new URLSearchParams(window.location.search).get('catalog');
-        hideDirectPosts = studioCatalogQuery && studioCatalogQuery !== 'All' ? false : node?.studio_expand === 'hide' ? true : node?.studio_expand === 'show' ? false : hideDirectPosts;
+        hideDirectPosts = studioCatalogQuery && studioCatalogQuery !== 'All' ? false : node?.studio_expand === 'hide';
         const catalog =
             cloneTemplate(
                 catalogTemplate
@@ -1962,7 +1964,15 @@ Y1Data.ready.then(() => {
         while (
             currentNode &&
             typeof currentNode === "object" &&
-            currentNode.studio_namespace === true && !Array.isArray(currentNode.posts) &&
+            // A configured Catalog node must retain its own expand/collapse
+            // policy. Flatten only presentation-only intermediate nodes.
+            (currentNode.studio_expand || 'auto') === 'auto' &&
+            currentNode.studio_namespace !== true &&
+            // A configured Catalog node must retain its own expand/collapse
+            // policy. Flatten only presentation-only intermediate nodes.
+            (currentNode.studio_expand || 'auto') === 'auto' &&
+            currentNode.studio_namespace !== true &&
+            !Array.isArray(currentNode.posts) &&
             getCatalogChildren(currentNode).length === 1
         ) {
             const [childName, childNode] = getCatalogChildren(currentNode)[0];

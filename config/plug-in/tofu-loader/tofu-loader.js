@@ -16,30 +16,42 @@ Y1Data.ready.then(() => {
     }
 
     let currentMode = 'grid';
+    let preferredMode = 'grid';
+    let gridGeneration = 0;
     const viewModeKey = 'yuri1.codex.viewMode';
     let renderTimer = null;
+    let catalogIndexPromise = null;
+    const firstSelectorKey = 'yuri1.codex.catalogSelectorUsed';
+    const firstCodexListKey = 'yuri1.codex.firstCodexList';
+    // Only the first explicit selection of Codex in this tab defaults to
+    // List. Subsequent Catalog navigation follows the saved mode preference.
+    let initialCodexList = false;
+
+    function sessionRead(key) {
+        try { return sessionStorage.getItem(key); } catch (_) { return null; }
+    }
+
+    function sessionWrite(key, value) {
+        try { sessionStorage.setItem(key, value); } catch (_) {}
+    }
+
+    function trackFirstCatalogSelection(event) {
+        const select = event.target;
+        if (!select?.matches?.('#codex-filter-catalog select')) return;
+        if (sessionRead(firstSelectorKey) === '1') return;
+        sessionWrite(firstSelectorKey, '1');
+        if (select.value === 'All') sessionWrite(firstCodexListKey, '1');
+    }
+
+    // Capture before the Codex selector's own change handler navigates away.
+    document.addEventListener('change', trackFirstCatalogSelection, true);
 
     init();
 
     function init() {
         buttons.forEach(button => {
             button.addEventListener('click', () => {
-                const mode = button.dataset.viewMode;
-
-                // On a direct Catalog page whose only Posts are intentionally
-                // hidden from Tofu (for example IDs beginning with "_"),
-                // clicking Tofu should not look like a broken button.
-                // Return to the main Codex page instead.
-                if (mode === 'grid' && isTofuHiddenOnlyCatalog()) {
-                    // This Catalog has no Tofu-visible Posts. Return to the
-                    // main Codex page, but explicitly keep the user's intent
-                    // to use Tofu/Grid so the button does not appear broken.
-                    localStorage.setItem(viewModeKey, 'grid');
-                    window.location.href = 'w/index.html';
-                    return;
-                }
-
-                if (mode === 'grid') {
+                if (button.dataset.viewMode === 'grid') {
                     showGrid();
                 } else {
                     showList();
@@ -47,66 +59,192 @@ Y1Data.ready.then(() => {
             });
         });
 
-        const savedMode = localStorage.getItem(viewModeKey);
+        try {
+            preferredMode = localStorage.getItem(viewModeKey) === 'list'
+                ? 'list' : 'grid';
+        } catch (_) { preferredMode = 'grid'; }
+        const requestedCatalog = new URLSearchParams(location.search).get('catalog');
+        initialCodexList = requestedCatalog === 'All' &&
+            sessionRead(firstCodexListKey) === '1';
+        if (initialCodexList) sessionWrite(firstCodexListKey, '0');
 
-        if (savedMode === 'list') {
-            showList();
-        } else {
-            showGrid();
-        }
+        // The Codex data / Catalog render is asynchronous. An initially empty
+        // results element is NOT evidence that a Catalog has no covers.
+        showList({ remember: false });
+        if (resultRoot.dataset.studioReady === 'true') refreshView();
 
-        const observer = new MutationObserver(() => {
+        document.addEventListener('y1:codex-rendered', refreshView);
+        // Codex contains Lucide SVGs and reader/status controls. Those can be
+        // replaced without any post or Catalog changing. Rebuilding Grid for
+        // every descendant mutation creates a feedback loop:
+        // setButtonState -> lucide.createIcons -> SVG replacement -> observer.
+        // Only structural changes to post/Catalog nodes require a Grid refresh.
+        const affectsCatalogContent = mutations => mutations.some(mutation => {
+            if (mutation.type !== 'childList') return false;
+            return [...mutation.addedNodes, ...mutation.removedNodes].some(node => {
+                if (node.nodeType !== 1) return false;
+                const selector = '.codex-post, .codex-catalog, .codex-post-list';
+                return node.matches(selector) || Boolean(node.querySelector(selector));
+            });
+        });
+        const observer = new MutationObserver(mutations => {
+            if (!affectsCatalogContent(mutations)) return;
             clearTimeout(renderTimer);
-            renderTimer = setTimeout(() => {
-                if (currentMode === 'grid') {
-                    buildGrid();
+            renderTimer = setTimeout(refreshView, 0);
+        });
+        observer.observe(resultRoot, { childList: true, subtree: true });
+    }
+
+    function refreshView() {
+        if (resultRoot.dataset.studioReady !== 'true') return;
+        if (initialCodexList || preferredMode === 'list') {
+            if (currentMode !== 'list') showList({ remember: false });
+            return;
+        }
+        showGrid({ remember: false });
+    }
+
+    // Grid is image-only. The presence of a Post is not proof that a
+    // cover exists; empty image records must show the complete List instead.
+    function hasGridCover(post) {
+        const postId = post?.dataset?.postId || '';
+        if (!postId || postId.startsWith('_') || postId.startsWith('~')) {
+            return false;
+        }
+        // Studio's built WWW already has a complete image registry in memory.
+        // Do not infer covers from a blank <img> left in the HTML template.
+        if (window.Y1Data && typeof window.Y1Data.images === 'function') {
+            return window.Y1Data.images(postId).some(
+                image => image && (image.thumb || image.image)
+            );
+        }
+        const img = post.querySelector('[data-codex="post-image-link"]');
+        return Boolean(img && img.getAttribute('src'));
+    }
+
+    // Grid and List have separate content sources. A Catalog can deliberately
+    // collapse its Notofu post rows without removing those posts (or their
+    // covers) from the selected Catalog. Grid must never infer "no covers"
+    // from the currently rendered List DOM.
+    function readCatalogIndex() {
+        if (!catalogIndexPromise) {
+            catalogIndexPromise = window.Y1Data.request('w/catalog.html')
+                .then(response => {
+                    if (!response.ok) throw new Error('Codex Catalog unavailable');
+                    return response.json();
+                })
+                .catch(error => {
+                    catalogIndexPromise = null;
+                    throw error;
+                });
+        }
+        return catalogIndexPromise;
+    }
+
+    function selectedCatalogRoot(catalogs, query) {
+        if (!query || query === 'All') return catalogs;
+        const segments = String(query).split('/').filter(Boolean);
+        function walk(nodes, path = '') {
+            for (const [name, node] of Object.entries(nodes || {})) {
+                const nextPath = path ? `${path}/${name}` : name;
+                if (String(node?.id || '') === query || nextPath === query ||
+                    (segments.length === 1 && name === query)) return node;
+                const child = walk(node?.children, nextPath);
+                if (child) return child;
+            }
+            return null;
+        }
+        return walk(catalogs);
+    }
+
+    function collectCatalogPosts(node, ids, seen) {
+        if (!node || typeof node !== 'object') return;
+        // A top-level Catalog map has no `posts`, only named children.
+        if (Array.isArray(node.posts)) {
+            for (const entry of node.posts) {
+                const id = typeof entry === 'string' ? entry :
+                    String(entry?.name || entry?.file || entry?.storage || '');
+                if (id && !seen.has(id)) {
+                    seen.add(id);
+                    ids.push(id);
                 }
-            }, 0);
-        });
-
-        observer.observe(resultRoot, {
-            childList: true,
-            subtree: true
-        });
-    }
-
-    function isTofuHiddenOnlyCatalog() {
-        const catalogQuery =
-            new URLSearchParams(window.location.search).get('catalog');
-
-        if (
-            !catalogQuery ||
-            catalogQuery === 'All' ||
-            catalogQuery === 'Favorite'
-        ) {
-            return false;
+            }
         }
+        const children = node.children || (node.catalogs ? node.catalogs : null);
+        for (const child of Object.values(children || {}))
+            collectCatalogPosts(child, ids, seen);
+    }
 
-        const posts =
-            resultRoot.querySelectorAll('.codex-post[data-post-id]');
+    function hiddenByReader(postId) {
+        return localStorage.getItem('yuri1.reader.codex-hidden.' + postId) === 'true';
+    }
 
-        if (!posts.length) {
-            return false;
+    function virtualPost(postId) {
+        const record = window.Y1Data.record(postId);
+        if (!record || hiddenByReader(postId)) return null;
+        return {
+            dataset: { postId },
+            querySelector(selector) {
+                if (selector === '[data-codex="post-link"]') return {
+                    href: `get/${encodeURIComponent(postId)}.html`,
+                    textContent: record.title || postId
+                };
+                if (selector === '[data-codex="post-image-link"]') return {
+                    alt: record.title || postId
+                };
+                return null;
+            }
+        };
+    }
+
+    async function activeGridPosts() {
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get('catalog');
+        // Tags, favorites and the reader's hidden-items view intentionally
+        // use the actual filtered List DOM, not the entire Catalog index.
+        if (params.has('tag') || query === 'Favorite' || query === 'Hidden') {
+            return Array.from(resultRoot.querySelectorAll('.codex-post[data-post-id]'));
         }
+        if (!window.Y1Data || typeof window.Y1Data.request !== 'function') {
+            return Array.from(resultRoot.querySelectorAll('.codex-post[data-post-id]'));
+        }
+        const data = await readCatalogIndex();
+        const catalogs = data?.catalogs || {};
+        const root = selectedCatalogRoot(catalogs, query);
+        if (!root) return [];
+        const ids = [];
+        const seen = new Set();
+        if (root === catalogs) {
+            for (const child of Object.values(catalogs))
+                collectCatalogPosts(child, ids, seen);
+        } else {
+            collectCatalogPosts(root, ids, seen);
+        }
+        return ids.map(virtualPost).filter(Boolean);
+    }
 
-        return Array.from(posts).every(post => {
-            const postId = post.dataset.postId || '';
-            return postId.startsWith('_') || postId.startsWith('~') || !Y1Data.images(postId).length;
+    function showGrid({ remember = true } = {}) {
+        if (remember) {
+            initialCodexList = false;
+            preferredMode = 'grid';
+            try { localStorage.setItem(viewModeKey, 'grid'); } catch (_) {}
+        }
+        // Keep the List visible until the selected Catalog's cover index
+        // has been evaluated and at least one Grid card has been built.
+        buildGrid({ navigateOnEmpty: remember }).catch(error => {
+            console.error('TOFU render:', error);
+            if (preferredMode === 'grid') showList({ remember: false });
         });
     }
 
-    function showGrid() {
-        currentMode = 'grid';
-        localStorage.setItem(viewModeKey, 'grid');
-        setButtonState('grid');
-        notofuRoot.classList.add('is-hidden');
-        tofuRoot.classList.remove('is-hidden');
-        buildGrid();
-    }
-
-    function showList() {
+    function showList({ remember = true } = {}) {
+        if (remember) {
+            initialCodexList = false;
+            preferredMode = 'list';
+            try { localStorage.setItem(viewModeKey, 'list'); } catch (_) {}
+        }
+        gridGeneration++; // Cancel any unfinished asynchronous Grid render.
         currentMode = 'list';
-        localStorage.setItem(viewModeKey, 'list');
         setButtonState('list');
         tofuRoot.classList.add('is-hidden');
         notofuRoot.classList.remove('is-hidden');
@@ -137,14 +275,28 @@ Y1Data.ready.then(() => {
         });
     }
 
-    async function buildGrid() {
-        const posts = resultRoot.querySelectorAll('.codex-post[data-post-id]');
+    function returnToCoverRoot() {
+        const params = new URLSearchParams(window.location.search);
+        const catalog = params.get('catalog');
+        // Only a deliberate Grid click within a coverless Catalog navigates;
+        // automatic fallback and root pages must never loop or leave their URL.
+        if (!catalog || catalog === 'All' || params.has('tag')) return false;
+        window.location.assign(new URL('w/index.html?catalog=All', document.baseURI).href);
+        return true;
+    }
 
-        tofuRoot.replaceChildren();
-
+    async function buildGrid({ navigateOnEmpty = false } = {}) {
+        const generation = ++gridGeneration;
+        const posts = await activeGridPosts();
+        if (generation !== gridGeneration || preferredMode !== 'grid') return;
+        if (!posts.some(hasGridCover)) {
+            if (navigateOnEmpty && returnToCoverRoot()) return;
+            showList({ remember: false });
+            return;
+        }
+        // Build detached, commit only when at least one usable cover card exists.
         const grid = document.createElement('div');
         grid.className = 'codex-tofu-grid';
-        tofuRoot.appendChild(grid);
 
         // A favorite post may also appear in the normal Codex result list.
         // Tofu should render the same post only once, while keeping the
@@ -156,7 +308,7 @@ Y1Data.ready.then(() => {
 
             // IDs beginning with "_" or "~" are internal/news entries.
             // Keep them in List (Notofu), but never expose them in Tofu Grid.
-            if (!postId || postId.startsWith("_") || postId.startsWith("~") || !Y1Data.images(postId).length) {
+            if (!postId || postId.startsWith("_") || postId.startsWith("~")) {
                 return;
             }
 
@@ -167,27 +319,8 @@ Y1Data.ready.then(() => {
             seenPostIds.add(postId);
         });
 
-        // If the selected Catalog contains only Posts that Tofu intentionally
-        // hides (for example IDs beginning with "_" or "~"), an empty Grid looks
-        // broken to users. Fall back to List instead of showing a blank page.
-        // This applies to direct Catalog views; the root/Favorite views keep
-        // their existing behavior.
-        const catalogQuery =
-            new URLSearchParams(window.location.search).get("catalog");
-
-        if (
-            catalogQuery &&
-            catalogQuery !== "All" &&
-            catalogQuery !== "Favorite" &&
-            posts.length > 0 &&
-            !Array.from(posts).some(post => {
-                const postId = post.dataset.postId || "";
-                return postId && !postId.startsWith("_") && !postId.startsWith("~") && Y1Data.images(postId).length > 0;
-            })
-        ) {
-            showList();
-            return;
-        }
+        // Never navigate away from the selected Catalog just because it has
+        // no Tofu-compatible cover. showList() preserves the current URL.
 
         // Render cards in the same order as the Codex result list.
         // Cover-count/storage reads are async, so appending each card directly
@@ -199,7 +332,7 @@ Y1Data.ready.then(() => {
         posts.forEach(post => {
             const postId = post.dataset.postId;
 
-            if (!postId || postId.startsWith("_") || postId.startsWith("~") || !Y1Data.images(postId).length) {
+            if (!hasGridCover(post)) {
                 return;
             }
 
@@ -215,11 +348,20 @@ Y1Data.ready.then(() => {
             orderedPosts.map(post => renderTofuItem(post))
         );
 
+        if (generation !== gridGeneration || preferredMode !== 'grid') return;
         items.forEach(item => {
-            if (item) {
-                grid.appendChild(item);
-            }
+            if (item && item.dataset.coverFailed !== 'true') grid.appendChild(item);
         });
+        if (!grid.children.length) {
+            if (navigateOnEmpty && returnToCoverRoot()) return;
+            showList({ remember: false });
+            return;
+        }
+        tofuRoot.replaceChildren(grid);
+        currentMode = 'grid';
+        setButtonState('grid');
+        notofuRoot.classList.add('is-hidden');
+        tofuRoot.classList.remove('is-hidden');
     }
 
     async function renderTofuItem(post) {
@@ -249,6 +391,7 @@ Y1Data.ready.then(() => {
         const coverCount = window.YURI1Cover
             ? await window.YURI1Cover.count(postId)
             : 1;
+        if (coverCount < 1) return null;
 
         let coverNumber = window.YURI1Cover
             ? window.YURI1Cover.get(postId)
@@ -278,7 +421,14 @@ Y1Data.ready.then(() => {
                 return;
             }
 
-            imageBlock.remove();
+            item.dataset.coverFailed = 'true';
+            item.remove();
+            // If every actual image has failed, keep the user in this Catalog
+            // and render its readable Notofu content rather than a blank Grid.
+            if (currentMode === 'grid' &&
+                !tofuRoot.querySelector('.codex-tofu-item')) {
+                showList({ remember: false });
+            }
         }, { once: false });
 
         applyCover(coverNumber);
@@ -320,14 +470,10 @@ Y1Data.ready.then(() => {
                     ? window.YURI1Cover.next(coverNumber, coverCount)
                     : (coverNumber >= coverCount ? 1 : coverNumber + 1);
 
-                // Update ONLY this card. Rebuilding the whole grid here made
-                // neighbouring cards re-render and appear to switch together.
+                // Paint this card before writing the preference. A full or
+                // unavailable localStorage must not turn a valid click into
+                // an apparent no-op.
                 coverNumber = next;
-
-                if (window.YURI1Cover) {
-                    window.YURI1Cover.set(postId, coverNumber);
-                }
-
                 const nextThumbnail = window.YURI1Cover
                     ? window.YURI1Cover.next(coverNumber, coverCount)
                     : (coverNumber >= coverCount ? 1 : coverNumber + 1);
@@ -339,6 +485,10 @@ Y1Data.ready.then(() => {
                 swapImage.src = window.YURI1Cover
                     ? window.YURI1Cover.src(postId, nextThumbnail)
                     : Y1Data.image(postId,nextThumbnail,true);
+                if (window.YURI1Cover) {
+                    try { window.YURI1Cover.set(postId, coverNumber); }
+                    catch (error) { console.warn('Cover preference not saved:', error); }
+                }
             });
 
             imageBlock.appendChild(swapButton);
