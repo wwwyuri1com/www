@@ -1093,12 +1093,25 @@ Y1Data.ready.then(() => {
     }
 
 
+    function getFilterTagPosts(data, ref) {
+        const id = resolveTagId(data, ref);
+        const presentPosts = data?._present_filters?.[id]?.posts;
+        if (Array.isArray(presentPosts)) return presentPosts;
+
+        const name = resolveTagName(data, ref);
+        const ordinaryPosts = data?.tags?.[name]?.posts;
+        return Array.isArray(ordinaryPosts) ? ordinaryPosts : [];
+    }
+
+
     function formatTagLabel(tag) {
-        const name =
-            resolveTagName(
-                tagFilterData || {},
-                tag
-            );
+        const data = tagFilterData || {};
+        const name = resolveTagName(data, tag);
+
+        // Derived media filters are read-only options, not manually managed #Tags.
+        if (Array.isArray(data?._present_filters?.[resolveTagId(data, tag)]?.posts)) {
+            return name;
+        }
 
         return /^\p{Extended_Pictographic}/u.test(name)
             ? name
@@ -1140,16 +1153,7 @@ Y1Data.ready.then(() => {
         let baseOrder = null;
 
         for (const tagRef of selectedTags) {
-            const tagName =
-                resolveTagName(
-                    data,
-                    tagRef
-                );
-
-            const posts =
-                Array.isArray(data?.tags?.[tagName]?.posts)
-                    ? data.tags[tagName].posts
-                    : [];
+            const posts = getFilterTagPosts(data, tagRef);
 
             const set = new Set();
             const order = [];
@@ -2623,10 +2627,7 @@ Y1Data.ready.then(() => {
 
             const visibleTags =
                 tagEntries.filter(tag =>
-                    Array.isArray(
-                        data?.tags?.[tag.name]?.posts
-                    ) &&
-                    data.tags[tag.name].posts.length > 0
+                    getFilterTagPosts(data, tag.id || tag.name).length > 0
                 );
 
             if (visibleTags.length === 0) {
@@ -3017,8 +3018,7 @@ Y1Data.ready.then(() => {
 
             const visibleTags =
                 tagEntries.filter(tag =>
-                    Array.isArray(data?.tags?.[tag.name]?.posts) &&
-                    data.tags[tag.name].posts.length > 0
+                    getFilterTagPosts(data, tag.id || tag.name).length > 0
                 );
 
             if (!visibleTags.length) continue;

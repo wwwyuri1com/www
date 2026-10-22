@@ -384,7 +384,7 @@ body.reader-dark .reader-data-dialog-button.primary {
     border-radius: 4px;
     background: rgba(255, 255, 255, 0);
     color: #ffffff;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+    /* box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12); */
     cursor: pointer;
     display: inline-flex;
     align-items: center;
