@@ -185,6 +185,21 @@ Y1Data.ready.then(() => {
     }
     locateNews(data?.catalogs || {});
 
+    // Only ordinary posts under the actual W Catalog 300 (Music) and 500
+    // (Novels) branches, including descendants, belong on the homepage.
+    // Membership is from Catalog nodes, never the asset-number prefix.
+    const featuredPosts = new Map();
+    function locateFeatured(nodes) {
+        for (const node of Object.values(nodes || {})) {
+            if (String(node?.id) === '300' || String(node?.id) === '500') {
+                collectPosts({branch: node}, featuredPosts);
+            } else {
+                locateFeatured(node?.children);
+            }
+        }
+    }
+    locateFeatured(data?.catalogs || {});
+
     // Editable publication date takes precedence over the immutable ID date
     // and CCC; the 3-digit work sequence breaks ties within a date.
     function newestFirst(a, b) {
@@ -195,7 +210,7 @@ Y1Data.ready.then(() => {
     }
     const ids = [...postRefs.keys()];
     const news = ids.filter(id => newsIds.has(id)).sort(newestFirst).slice(0, 2);
-    const otherPosts = ids.filter(id => !newsIds.has(id)).sort(newestFirst);
+    const otherPosts = ids.filter(id => !newsIds.has(id) && featuredPosts.has(id)).sort(newestFirst);
     const orderedIds = [...news, ...otherPosts];
     const loaded = await loadPostData(orderedIds.map(id => [id, postRefs.get(id)]));
     const byStorageId = new Map(loaded.map(post => [post.id, post]));
