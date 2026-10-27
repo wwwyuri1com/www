@@ -1,10 +1,10 @@
 window.Y1Data=(()=>{
- const all=JSON.parse(document.getElementById('get-ui-data').textContent),records=all.records;
+ const all=JSON.parse(document.getElementById('get-ui-data').textContent),index=window.Y1GetCoverIndex||{},records={...(index.records||{}),...all.records};
  const ready=Promise.resolve(records);
  async function request(path){
   const p=String(path);let value;
   if(p.startsWith('record:'))value=records[decodeURIComponent(p.slice(7))];
-  else if(p==='w/catalog.html')value=all.catalog;
+  else if(p==='w/catalog.html')value=index.catalog;
   else if(p==='w/tags.html')value=all.tags;
   else if(p==='w/fonts.html')value=all.fonts;
   else if(p.startsWith('data:')){const comma=p.indexOf(','),meta=p.slice(5,comma),raw=p.slice(comma+1);const text=meta.endsWith(';base64')?atob(raw):decodeURIComponent(raw);return new Response(Uint8Array.from(text,c=>c.charCodeAt(0)),{headers:{'Content-Type':meta.split(';')[0]}})}
@@ -13,7 +13,7 @@ window.Y1Data=(()=>{
  }
  function images(n){return records[n]?.images||[]}
  function image(n,i=1,small=false){const x=images(n)[Math.max(0,Number(i)-1)];return x?(small?x.thumb:x.image):''}
- return {ready,request,record:n=>records[n],images,image,date:n=>records[n]?.sort_date||'',isNews:n=>records[n]?.kind==='news',kind:n=>records[n]?.kind||'post'};
+ return {ready,request,record:n=>records[n],images,image,date:n=>records[n]?.sort_date||'',isNews:n=>records[n]?.kind==='news',kind:n=>records[n]?.kind||'post',defaultBackupCover:()=>structuredClone(index.default_cover)};
 })();
 window.YURI1PostStorageId=document.body.dataset.assetNo;
 window.YURI1PostPublicId=document.body.dataset.assetNo;

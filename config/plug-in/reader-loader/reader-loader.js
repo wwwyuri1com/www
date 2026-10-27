@@ -131,6 +131,7 @@ Y1Data.ready.then(() => {
         // It is independent from the currently opened post and from the cover
         // remembered for each post.
         const getDefaultBackupCover = async () => {
+            if (document.body.dataset.assetNo && window.Y1Data?.defaultBackupCover) return Y1Data.defaultBackupCover();
             if (defaultCoverPromise) return defaultCoverPromise;
 
             defaultCoverPromise = (async () => {
