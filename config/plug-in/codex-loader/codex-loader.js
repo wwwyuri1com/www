@@ -34,6 +34,7 @@ Y1Data.ready.then(() => {
     let catalogNodeMarks = new Map();
     let catalogPostStorageToPublic = new Map();
     let catalogPostPublicToStorage = new Map();
+    let codexLinkItems = [];
     let tagFilterData = null;
     let tagFilterPopup = null;
     let activeTagSelection = [];
@@ -53,6 +54,20 @@ Y1Data.ready.then(() => {
             catalogDataPromise = loadFreshJSON("w/catalog.html");
         }
         return catalogDataPromise;
+    }
+
+    function activeCodexLinks(data) {
+        return (Array.isArray(data?.codex_links) ? data.codex_links : [])
+            .filter(link => link && link.enabled === true &&
+                typeof link.label === "string" &&
+                typeof link.url === "string" &&
+                (
+                    // Saved URLs are always validated absolute http(s).
+                    /^https?:\/\//i.test(link.url) ||
+                    // Studio HTTP preview intentionally rewrites known site
+                    // hosts to local paths in served w/catalog.html.
+                    /^\/(?:source-)?preview\/(?:sandbox|standby|real)\/(?:www|music|oc|social)\//.test(link.url)
+                ));
     }
 
     function getTagData() {
@@ -154,6 +169,7 @@ Y1Data.ready.then(() => {
                                 buildCatalogPostMarks(data);
                             catalogNodeMarks =
                                 buildCatalogNodeMarks(data);
+                            codexLinkItems = activeCodexLinks(data);
                             indexCatalogPostIds(data?.catalogs || {});
 
                             return loadCodexResult();
@@ -1874,18 +1890,19 @@ Y1Data.ready.then(() => {
             codexHeader
         );
 
-        /* Music: external site, always in a new tab. */
-        const musicHeader = document.createElement("div");
-        musicHeader.className = "codex-header codex-music-header";
-
-        const musicLink = document.createElement("a");
-        musicLink.href = "https://music.yuri1.com/";
-        musicLink.target = "_blank";
-        musicLink.rel = "noopener noreferrer";
-        musicLink.textContent = "♫ Music";
-
-        musicHeader.appendChild(musicLink);
-        resultRoot.appendChild(musicHeader);
+        /* Configured WWW-only subsite entries, immediately after Codex. */
+        for (const item of codexLinkItems) {
+            const header = document.createElement("div");
+            header.className = "codex-header codex-subsite-header";
+            const link = document.createElement("a");
+            link.href = item.url;
+            link.target = item.target === "_self" ? "_self" : "_blank";
+            if (link.target === "_blank") link.rel = "noopener noreferrer";
+            // Show the exact W Demon display name, without decorative prefixes.
+            link.textContent = item.label;
+            header.appendChild(link);
+            resultRoot.appendChild(header);
+        }
 
         /*
          * Current result title
@@ -2210,7 +2227,8 @@ Y1Data.ready.then(() => {
                     )
             );
 
-        if (Object.keys(visibleCatalogs).length === 0) {
+        const subsiteLinks = activeCodexLinks(data);
+        if (Object.keys(visibleCatalogs).length === 0 && !subsiteLinks.length) {
             catalogRoot.hidden = true;
             return;
         }
@@ -2225,14 +2243,11 @@ Y1Data.ready.then(() => {
             separatorBefore
         );
 
-        select.appendChild(
-            createOption(
-                "Music",
-                "♫ Music",
-                "music",
-                "Music"
-            )
-        );
+        for (const item of subsiteLinks) {
+            const option = createOption(item.id, item.label, "subsite", item.url);
+            option.dataset.window = item.target === "_self" ? "_self" : "_blank";
+            select.appendChild(option);
+        }
 
         select.appendChild(
             createOption(
@@ -2275,11 +2290,15 @@ Y1Data.ready.then(() => {
 
                 if (
                     option.dataset.type ===
-                    "music"
+                    "subsite"
                 ) {
-                    // Reset so Music can be selected again when returning.
+                    // Reset so an external link can be opened repeatedly.
                     select.selectedIndex = 0;
-                    window.open("https://music.yuri1.com/", "_blank", "noopener,noreferrer");
+                    if (option.dataset.window === "_self") {
+                        window.location.href = option.dataset.target;
+                    } else {
+                        window.open(option.dataset.target, "_blank", "noopener,noreferrer");
+                    }
                     return;
                 }
 
