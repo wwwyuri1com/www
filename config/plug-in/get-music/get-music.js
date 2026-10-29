@@ -4,7 +4,8 @@
   const dataElement = document.getElementById('get-music-tracks');
   const root = document.getElementById('get-music-player');
   const trigger = document.getElementById('get-music-trigger');
-  if (!dataElement || !root || !trigger) return;
+  const inline = root?.dataset.inline === 'true';
+  if (!dataElement || !root || (!trigger && !inline)) return;
   const tracks = JSON.parse(dataElement.textContent || '[]');
   if (!Array.isArray(tracks) || !tracks.length) return;
 
@@ -88,6 +89,7 @@
     else audio.pause();
   }
   function showWindow(show) {
+    if (inline) { if (!show) showLyrics(false); return; }
     root.hidden = !show;
     trigger.setAttribute('aria-expanded', String(show));
     if (show) {
@@ -96,7 +98,7 @@
     } else trigger.focus();
     // Closing the dialog intentionally does not pause/destroy audio.
   }
-  trigger.addEventListener('click', () => showWindow(root.hidden));
+  trigger?.addEventListener('click', () => showWindow(root.hidden));
   $('[data-music-close]').addEventListener('click', () => showWindow(false));
   $('[data-music-disc]').addEventListener('click', switchPlayback);
   $('[data-music-prev]').addEventListener('click', () => setTrack(index - 1, !audio.paused));
