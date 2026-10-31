@@ -287,7 +287,8 @@ Y1Data.ready.then(() => {
     }
 
     function renderPosts(posts) {
-        const intro = river.querySelector(".candy-intro");
+        const intro = river.querySelector('[data-home-copy="intro"]');
+        const highlight = river.querySelector('[data-home-copy="highlight"]');
         river.replaceChildren();
         if (intro) river.appendChild(intro);
 
@@ -362,6 +363,7 @@ Y1Data.ready.then(() => {
 
             river.appendChild(row);
         });
+        if (highlight) river.appendChild(highlight);
     }
 
 }).catch(error=>console.error(error));

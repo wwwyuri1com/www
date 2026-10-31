@@ -57,23 +57,24 @@
     max-width: 360px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 70px;
+    margin-bottom: 0;
 }
 
 
 /* Fixed cover area at the top of Candy */
 .candy-boss {
     width: 340px;
-    height: 100%;
+    height: auto;
     position: fixed;
-    top: 0;
+    top: 177px;
+    bottom: 100px;
     left: auto;
     overflow-y: auto;
     background-image: url(../../img/cover-def.jpg);
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
-    margin-top:177px;
+    margin-top: 0;
     z-index: 1;
 }
 
@@ -155,6 +156,36 @@
     text-wrap: pretty;
     text-shadow: 0px 0px 5px #ca6688, 0 0 11px rgb(0 0 0);
     font-family: "Nanum Pen Script", cursive;
+}
+
+/* An editable homepage closing note, after the last post row. */
+.candy-highlight {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    color: #685784;
+    text-shadow: 2px 2px 3px #ffffffd1;
+    white-space: pre-wrap;
+    background: linear-gradient(220deg, #d6d6d633, #ebecff8a);
+    backdrop-filter: blur(1px) saturate(113%);
+    -webkit-backdrop-filter: blur(28px) saturate(135%);
+    box-shadow: -2px 13px 6px rgb(125 100 105 / 39%);
+    border-radius: -3px;
+    padding: 12px;
+    font-size:13px;
+}
+
+.candy-highlight:hover {
+    background: linear-gradient(220deg, #e8efff75, #e3e4ffcc);
+    transform: translateY(1px);
+    transition: all 0.3s;
+    color: #354570;
+    text-shadow: 2px 2px 11px #ffffffd1;
+}
+
+.candy-highlight:empty {
+    display: none;
 }
 
 
