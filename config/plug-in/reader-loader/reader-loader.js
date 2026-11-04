@@ -2518,6 +2518,64 @@ Y1Data.ready.then(() => {
         );
     }
 
+    // Post-only touch gesture: right-to-left enters immersive reading;
+    // left-to-right exits. Any expanded reader dialog/music box suspends it.
+    if (immersiveButton && document.getElementById("post-loader")) {
+        const readerSwipe = { active: false, identifier: null, x: 0, y: 0, startedAt: 0 };
+        const cancelReaderSwipe = () => {
+            readerSwipe.active = false;
+            readerSwipe.identifier = null;
+        };
+        const hasOpenReaderFeature = () => {
+            const overlays = document.querySelectorAll(
+                '#reader-font-modal, #reader-data-modal, #get-music-player, ' +
+                'dialog[open], [role="dialog"][aria-modal="true"]'
+            );
+            return Array.from(overlays).some(element =>
+                !element.hidden && element.getAttribute('aria-hidden') !== 'true' &&
+                element.getClientRects().length > 0
+            );
+        };
+        const blockedReaderTarget = target => Boolean(target?.closest?.(
+            'button, a, input, select, textarea, label, [contenteditable="true"], ' +
+            '.reader-post-preferences, .reader-actions, .post-catalog, ' +
+            '#get-music-player, .reader-data-modal'
+        ));
+
+        document.addEventListener('touchstart', event => {
+            cancelReaderSwipe();
+            if (event.touches.length !== 1 || hasOpenReaderFeature() ||
+                blockedReaderTarget(event.target)) return;
+            const touch = event.touches[0];
+            readerSwipe.active = true;
+            readerSwipe.identifier = touch.identifier;
+            readerSwipe.x = touch.clientX;
+            readerSwipe.y = touch.clientY;
+            readerSwipe.startedAt = performance.now();
+        }, { passive: true });
+
+        document.addEventListener('touchmove', event => {
+            if (readerSwipe.active && event.touches.length !== 1) cancelReaderSwipe();
+        }, { passive: true });
+
+        document.addEventListener('touchend', event => {
+            if (!readerSwipe.active || event.touches.length) { cancelReaderSwipe(); return; }
+            const touch = Array.from(event.changedTouches).find(t => t.identifier === readerSwipe.identifier);
+            const dx = touch ? touch.clientX - readerSwipe.x : 0;
+            const dy = touch ? touch.clientY - readerSwipe.y : 0;
+            const elapsed = performance.now() - readerSwipe.startedAt;
+            cancelReaderSwipe();
+            if (!touch || elapsed > 1500 || hasOpenReaderFeature() || blockedReaderTarget(event.target)) return;
+            if (Math.abs(dx) < 68 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+            if ((dx < 0 && !isImmersive()) || (dx > 0 && isImmersive())) {
+                setImmersive(dx < 0);
+                if (event.cancelable) event.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchcancel', cancelReaderSwipe, { passive: true });
+    }
+
 
     // AI loader changes its data-mode whenever
     // A / H / P / ALL is selected.
