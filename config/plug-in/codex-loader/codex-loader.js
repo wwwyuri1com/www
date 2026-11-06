@@ -39,6 +39,7 @@ Y1Data.ready.then(() => {
     let tagFilterPopup = null;
     let activeTagSelection = [];
     let tagFilterCountRequest = 0;
+    let novelSearchCorpusPromise = null;
 
     function loadFreshJSON(path) {
         return Y1Data.request(path, { cache: "no-cache" }).then(async response => {
@@ -208,8 +209,15 @@ Y1Data.ready.then(() => {
 
         const hasTagQuery =
             tagQueries.length > 0;
+        const searchQuery =
+            params.get("search");
 
         try {
+            if (searchQuery !== null) {
+                await renderNovelSearchResult(searchQuery);
+                return;
+            }
+
             if (
                 catalogQuery === "Favorite" &&
                 !hasTagQuery
@@ -2876,6 +2884,43 @@ Y1Data.ready.then(() => {
         groups.className =
             "codex-tag-filter-groups";
 
+        const keyword = document.createElement("section");
+        keyword.className = "codex-tag-filter-search";
+        const keywordLabel = document.createElement("label");
+        keywordLabel.className = "codex-tag-filter-search-label";
+        keywordLabel.htmlFor = "codex-tag-filter-keyword";
+        keywordLabel.textContent = "Keyword Search in Novels";
+        const keywordRow = document.createElement("div");
+        keywordRow.className = "codex-tag-filter-search-row";
+        const keywordInput = document.createElement("input");
+        keywordInput.id = "codex-tag-filter-keyword";
+        keywordInput.className = "codex-tag-filter-search-input";
+        keywordInput.type = "text";
+        keywordInput.autocomplete = "off";
+        keywordInput.placeholder = "Enter keywords to search";
+        keywordInput.setAttribute("aria-label", "Search novels by keyword");
+        const keywordClear = document.createElement("button");
+        keywordClear.type = "button";
+        keywordClear.className = "codex-tag-filter-search-clear";
+        keywordClear.setAttribute("aria-label", "Clear search");
+        keywordClear.title = "Clear search";
+        keywordClear.textContent = "×";
+        keywordClear.hidden = true;
+        keywordRow.append(keywordInput, keywordClear);
+        keyword.append(keywordLabel, keywordRow);
+        keywordInput.addEventListener("input", () => {
+            const hasKeyword = keywordInput.value.trim().length > 0;
+            keywordClear.hidden = !hasKeyword;
+            modal.classList.toggle("has-keyword", hasKeyword);
+            confirm.textContent = hasKeyword ? "Search" : "Confirm";
+            renderTagFilterPopup();
+        });
+        keywordClear.addEventListener("click", () => {
+            keywordInput.value = "";
+            keywordInput.dispatchEvent(new Event("input", { bubbles: true }));
+            keywordInput.focus();
+        });
+
         const note =
             document.createElement("div");
         note.className =
@@ -2909,6 +2954,7 @@ Y1Data.ready.then(() => {
         actions.appendChild(confirm);
         dialog.append(
             titleRow,
+            keyword,
             groups,
             note,
             selected,
@@ -2926,6 +2972,8 @@ Y1Data.ready.then(() => {
             dialog,
             selected,
             groups,
+            keywordInput,
+            keywordClear,
             match,
             confirm,
             close
@@ -2968,6 +3016,10 @@ Y1Data.ready.then(() => {
 
         tagFilterPopup.modal._draftTags =
             new Set(current);
+        tagFilterPopup.keywordInput.value = "";
+        tagFilterPopup.keywordClear.hidden = true;
+        tagFilterPopup.modal.classList.remove("has-keyword");
+        tagFilterPopup.confirm.textContent = "Confirm";
 
         tagFilterPopup.modal.hidden = false;
         tagFilterPopup.modal.setAttribute(
@@ -3004,6 +3056,8 @@ Y1Data.ready.then(() => {
         const draft =
             tagFilterPopup.modal._draftTags ||
             new Set();
+        const keywordActive =
+            tagFilterPopup.keywordInput.value.trim().length > 0;
 
         tagFilterPopup.selected.replaceChildren();
 
@@ -3085,6 +3139,7 @@ Y1Data.ready.then(() => {
                     "aria-pressed",
                     String(active)
                 );
+                button.disabled = keywordActive;
 
                 button.addEventListener(
                     "click",
@@ -3118,7 +3173,135 @@ Y1Data.ready.then(() => {
             tagFilterPopup.groups.appendChild(group);
         }
 
-        updateTagFilterMatchCount();
+        if (keywordActive) {
+            updateNovelSearchMatchCount();
+        } else {
+            updateTagFilterMatchCount();
+        }
+    }
+
+
+    function collectNovelPostIds(data) {
+        const ids = [];
+        const seen = new Set();
+        function walk(nodes, inheritedCategory = "") {
+            if (!nodes || typeof nodes !== "object" || Array.isArray(nodes)) return;
+            for (const node of Object.values(nodes)) {
+                if (!node || typeof node !== "object") continue;
+                const id = String(node.id || "");
+                const category = /^\d{3}$/.test(id) ? id : inheritedCategory;
+                const categoryNumber = Number(category);
+                if (Array.isArray(node.posts) && categoryNumber >= 500 && categoryNumber <= 799) {
+                    for (const postRef of node.posts) {
+                        const postId = getCatalogPostStorageId(postRef);
+                        if (postId && !seen.has(postId) && !isCodexHidden(postId)) {
+                            seen.add(postId);
+                            ids.push(postId);
+                        }
+                    }
+                }
+                walk(node.children, category);
+            }
+        }
+        walk(data?.catalogs);
+        return ids;
+    }
+
+
+    function getNovelSearchCorpus() {
+        if (!novelSearchCorpusPromise) {
+            novelSearchCorpusPromise = getCatalogData().then(async data => {
+                const ids = collectNovelPostIds(data);
+                const posts = new Map();
+                for (let index = 0; index < ids.length; index += 12) {
+                    const batch = await loadPostData(ids.slice(index, index + 12));
+                    for (const [id, post] of batch) posts.set(id, post);
+                    if (typeof window.Y1Data?.request === "function") {
+                        await Promise.all([...batch].map(async ([id, post]) => {
+                            if (typeof post.content === "string") return;
+                            try {
+                                const response = await window.Y1Data.request(
+                                    `content:${encodeURIComponent(id)}`
+                                );
+                                if (response.ok) posts.set(id, await response.json());
+                            } catch (error) {
+                                console.warn("Novel content unavailable:", id, error);
+                            }
+                        }));
+                    }
+                }
+                return ids.map(id => ({ id, data: posts.get(id) })).filter(item => item.data);
+            }).catch(error => {
+                novelSearchCorpusPromise = null;
+                throw error;
+            });
+        }
+        return novelSearchCorpusPromise;
+    }
+
+
+    function findNovelMatches(corpus, query) {
+        const terms = String(query || "").trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+        if (!terms.length) return [];
+        return corpus.filter(({ data }) => {
+            const searchable = [data.title, data.content, ...(Array.isArray(data.tags) ? data.tags : [])]
+                .filter(Boolean).join(" ").toLocaleLowerCase();
+            return terms.every(term => searchable.includes(term));
+        });
+    }
+
+
+    async function updateNovelSearchMatchCount() {
+        if (!tagFilterPopup) return;
+        const query = tagFilterPopup.keywordInput.value.trim();
+        const requestId = ++tagFilterCountRequest;
+        tagFilterPopup.match.textContent = "Searching novels…";
+        tagFilterPopup.confirm.disabled = !query;
+        if (!query) return;
+        try {
+            const corpus = await getNovelSearchCorpus();
+            if (requestId !== tagFilterCountRequest || tagFilterPopup.modal.hidden) return;
+            const count = findNovelMatches(corpus, query).length;
+            tagFilterPopup.match.textContent = count === 1
+                ? "1 novel matches"
+                : `${count} novels match`;
+            tagFilterPopup.confirm.disabled = false;
+        } catch (error) {
+            if (requestId !== tagFilterCountRequest || tagFilterPopup.modal.hidden) return;
+            console.error("Novel keyword search:", error);
+            tagFilterPopup.match.textContent = "Unable to search novels.";
+            tagFilterPopup.confirm.disabled = true;
+        }
+    }
+
+
+    async function renderNovelSearchResult(query) {
+        clearResult();
+        const normalized = String(query || "").trim();
+        appendResultHeader(normalized ? `Search results for “${normalized}”` : "Novel Search");
+        if (!normalized) {
+            renderMessage("Enter a keyword to search novels.");
+            return;
+        }
+        try {
+            const corpus = await getNovelSearchCorpus();
+            const matches = findNovelMatches(corpus, normalized);
+            if (!matches.length) {
+                renderMessage("No novels match your search.");
+                return;
+            }
+            const list = document.createElement("div");
+            list.className = "codex-post-list";
+            for (const { id, data } of matches) {
+                const post = createPostElement(id, data, 0);
+                if (post) list.appendChild(post);
+            }
+            resultRoot.appendChild(list);
+            renderStatusIcons();
+        } catch (error) {
+            console.error("Novel keyword search:", error);
+            renderMessage("Unable to search novels.");
+        }
     }
 
 
@@ -3246,6 +3429,12 @@ Y1Data.ready.then(() => {
         const draft =
             tagFilterPopup.modal._draftTags ||
             new Set();
+
+        const keyword = tagFilterPopup.keywordInput.value.trim();
+        if (keyword) {
+            window.location.href = `w/index.html?search=${encodeURIComponent(keyword)}`;
+            return;
+        }
 
         const selected = [...draft];
         const postIds =

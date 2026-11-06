@@ -438,7 +438,7 @@ body.reader-dark .codex-tag-filter-dialog {
 }
 
 .codex-tag-filter-dialog {
-    width: min(340px, calc(100vw - 28px));
+    width: min(540px, calc(100vw - 28px));
     height: min(82vh, 680px);
     max-height: calc(100vh - 28px);
     padding: 18px 16px 14px;
@@ -498,6 +498,68 @@ body.reader-dark .codex-tag-filter-dialog {
     margin-top: 8px;
 }
 
+.codex-tag-filter-search {
+    flex: 0 0 auto;
+    margin: 0 0 10px;
+}
+
+.codex-tag-filter-search-label {
+    display: block;
+    margin: 0 0 5px;
+    color: #696969;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.codex-tag-filter-search-row {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+}
+
+.codex-tag-filter-search-input {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 32px;
+    padding: 4px 9px;
+    border: 1px solid #bbb;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+}
+
+.codex-tag-filter-search-input:focus-visible {
+    outline: 1px solid #fa6699;
+    outline-offset: 1px;
+}
+
+.codex-tag-filter-search-input::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+.codex-tag-filter-search-clear {
+    appearance: none;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #bbb;
+    background: transparent;
+    color: #262522;
+    font: inherit;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.codex-tag-filter-search-clear[hidden] {
+    display: none;
+}
+
 .codex-tag-filter-chip {
     display: inline-block;
     padding: 4px 8px;
@@ -553,6 +615,14 @@ body.reader-dark .codex-tag-filter-dialog {
 
 .codex-tag-filter-option:hover {
     background: #f2f0ec;
+}
+
+.codex-tag-filter-option:disabled,
+.codex-tag-filter-option:disabled:hover {
+    color: #aaa;
+    border-color: #ddd;
+    background: #f7f7f7;
+    cursor: not-allowed;
 }
 
 /* Single-select groups use the same selected color as multi-select.
@@ -623,6 +693,18 @@ body.reader-dark .codex-tag-filter-option {
 
 body.reader-dark .codex-tag-filter-option:hover {
     background: #1b1b1b;
+}
+
+body.reader-dark .codex-tag-filter-search-clear {
+    color: #999;
+    border-color: #666;
+}
+
+body.reader-dark .codex-tag-filter-option:disabled,
+body.reader-dark .codex-tag-filter-option:disabled:hover {
+    color: #555;
+    border-color: #333;
+    background: #171717;
 }
 
 body.reader-dark .codex-tag-filter-option.is-selected {
