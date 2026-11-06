@@ -3244,10 +3244,58 @@ Y1Data.ready.then(() => {
         const terms = String(query || "").trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
         if (!terms.length) return [];
         return corpus.filter(({ data }) => {
-            const searchable = [data.title, data.content, ...(Array.isArray(data.tags) ? data.tags : [])]
-                .filter(Boolean).join(" ").toLocaleLowerCase();
+            const searchable = getLlmEnglishContent(data.content).toLocaleLowerCase();
             return terms.every(term => searchable.includes(term));
         });
+    }
+
+
+    function getLlmEnglishContent(content) {
+        let inAssistantBlock = false;
+        const lines = String(content || "").replace(/\r/g, "").split("\n");
+        const output = [];
+        for (const line of lines) {
+            const role = line.trim().replace(/^\/+\s*/, "").replace(/\s*\/+$/, "").toLocaleLowerCase();
+            if (/^(?:chatgpt|assistant|llm)\s*:?$/.test(role)) {
+                inAssistantBlock = true;
+                continue;
+            }
+            if (/^(?:user|human|draft|prompt)\s*:?$/.test(role)) {
+                inAssistantBlock = false;
+                continue;
+            }
+            if (inAssistantBlock && !/[\u3400-\u9fff\uf900-\ufaff]/.test(line)) {
+                output.push(line);
+            }
+        }
+        return output.join("\n");
+    }
+
+
+    function getNovelSearchSnippet(data, query) {
+        const terms = String(query || "").trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+        const paragraphs = getLlmEnglishContent(data?.content)
+            .replace(/\r/g, "")
+            .split(/\n\s*\n+/)
+            .map(paragraph => paragraph
+                .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+                .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+                .replace(/<[^>]*>/g, " ")
+                .replace(/^\s*(?:user|ChatGPT|!start|!end|\/+)+\s*$/gim, "")
+                .replace(/^\s*#+\s*/gm, "")
+                .replace(/\s+/g, " ")
+                .trim())
+            .filter(Boolean);
+        const matchingParagraphs = paragraphs.filter(paragraph => {
+            const lower = paragraph.toLocaleLowerCase();
+            return terms.some(term => lower.includes(term));
+        });
+        const longParagraph = matchingParagraphs.find(paragraph =>
+            Array.from(paragraph).length >= 30
+        );
+        if (longParagraph) return longParagraph;
+        if (matchingParagraphs.length) return matchingParagraphs[0];
+        return String(data?.title || "").trim();
     }
 
 
@@ -3293,14 +3341,53 @@ Y1Data.ready.then(() => {
             const list = document.createElement("div");
             list.className = "codex-post-list";
             for (const { id, data } of matches) {
+                const result = document.createElement("div");
+                result.className = "codex-search-result";
                 const post = createPostElement(id, data, 0);
-                if (post) list.appendChild(post);
+                if (!post) continue;
+                result.appendChild(post);
+                const snippetText = getNovelSearchSnippet(data, normalized);
+                if (snippetText) {
+                    const snippet = document.createElement("p");
+                    snippet.className = "codex-search-result-snippet";
+                    appendHighlightedSearchText(snippet, snippetText, normalized);
+                    result.appendChild(snippet);
+                }
+                list.appendChild(result);
             }
             resultRoot.appendChild(list);
             renderStatusIcons();
         } catch (error) {
             console.error("Novel keyword search:", error);
             renderMessage("Unable to search novels.");
+        }
+    }
+
+
+    function appendHighlightedSearchText(container, text, query) {
+        const terms = String(query || "").trim().split(/\s+/).filter(Boolean)
+            .sort((a, b) => b.length - a.length);
+        if (!terms.length) {
+            container.textContent = text;
+            return;
+        }
+        const pattern = new RegExp(terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "gi");
+        let cursor = 0;
+        for (const match of text.matchAll(pattern)) {
+            if (match.index > cursor) {
+                container.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            }
+            const highlight = document.createElement("b");
+            highlight.style.color = "#fa6699";
+            highlight.style.backgroundColor = "mistyrose";
+            highlight.style.borderRadius = "3px";
+            highlight.style.padding = "0 3px";
+            highlight.textContent = match[0];
+            container.appendChild(highlight);
+            cursor = match.index + match[0].length;
+        }
+        if (cursor < text.length) {
+            container.appendChild(document.createTextNode(text.slice(cursor)));
         }
     }
 
