@@ -1,4 +1,66 @@
 Y1Data.ready.then(() => {
+    // Custom font chooser: native select remains the settings adapter.
+    const enhanceFontSelect = (select, storageKey, loadPreview = () => {}) => {
+        const systemFamily = 'system-ui, sans-serif';
+        let favorites = new Set();
+        const read = () => {
+            try { const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                favorites = new Set(Array.isArray(data) ? data.filter(v => typeof v === 'string') : []);
+            } catch (_) { favorites = new Set(); }
+        };
+        const shell = document.createElement('div'); shell.className = 'y1-font-picker';
+        const trigger = document.createElement('button'); trigger.type = 'button';
+        trigger.className = 'y1-font-trigger'; trigger.setAttribute('aria-expanded', 'false');
+        trigger.setAttribute('aria-controls', select.id + '-choices');
+        const label = document.querySelector(`label[for="${select.id}"]`);
+        if (label) { label.id = select.id + '-label'; trigger.setAttribute('aria-labelledby', label.id + ' ' + select.id + '-value'); }
+        const caption = document.createElement('span'); caption.id = select.id + '-value';
+        trigger.append(caption, document.createTextNode(' ▾'));
+        const list = document.createElement('div'); list.id = select.id + '-choices';
+        list.className = 'y1-font-choices'; list.hidden = true;
+        select.after(shell); shell.append(trigger, list); select.hidden = true;
+        const close = () => {list.hidden = true; trigger.setAttribute('aria-expanded', 'false');};
+        const refresh = () => {
+            const option = select.selectedOptions[0];
+            caption.textContent = option?.textContent || '';
+            trigger.style.fontFamily = option?.value === 'system' ? systemFamily : option?.style.fontFamily || systemFamily;
+            close();
+        };
+        const render = () => {
+            list.replaceChildren();
+            const options = [...select.options];
+            options.sort((a,b) => Number(favorites.has(b.value)) - Number(favorites.has(a.value)));
+            options.forEach(option => {
+                const row = document.createElement('div'); row.className = 'y1-font-choice';
+                const choose = document.createElement('button'); choose.type = 'button';
+                choose.textContent = option.textContent; choose.style.fontFamily = option.value === 'system' ? systemFamily : option.style.fontFamily || systemFamily;
+                choose.setAttribute('aria-pressed', String(select.value === option.value));
+                choose.addEventListener('click', () => {select.value = option.value; select.dispatchEvent(new Event('change', {bubbles:true})); refresh(); trigger.focus();});
+                const star = document.createElement('button'); star.type = 'button'; star.className = 'y1-font-star';
+                const active = favorites.has(option.value); star.textContent = active ? '★' : '☆';
+                star.setAttribute('aria-pressed', String(active)); star.setAttribute('aria-label', (active ? 'Remove favorite: ' : 'Add favorite: ') + option.textContent);
+                star.addEventListener('click', () => {
+                    if (favorites.has(option.value)) favorites.delete(option.value); else favorites.add(option.value);
+                    try {localStorage.setItem(storageKey, JSON.stringify([...favorites]));} catch (error) {console.warn('Font favorites could not be saved', error);}
+                    render(); [...list.querySelectorAll('.y1-font-star')].find(b => b.dataset.value === option.value)?.focus();
+                }); star.dataset.value = option.value;
+                row.append(choose, star); list.append(row); loadPreview(option.value);
+            });
+        };
+        trigger.addEventListener('click', () => {if (!list.hidden) {close(); return;} read(); render(); list.hidden = false; trigger.setAttribute('aria-expanded','true');});
+        shell.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !list.hidden) {event.preventDefault(); event.stopPropagation(); close(); trigger.focus();}
+            if (['ArrowDown','ArrowUp','Home','End'].includes(event.key) && !list.hidden) {
+                event.preventDefault(); const buttons = [...list.querySelectorAll('button')]; const index = buttons.indexOf(document.activeElement);
+                const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length-1 : (index + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+                buttons[next]?.focus();
+            }
+        });
+        document.addEventListener('click', event => {if (!shell.contains(event.target)) close();});
+        select.addEventListener('change', refresh);
+        read(); refresh(); return refresh;
+    };
+
     const initDataBackupUI = () => {
         // Backup controls intentionally live in Codex only.
         const isCodexPage = document.body.dataset.page === 'catalog';
@@ -1615,6 +1677,10 @@ Y1Data.ready.then(() => {
             zhLineSelect.appendChild(createFontOption(option));
         });
 
+        const refreshFontPickers = [
+            enhanceFontSelect(enSelect, 'yuri1.reader.font.favorites.english'),
+            enhanceFontSelect(zhSelect, 'yuri1.reader.font.favorites.chinese')
+        ];
         const close = () => {
             modal.hidden = true;
             modal.setAttribute("aria-hidden", "true");
@@ -1726,6 +1792,7 @@ Y1Data.ready.then(() => {
             enLineSelect.value = getReaderPref(READER_FONT_KEYS.enLine, "system");
             zhLineSelect.value = getReaderPref(READER_FONT_KEYS.zhLine, "system");
             updatePreview();
+            refreshFontPickers.forEach(refresh => refresh());
         };
 
         modal._readerClose = close;

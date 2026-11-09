@@ -721,3 +721,18 @@ body[data-reader-font-zh-line="extra-wide"] .post-text.post [data-reader-font-la
 .reader-font-preview-note {
     color: #888888;
 }
+
+/* Font chooser only; article typography is unchanged. */
+.y1-font-picker { position:relative; min-width:0; }
+.y1-font-picker button { box-sizing:border-box; color:inherit; font-size:16px; text-align:left; cursor:pointer; }
+.y1-font-trigger { width:100%; min-height:44px; padding:10px; border:1px solid #8886; border-radius:4px; background:transparent; }
+.y1-font-choices { max-height:280px; overflow-y:auto; overscroll-behavior:contain; border:1px solid #8888; margin-top:4px; background:#fff; color:#222; }
+.y1-font-choices[hidden] { display:none; }
+.y1-font-choice { display:flex; min-height:44px; }
+.y1-font-choice button { border:0; background:transparent; padding:9px 12px; min-width:0; }
+.y1-font-choice > button:first-child { flex:1; overflow-wrap:anywhere; }
+.y1-font-choice .y1-font-star { flex:0 0 44px; text-align:center; font-family:system-ui,sans-serif; }
+.y1-font-choice button:hover,.y1-font-choice button[aria-pressed="true"] { background:#ff719629; }
+.y1-font-picker button:focus-visible { outline:2px solid #e95d91; outline-offset:-2px; }
+body.reader-dark .y1-font-choices,.social-font-modal .y1-font-choices { background:#242024; color:#f3eef1; }
+#reader-font-en[hidden],#reader-font-zh[hidden] { display:none !important; }
