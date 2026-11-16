@@ -3240,13 +3240,37 @@ Y1Data.ready.then(() => {
     }
 
 
+    // A whole-word hit has no adjoining English letter (digits/punctuation are boundaries).
+    function isExactNovelSearchHit(text, index, length) {
+        return !/[a-z]/i.test(text.charAt(index - 1)) &&
+            !/[a-z]/i.test(text.charAt(index + length));
+    }
+
+
+    function hasExactNovelSearchTerm(text, term) {
+        let index = text.indexOf(term);
+        while (index !== -1) {
+            if (isExactNovelSearchHit(text, index, term.length)) return true;
+            index = text.indexOf(term, index + 1);
+        }
+        return false;
+    }
+
+
     function findNovelMatches(corpus, query) {
         const terms = String(query || "").trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
         if (!terms.length) return [];
-        return corpus.filter(({ data }) => {
-            const searchable = getLlmEnglishContent(data.content).toLocaleLowerCase();
-            return terms.every(term => searchable.includes(term));
-        });
+        const exact = [];
+        const fuzzy = [];
+        for (const item of corpus) {
+            const searchable = getLlmEnglishContent(item.data.content).toLocaleLowerCase();
+            if (!terms.every(term => searchable.includes(term))) continue;
+            // Keep original order within each group; multi-term queries still use AND.
+            const group = terms.every(term => hasExactNovelSearchTerm(searchable, term))
+                ? exact : fuzzy;
+            group.push(item);
+        }
+        return exact.concat(fuzzy);
     }
 
 
@@ -3290,11 +3314,17 @@ Y1Data.ready.then(() => {
             const lower = paragraph.toLocaleLowerCase();
             return terms.some(term => lower.includes(term));
         });
-        const longParagraph = matchingParagraphs.find(paragraph =>
+        const exactParagraphs = matchingParagraphs.filter(paragraph => {
+            const lower = paragraph.toLocaleLowerCase();
+            return terms.some(term => hasExactNovelSearchTerm(lower, term));
+        });
+        // Even a short whole-word paragraph takes precedence over a long fuzzy one.
+        const preferred = exactParagraphs.length ? exactParagraphs : matchingParagraphs;
+        const longParagraph = preferred.find(paragraph =>
             Array.from(paragraph).length >= 30
         );
         if (longParagraph) return longParagraph;
-        if (matchingParagraphs.length) return matchingParagraphs[0];
+        if (preferred.length) return preferred[0];
         return String(data?.title || "").trim();
     }
 
@@ -3378,8 +3408,10 @@ Y1Data.ready.then(() => {
                 container.appendChild(document.createTextNode(text.slice(cursor, match.index)));
             }
             const highlight = document.createElement("b");
-            highlight.style.color = "#fa6699";
-            highlight.style.backgroundColor = "mistyrose";
+            const exact = isExactNovelSearchHit(text, match.index, match[0].length);
+            highlight.style.color = exact ? "#fa6699" : "rgb(255 163 195)";
+            highlight.style.backgroundColor = exact ? "mistyrose" : "#ffffff";
+            if (!exact) highlight.style.border = "1px dashed #fa6699";
             highlight.style.borderRadius = "3px";
             highlight.style.padding = "0 3px";
             highlight.textContent = match[0];
