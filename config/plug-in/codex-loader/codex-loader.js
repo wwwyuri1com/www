@@ -28,6 +28,24 @@ Y1Data.ready.then(() => {
         return;
     }
 
+    const stagToggle = document.querySelector(".codex-stag-toggle");
+    if (stagToggle) {
+        const preferenceKey = "yuri1.codex.hideStags";
+        function showHiddenState(hidden) {
+            document.body.classList.toggle("codex-stags-hidden", hidden);
+            stagToggle.setAttribute("aria-pressed", String(!hidden));
+            stagToggle.title = hidden ? "Show STag" : "Hide STag";
+        }
+        let hidden = true;
+        try { hidden = localStorage.getItem(preferenceKey) !== "0"; } catch {}
+        showHiddenState(hidden);
+        stagToggle.addEventListener("click", () => {
+            hidden = !hidden;
+            showHiddenState(hidden);
+            try { localStorage.setItem(preferenceKey, hidden ? "1" : "0"); } catch {}
+        });
+    }
+
     let catalogDataPromise = null;
     let tagDataPromise = null;
     let catalogPostMarks = new Map();
@@ -1540,6 +1558,24 @@ Y1Data.ready.then(() => {
 
             titleLink.dataset.readDoneText =
                 displayTitle;
+
+            let previous = titleLink;
+            for (const tag of data?.stags || []) {
+                const badge = document.createElement("span");
+                badge.className = "codex-stag";
+                badge.textContent = tag.label;
+                Object.assign(badge.style, {
+                    whiteSpace: "nowrap",
+                    borderRadius: "20px", backgroundColor: tag.background,
+                    fontSize: "7px", padding: "0px 3px",
+                    border: "1px dotted " + tag.border,
+                    color: tag.color, marginLeft: "3px"
+                });
+                const gap = document.createElement("wbr");
+                gap.className = "codex-stag-break";
+                previous.after(gap, badge);
+                previous = badge;
+            }
         }
 
         const donePrefix =

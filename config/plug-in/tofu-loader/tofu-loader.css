@@ -12,7 +12,7 @@
     z-index: 1001;
 }
 
-.codex-view-button {
+:is(.codex-view-button, .codex-stag-toggle) {
     appearance: none;
     border: 0;
     padding: 0;
@@ -33,11 +33,11 @@
     color: #fa696969;
 }
 
-.codex-view-button:hover {
+:is(.codex-view-button, .codex-stag-toggle):hover {
     opacity: 0.72;
 }
 
-.codex-view-button:focus-visible {
+:is(.codex-view-button, .codex-stag-toggle):focus-visible {
     outline: 1px solid currentColor;
     outline-offset: 2px;
 }
@@ -54,14 +54,31 @@
     pointer-events: none;
 }
 
-.codex-view-button svg {
+:is(.codex-view-button, .codex-stag-toggle) svg {
     width: 18px;
     height: 18px;
     stroke-width: 1.5;
     pointer-events: none;
 }
 
-.codex-view-button svg + .codex-view-fallback {
+:is(.codex-view-button, .codex-stag-toggle) svg + .codex-view-fallback {
+    display: none;
+}
+
+.codex-stag-toggle > span {
+    display: inline-flex;
+}
+
+.codex-stag-toggle[aria-pressed="true"] {
+    background: #fa6699;
+    border-color: #fa6699;
+    color: #fff;
+}
+
+.codex-stag-toggle[aria-pressed="true"] .stag-hidden-icon,
+.codex-stag-toggle[aria-pressed="false"] .stag-visible-icon,
+.codex-stags-hidden .codex-stag,
+.codex-stags-hidden .codex-stag-break {
     display: none;
 }
 

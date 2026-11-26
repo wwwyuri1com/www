@@ -42,7 +42,7 @@
     <script src="config/plug-in/candy-loader/candy-loader.js?v=20261008-3" defer></script>
     
     <link rel="stylesheet" href="config/plug-in/codex-loader/codex-loader.css">
-    <script src="config/plug-in/codex-loader/codex-loader.js?v=20261008-3" defer></script>
+    <script src="config/plug-in/codex-loader/codex-loader.js?v=20261126-stag-toggle-2" defer></script>
     
     <link rel="stylesheet" href="config/plug-in/post-loader/post-loader.css">
     <script src="config/plug-in/post-loader/post-loader.js" defer></script>
@@ -52,11 +52,11 @@
     <link rel="stylesheet" href="config/plug-in/reader-loader/reader-loader.css">
     <script src="config/plug-in/reader-loader/reader-loader.js?v=20261008-2" defer></script>
     
-    <link rel="stylesheet" href="config/plug-in/tofu-loader/tofu-loader.css">
+    <link rel="stylesheet" href="config/plug-in/tofu-loader/tofu-loader.css?v=20261126-stag-toggle-2">
     <script src="config/plug-in/tofu-loader/tofu-loader.js" defer></script>
 </head>
 
-<body data-page="catalog">
+<body class="codex-stags-hidden">
 <div class="out-warper">
 
 <div class="reader-data-actions" aria-label="Website data">
@@ -73,6 +73,10 @@
   <div class="logo"><a href="index.html"><img src="config/img/icon-xs.png"></a></div>
 
   <div class="codex-view-toggle" aria-label="View mode">
+    <button type="button" class="codex-stag-toggle" aria-label="Show STag" aria-pressed="false" title="Show STag">
+      <span class="stag-visible-icon" aria-hidden="true"><i data-lucide="pencil-line"></i><span class="codex-view-fallback">✎</span></span>
+      <span class="stag-hidden-icon" aria-hidden="true"><i data-lucide="pen-off"></i><span class="codex-view-fallback">⊘</span></span>
+    </button>
     <button type="button" class="codex-view-button" data-view-mode="list" aria-label="List View" title="List View">
       <i data-lucide="list"></i><span class="codex-view-fallback" aria-hidden="true">☰</span>
     </button>
